@@ -322,3 +322,158 @@ let test2 = (v1, v2) => ({v1: v1, v2: v2})// { v1: 2, v2: 3 }
 ### 不适应场合
 1. 定义对象内部的函数时
 2. 动态this
+
+## 尾调用
+尾调用就是在函数的最后一步调用其他函数
+```js
+// 示例
+function f() {
+    return g();
+}
+```
+以下三种情况均不属于尾调用
+```js
+// 情况一: 在调用之后还有赋值操作
+function f(x){
+  let y = g(x);
+  return y;
+}
+
+// 情况二: 在调用之后还有加法操作
+function f(x){
+  return g(x) + 1;
+}
+
+// 情况三: 在调用之后还有return undefined
+function f(x){
+  g(x);
+}
+```
+尾调用并不一定是函数的最后一行，只要是函数执行的**最后一步**操作即可
+
+### 尾调用优化
+**非尾调用**
+
+在函数调用的时候，会形成一个调用帧，然后将调用帧push到调用栈内。如果有一个函数A，其内部调用了函数B，
+此时我们调用函数A的时候，会形成一个调用帧A，然后push到调用栈内，其次会执行到调用函数B时，函数B形成
+调用帧B，然后push到调用栈内，这个时候当函数B调用完毕之后，就会将B帧pop出调用栈，然后等待A调用完成
+后，将A pop出调用栈，至此执行完毕
+
+**尾调用**
+
+尾调用的执行就在于因为函数在最后一步调用，所以不需要保存外层的调用帧了，因为调用位置和内部变量等都用不到了
+，所以只需要用内层函数的调用帧，代替外层函数的调用帧即可
+
+注意：下面这个函数并不属于尾调用优化，因为inner还用到了外层的变量one，所以不属于尾调用优化
+```js
+function addOne(a){
+  var one = 1;
+  function inner(b){
+    return b + one;
+  }
+  return inner(a);
+}
+```
+> 注意：目前只有safari支持尾调用优化
+
+### 尾递归
+尾递归就是尾调用自身，就称为尾递归.
+```js
+// 阶乘示例
+function factorial(n) {
+    if (n === 0 || n === 1) {
+        return n;
+    }
+    return factorial(n -1) * n
+}
+// 尾递归优化
+function factorial (n, total) {
+    if (n === 0 || n === 1) {
+        return total;
+    }
+    return factorial(n -1, n * total)
+    
+}
+
+// 斐波那契示例
+function Fibonacci(n) {
+    if (n <= 1) return n;
+    return Fibonacci(n - 1) + Fibonacci(n - 2);
+}
+// 尾调用优化
+var Fibonacci2 = function(n, ac1 = 0, ac2 = 1) {
+    if(n === 1) return ac2;
+    if(n === 0) return 0
+    return Fibonacci2(n-1, ac2, ac1+ ac2)
+};
+// 函数柯理化优化
+function Fibonacci3(n, total) {
+    if (n <= 1) return total;
+    return Fibonacci3(n - 1, n * total)
+}
+function curry(fn, n) {
+    return function (m) {
+        return fn.call(this, m, n);
+    }
+}
+
+curry(Fibonacci3, 4)
+```
+
+### 严格模式
+ES6的尾调用优化只在严格模式下开启
+这是因为在正常模式下，函数内部有两个变量，可以跟踪函数的调用栈。
+    - func.arguments：返回调用时函数的参数。
+    - func.caller：返回调用当前函数的那个函数。
+尾调用优化发生时，函数的调用栈会改写，因此上面两个变量就会失真。严格模式禁用这两个变量，所以尾调用模式仅在严格模式下生效。
+
+### 非严格模式下的尾调用优化
+1. 如何自己实现一个尾调用优化呢
+首先尾调用优化的原因就是因为调用栈太多，会造成溢出，那么只要我们减少调用栈即可,怎么才能减少调用栈呢，这里
+   我们使用蹦床函数来解决，将递归调用转换为循环调用
+```js
+function sum(x, y) {
+    if (y > 0) return sum(x + 1, y - 1)
+    return x;
+}
+
+console.log(sum(1, 100000)) // 栈溢出
+
+// 解决方法
+function trampoline(f) {
+    while(f && f instanceof  Function) {
+        f = f();
+    }
+    return f;
+}
+function sum(x, y) {
+    if (y > 0) return sum(x + 1, y - 1)
+    return x;
+}
+
+```   
+## 7.函数参数的尾逗号
+ES2017支持函数的最后一个参数后有一个逗号，
+
+## 8. Function.prototype.toString()
+在ES2019之前，函数代码会返回代码本身，省略空格和注释，但是ES2019开始会原样返回函数
+```js
+function /** getName */ getName() {
+    console.log(123)
+}
+console.log(getName.toString())
+//function /** getName */ getName() {
+//    console.log(123)
+//}
+
+```
+
+## 9.catch函数的参数省略
+ES2019之前catch的参数必须带上，不管有没有用到，但是ES2019规定catch函数可以不写
+```js
+try {
+    console.log(123)
+}catch {
+    
+}
+```

@@ -111,7 +111,7 @@ x // 1
 //     return value;
 // }
 
-// function doSomethine() {
+// function doSomething() {
 //     "use strict";
 //     return function (value = 010) {
 //         return value
@@ -141,5 +141,88 @@ x // 1
 // let test2 = (v1, v2) => {v1: v1, v2: v2} // 报错
 // console.log(test(1));
 
-let test1 = (v1, v2) => ({v1: v1, v2: v2})
-console.log(test1(2,3));
+// let test1 = (v1, v2) => ({v1: v1, v2: v2})
+// console.log(test1(2,3));
+
+// 阶乘
+// function factorial (n, total) {
+//     if (n === 0 || n === 1) {
+//         return total;
+//     }
+//     return factorial(n -1, n * total)
+//
+// }
+
+// console.log(factorial(4, 1))
+
+// 斐波那契
+// function Fibonacci (n) {
+//     if ( n <= 1 ) {return n};
+//     return Fibonacci(n - 1) + Fibonacci(n - 2);
+// }
+// console.log(Fibonacci(6))
+
+// 尾调用优化
+// var Fibonacci2 = function(n, ac1 = 0, ac2 = 1) {
+//     if(n === 1) return ac2;
+//     if(n === 0) return 0
+//     return Fibonacci2(n-1, ac2, ac1+ ac2)
+// };
+// console.log(Fibonacci2(6))
+
+
+// 函数柯里化优化
+// function Fibonacci3(n, total) {
+//     if (n <= 1) return total;
+//     return Fibonacci3(n - 1, n * total)
+// }
+// function curry(fn, n) {
+//     return function (m) {
+//         return fn.call(this, m, n);
+//     }
+// }
+//
+// console.log(curry(Fibonacci3, 1)(5))
+
+// 加法
+// function sum(x, y) {
+//     if (y > 0) return sum(x + 1, y - 1)
+//     return x;
+// }
+//
+// console.log(sum(1, 100000)) // 栈溢出
+
+// 解决方法：蹦床函数
+// function trampoline(fn) {
+//     while(fn && fn instanceof Function) {
+//         fn = fn();
+//     }
+//     return fn;
+// }
+// function sum2 (x, y) {
+//     if (y> 0) return sum2.bind(this,x + 1, y -1);
+//     return x;
+// }
+//
+// console.log(trampoline(sum2(1, 1000000)))
+
+// 尾逗号
+// function close (param1, param2,) {
+//     console.log(13)
+// }
+//
+// close()
+
+// toString
+// function /** getName */ getName() {
+//     console.log(123)
+// }
+//
+// console.log(getName.toString())
+
+// catch
+try {
+    console.log(123)
+}catch {
+
+}
