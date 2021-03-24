@@ -8,7 +8,7 @@
 // 方式1
 let str = "  We  Are  Happy";
 function replaceTrim(str) {
-    return str.replace(/\s/g, '%20')
+    return str.replaceAll(' ', '%20') // node不行，浏览器可以 ES2021
 }
 
 let str2 = 'WeAreHappy'
@@ -29,5 +29,5 @@ function replaceTrim2(str) {
     return newStr
 }
 
-console.log(replaceTrim2(str))
+console.log(replaceTrim(str))
 console.log(replaceTrim2(str2))
