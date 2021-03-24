@@ -126,3 +126,29 @@ ES2021 引入了replaceAll()方法，可以一次性替换所有匹配。
         // 'bcab'
 
     ```
+
+## 以前的方法
+1. repeat(n)
+将字符串重复n次，如果n为0，则返回空字符串，如果n为负数，则报错
+返回值：新字符串
+2. str.padStart(length, substr);
+使用str将字符串填充为长度为length的字符串
+如果length的长度小于当前字符串的长度，则返回当前字符串本身。
+如果substr的长度太长，则会只保留左侧的部分
+```js
+let str = 'abc'
+str.padStart(4, 'dd') // dabc
+```
+3. includes(substr, position)
+用于判断一个子字符串是否在字符串内
+参数
+- substr: 子串
+- position: 从哪个位置开始查找，默认为0 
+4. slice(start, end)
+用于提取字符串的一部分
+返回一个新的字符串
+5. split(spera, limit)
+使用指定的分隔符字符串将字符串分隔成一个数组
+参数
+- spera: 表示使用什么字符串进行分割
+- limit: 表示分割后数组的长度，如果本来要分割的个数大于limit，则后面的会被忽略
