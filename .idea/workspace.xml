@@ -2,10 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ad18d6a6-286b-4bd4-8fc8-2298a730e6a8" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/ig/二维数组中的查找/index.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ig/去空格/index.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/nodejs/express/express.md" beforeDir="false" afterPath="$PROJECT_DIR$/nodejs/express/express.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/nodejs/express/url2/public/stylesheets/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/nodejs/express/url2/public/stylesheets/style.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ig/二维数组中的查找/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/ig/二维数组中的查找/index.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -62,7 +61,7 @@
       <option name="presentableId" value="Default" />
       <updated>1616467550394</updated>
       <workItem from="1616467551645" duration="7105000" />
-      <workItem from="1616482942396" duration="21415000" />
+      <workItem from="1616482942396" duration="23238000" />
     </task>
     <servers />
   </component>
