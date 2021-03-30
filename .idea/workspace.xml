@@ -2,8 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ad18d6a6-286b-4bd4-8fc8-2298a730e6a8" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/js/es6/module/index.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/js/es6/module/index.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/js/es6/module/module.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/js/es6/module/test.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/nodejs/express/express.md" beforeDir="false" afterPath="$PROJECT_DIR$/nodejs/express/express.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -13,8 +16,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="HTML File" />
         <option value="Pug File" />
+        <option value="HTML File" />
       </list>
     </option>
   </component>
@@ -61,6 +64,7 @@
       <updated>1616467550394</updated>
       <workItem from="1616467551645" duration="7105000" />
       <workItem from="1616482942396" duration="28641000" />
+      <workItem from="1617092861404" duration="7453000" />
     </task>
     <servers />
   </component>
