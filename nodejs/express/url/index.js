@@ -1,9 +1,10 @@
 const express = require('express');
 const path = require('path');
-
+const birds = require('./router/birds')
 const app = express();
 app.set('view engine', 'jade');
 
+app.use(express.json())
 app.all('*', (req,res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
     res.header("Content-Type", "application/json;charset=utf-8");
@@ -19,8 +20,12 @@ app.get('/about/:aboutId', (req, res) => {
     // res.send(JSON.parse(JSON.stringify(req)));
     res.send('加油')
 })
+app.use('/birds', birds);
+// app.post('/', function (req, res, next) {
+//     res.send(app.locals)
+// })
 
-app.post('/', (req, res) => {
+app.get('/', (req, res) => {
     res.setHeader('Content-Type', 'text/html')
     res.render(path.join(__dirname, './view/index.jade'))
 })

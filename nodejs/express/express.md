@@ -90,6 +90,10 @@ link(rel="stylesheet", href="/static/stylesheets/style.css")
 ### 2.app.use
 最主要的功能是使用一个中间件
 
+### 3.express.json([options])
+### Application
+#### app.locals
+
 ### response Methods
 主要列举了res Object的一些方法
 #### res.download(path[, filename, options, fn])
@@ -143,7 +147,6 @@ Route path: /user/:userId(\d+)
 Request URL: http://localhost:3000/user/42
 req.params: {"userId": "42"}
 ```
-
 ### router handlers
 我们可以通过给app.METHOD中传递handler来决定当路由匹配时，我们需要做什么
 ```js
@@ -178,6 +181,46 @@ app.get('/example/c', [cb0, cb1, cb2])
 当然还可以两者结合使用
 > 注意：当有多个handler时，一定记得在前面的handler内加next否则后续的不会走到
 
+## app.route()
+你可以通过app.route()为某个路径创建一个链式调用的处理函数,创建模块化路由可以有效地帮助我们减少代码冗余和拼写错误
+
+example
+```js
+app.route('/')
+        .get(function (req, res) {  })
+        .post(function (req, res) {  })
+        .put(function (req, res) {  })
+```
+
+## express.Router()
+我们可以通过express.Router去创建一个模块化、可挂载的路由处理函数，路由实例是一个完整的中间件和路由系统，因此，他常常被称为迷你应用
+
+下面我们来一个示例，在app目录下创建一个birds.js文件，其内容如下
+
+```js
+const express = require('express');
+const router = express.Router();
+
+router.use(function (timelog) {
+   console.log(timelog);
+   next();
+})
+router.get('/', function (req, res) { 
+    res.send('root birds');
+})
+router.get('/about', function (req, res) {
+   res.send('About birds');
+})
+module.exports = router;
+
+```
+我们在index.js中引入这个文件
+
+```js
+var birds = require('./birds')
+// ...
+app.use('/birds', birds)
+```
 ## 记一次通过express返回给页面一个html文件趟过的坑
 
 首先页面路径如图所示
