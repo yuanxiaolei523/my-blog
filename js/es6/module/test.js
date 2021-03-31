@@ -26,3 +26,7 @@ export default function getNumber() {
 export function getName () {
     return '123'
 }
+
+export default  function () {
+    return 456;
+}

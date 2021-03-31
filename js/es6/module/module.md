@@ -234,7 +234,8 @@ console.log(number()); // 123
 ```
 上面我们暴露的方法是getNumber，但是我们引入的时候将其命名为number，而且可以正常打印123了。要注意的一点是，import后面没有大括号了
 
-一个模块只能有一个export default命令。export default可以和export同时存在
+一个模块只能有一个export default命令。当一个模块内存在多个export default的时候，会报错
+export default可以和export同时存在
 ```js
 // modules.js
 function add(x, y) {
