@@ -17,7 +17,11 @@
 
 // import number from './test.js';
 // console.log(number());
-import('./test.js')
-.then(({default: getNumber, getName}) => {
-    console.log(getNumber, getName)
-})
+// import('./test.js')
+// .then(({default: getNumber, getName}) => {
+//     console.log(getNumber, getName)
+// })
+// foo();
+// export function foo () {
+//     console.log(123)
+// }

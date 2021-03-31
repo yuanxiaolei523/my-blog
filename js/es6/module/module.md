@@ -397,6 +397,60 @@ import('./test.js')
 
 ## CommonJS和ES6的区别
 1. ES6中是在编译时确定模块间的依赖关系以及输入输出的变量，CommonJS是在运行时才能确定
-2. ES6导出的是接口，这些接口与模块内部的变量一一对应，CommonJS导出的是整个模块对象
+2. ES6导出的是接口，这些接口与模块内部的变量一一对应(值的引用)，CommonJS导出的是整个模块对象(值的拷贝，在不借助于函数的延时执行的情况下，每次得到的都是相同的)
+   ```js
+        // commonjs
+        // a.js
+        var b = require('./b');
+        console.log(b.foo);
+        setTimeout(() => {
+           console.log(b.foo);
+           console.log(require('./b').foo);
+        }, 1000);
+      
+        // b.js
+        let foo = 1;
+        setTimeout(() => {
+            foo = 2;
+        }, 500);
+        module.exports = {
+            foo: foo,
+        };
+        // 1 1 1
+   
+   
+        // es6
+        // a.js
+        import { foo } from './b';
+        console.log(foo);
+        setTimeout(() => {
+            console.log(foo);
+            import('./b').then(({ foo }) => {   
+            console.log(foo);
+        });
+        }, 1000);
+         
+        // b.js
+        export let foo = 1;
+        setTimeout(() => {
+            foo = 2;
+        }, 500);
+         // 1 2 2
+   ```
 3. ES6通过接口取值可以取到实时的值，CommonJS模块输出的是值的缓存
-4. export和import可以出现在当前模块的任意**顶层**的位置，CommonJS不可以
+4. export和import可以出现在当前模块的任意**顶层**的位置，CommonJS可以出现在任意位置
+
+## 注意：
+1. 在a中引入b模块，无论引入多少次，b模块只会执行一次
+```js
+// a.js
+import './b';
+import './b';
+
+// b.js
+console.log('只会执行一次');
+
+// 执行结果：
+// 只会执行一次
+```
+2. ES6的import只是将模块引用进来，并不会去执行模块，当真正需要的时候，才会去执行该模块
