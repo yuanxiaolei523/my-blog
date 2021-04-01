@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import CustomTextInput from './basic/ref/index'
+import CustomTextInput from './basic/ref/callBackRef/index'
 export default class GetMousePosition extends Component {
 	// handleClick() {
 	// 	console.log(123, appRouter);
