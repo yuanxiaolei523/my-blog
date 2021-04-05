@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>事件代理</title>
+</head>
+<body>
+    <ul>
+        <li>1</li>
+        <li>2</li>
+        <li>3</li>
+        <li>4</li>
+        <li>5</li>
+        <li>6</li>
+    </ul>
+</body>
+<script type="text/javascript">
+    // 方式1 缺点：需要为每个li绑定监听
+    let liList = document.getElementsByTagName('li');
+    for(let i = 0; i < liList.length; i++) {
+        liList[i].addEventListener('click', function(e) {
+            alert(`内容为${e.target.innerHTML}, 索引为${i}`)
+        }, true);
+    }
+
+    //方式2： 事件代理
+    let ul = document.querySelector('ul');
+    // console.log(li);
+    ul.addEventListener('click', (e) => {
+        e.stopPropagation();
+        console.log(123);
+        // const target = e.target;
+        // console.log(e);
+        // if(target.tagName.toLowerCase() === 'li') {
+        //     const liList = document.querySelectorAll('li');
+        //     // 因为liList是一个NodeList，并不能直接使用数组的方法，所以通过这种方式改变this的指向，从而使用原型链上的方法
+        //     let index = Array.prototype.indexOf.call(liList, target);
+        //     alert(`内容为${target.innerHTML}, 索引为${index}`)
+        // }
+    }, true);
+</script>
+</html>
