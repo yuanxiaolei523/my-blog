@@ -58,7 +58,7 @@ for (const iterator of set) {
 其次 Set 内部时采用了一种类似于精确相等运算符的算法(===), 与===的主要区别就是，Set 内部认为 NaN 等于 NaN，而===却认为 NaN 和 NaN 不相等
 
 对象类型
-两个对象在 Set 内部总是不等的
+两个对象在 Set 内部总是不等的，除非是同一个引用
 
 ```js
 console.log(new Set([NaN, 1, NaN]));
@@ -71,6 +71,8 @@ let obj = {};
 console.log(new Set([obj, obj, 1]));
 // Set { {}, 1 }
 ```
+
+> 注意：向set内添加+0、-0的时候，会自动转成0，也就是说在set中认为0、-0、+0是相同的
 
 ### 常用函数和属性
 
