@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ad18d6a6-286b-4bd4-8fc8-2298a730e6a8" name="Default Changelist" comment="">
+<<<<<<< HEAD
       <change afterPath="$PROJECT_DIR$/react/my-react-project/src/basic/ref/callBackRef/index.js" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/react/my-react-project/src/basic/ref/classComponents/Child.js" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/react/my-react-project/src/basic/ref/classComponents/parent.js" afterDir="false" />
@@ -10,6 +11,14 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/react/my-react-project/src/App.js" beforeDir="false" afterPath="$PROJECT_DIR$/react/my-react-project/src/App.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/react/my-react-project/src/basic/ref/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/react/my-react-project/src/basic/ref/index.js" afterDir="false" />
+=======
+      <change afterPath="$PROJECT_DIR$/ig/数组中重复的数字/test.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/blog.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+>>>>>>> 20210331_ig_repeatNumbers
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -70,8 +79,13 @@
       <updated>1616467550394</updated>
       <workItem from="1616467551645" duration="7105000" />
       <workItem from="1616482942396" duration="28641000" />
+<<<<<<< HEAD
       <workItem from="1617092861404" duration="15463000" />
       <workItem from="1617242496682" duration="347000" />
+=======
+      <workItem from="1617092861404" duration="7857000" />
+      <workItem from="1617329085407" duration="601000" />
+>>>>>>> 20210331_ig_repeatNumbers
     </task>
     <servers />
   </component>
