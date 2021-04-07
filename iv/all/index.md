@@ -107,8 +107,8 @@ react 的 diff 算法，会首先比较两棵树的根节点，不同类型的�
     1.2 如果 str 以'0X'或者'0x'开头，则 str 将以 16 进制进行解析
     1.3 如果输入的 string 以任何其他值开头， radix 是 10
 
-如果第一个字符不能转换为数字，parseInt 会返回 NaN。
-如果一个字符并不是有效的数字，parseInt 会返回 NaN
+如果第一个字符不能转换为字符串，parseInt 会返回 NaN。
+如果一个字符串并不是有效的数字，parseInt 会返回 NaN
 
 ```js
 let a = parseInt("234", "2"); // 2进制的有效数字是0、1，故返回NaN
