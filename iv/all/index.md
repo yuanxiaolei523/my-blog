@@ -236,8 +236,8 @@ let wsFun = new WeakSet([a])
 let ws = new WeakSet([1]) // error
 ```
 
-Map是一种类似于对象的数据结构，出现Map的原因就是因为传统的Object只能使用字符串作为key，而Map可以使用任意类型的结构作为key
-Map是可遍历的
+Map是一种类似于对象的数据结构， 是一个键值对的集合，出现Map的原因就是因为传统的Object只能使用字符串作为key，而Map可以使用任意类型的结构作为key
+Map是可遍历的，其构造函数可以传入一个二维数组
 
 WeakMap和Map大致相似，其最主要的区别就是，
 1. WeakMap的key只能是对象,null除外
