@@ -221,8 +221,30 @@ function throttle (fn, delay) {
 ```
 
 ### 3.  介绍下Set、Map、WeakSet、WeakMap的区别
+Set是一种类似于数组的结构，构造函数可以传入一个数组(或者其他具有iterator接口的数据解构)，首先其内部存储的值是唯一的。具有siz属性，可以用于遍历
 
-### 4. 如何解决for循环下settimeout的打印问题
+WeakSet和Set大致相同，主要的区别有三点，
+一是WeakSet的成员只能是非基本类型(数组、对象、函数)，不能是其他的数据结构；
+二是WeakSet中的对象都是弱引用的，可以有效的避免内存泄露
+三是WeakSet没有size属性，不支持遍历方法
+```js
+let wsArr = new WeakSet([[1, 2]])
+let wsObj = new WeakSet([{name: 12}])
+let a = function () {}
+let wsFun = new WeakSet([a])
+
+let ws = new WeakSet([1]) // error
+```
+
+Map是一种类似于对象的数据结构，出现Map的原因就是因为传统的Object只能使用字符串作为key，而Map可以使用任意类型的结构作为key
+Map是可遍历的
+
+WeakMap和Map大致相似，其最主要的区别就是，
+1. WeakMap的key只能是对象,null除外
+2. WeakMap的key是弱引用的
+3. 不能遍历
+
+### 4. 如何解决for循环下setTimeout的打印问题
 #### issue
 ```js
 for (var i = 0; i < 5; i++) {
