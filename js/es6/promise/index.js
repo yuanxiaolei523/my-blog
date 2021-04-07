@@ -13,6 +13,23 @@
 // }).then((res) => {
 // 	console.log(res);
 // });
+let p1 = new Promise((resolve) => {
+	console.log("p1");
+	resolve(1);
+});
+
+let p2 = new Promise((resolve, reject) => {
+	console.log("p2");
+	reject(1);
+}).catch((res) => {
+	console.log(res);
+});
+let p3 = new Promise((resolve, reject) => {
+	setTimeout(() => {
+		console.log("p3");
+		resolve(1);
+	}, 1000);
+});
 
 let p;
 // p = new Promise((resolve, reject) => {
@@ -58,23 +75,87 @@ let p;
 // 	console.log(123);
 // }, 2000);
 
-const promise = new Promise(function (resolve, reject) {
-	resolve("ok");
-	// throw new Error("test");
-	setTimeout(function () {
-		throw new Error("test");
-	}, 0);
-});
-promise
-	.then(function (value) {
-		setTimeout(() => {
-			console.log(value, "then");
-		}, 100);
-	})
-	.catch((res) => {
-		console.log(res, "catch");
-	});
+// const promise = new Promise(function (resolve, reject) {
+// 	resolve("ok");
+// 	// throw new Error("test");
+// 	setTimeout(function () {
+// 		throw new Error("test");
+// 	}, 0);
+// });
+// promise
+// 	.then(function (value) {
+// 		setTimeout(() => {
+// 			console.log(value, "then");
+// 		}, 100);
+// 	})
+// 	.catch((res) => {
+// 		console.log(res, "catch");
+// 	});
 
-setTimeout(() => {
-	console.log(123);
-}, 100);
+// setTimeout(() => {
+// 	console.log(123);
+// }, 100);
+
+// let p = new Promise(resolve => {
+//     // console.log(0)
+//     resolve(1);
+// })
+//     .finally(() => {return 1})
+//     // .then(()=> {console.log(2)})
+// console.log(p)
+
+// Promise.all([p1, p2, p3]).catch(e => {
+//     console.log(e)})
+
+// const p1 = new Promise((resolve, reject) => {
+// 	resolve("hello");
+// })
+// 	.then((result) => result)
+// 	.catch((e) => e);
+
+// const p2 = new Promise((resolve, reject) => {
+// 	throw new Error("报错了");
+// })
+// 	.then((result) => result)
+// 	.catch((e) => e);
+
+// Promise.all([p1, p2])
+// 	.then((result) => console.log(result, "then"))
+// 	.catch((e) => console.log(e));
+
+// const raceP = Promise.race([p2, p1, p3]);
+
+// raceP
+// 	.then((res) => {
+// 		console.log(res, "res");
+// 	})
+// 	.catch((res) => {
+// 		console.log(res, "catch");
+// 	});
+// console.log(raceP, "race");
+
+// const pSettled = Promise.allSettled([p1, p2]);
+
+// pSettled.then((res) => {
+// 	console.log(res);
+// });
+
+// var rejected = Promise.reject(-1);
+// Promise.any([rejected]).catch(function (results) {
+// 	console.log(results); // [-1, Infinity]
+// });
+
+// p = Promise.resolve(1);
+// console.log(p);
+
+let thenable = {
+	then: function (resolve, reject) {
+		console.log(123);
+		resolve(42);
+	},
+};
+p = Promise.resolve(thenable);
+console.log(thenable);
+p.then(function (value) {
+	console.log(value); // 42
+});
