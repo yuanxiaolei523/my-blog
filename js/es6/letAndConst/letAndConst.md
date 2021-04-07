@@ -3,7 +3,7 @@
 ### 基本用法
 `let name = 'zhangsan'`
 ### 特点
-1. let生命的变量只在当前代码块内有效
+1. let声明的变量只在当前代码块内有效
 ```
 {
     let name = 'zhangsan';
