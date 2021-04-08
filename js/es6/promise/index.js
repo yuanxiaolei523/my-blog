@@ -148,14 +148,34 @@ let p;
 // p = Promise.resolve(1);
 // console.log(p);
 
-let thenable = {
-	then: function (resolve, reject) {
-		console.log(123);
-		resolve(42);
-	},
-};
-p = Promise.resolve(thenable);
-console.log(thenable);
-p.then(function (value) {
-	console.log(value); // 42
-});
+// let thenable = {
+// 	then: function (resolve, reject) {
+// 		console.log(123);
+// 		resolve(42);
+// 	},
+// };
+// p = Promise.resolve(thenable);
+// console.log(thenable);
+// p.then(function (value) {
+// 	console.log(value); // 42
+// });
+
+// new Promise((resolve, reject) => {
+// 	throw new Error("error");
+// });
+
+// console.log(11222);
+try {
+	const promise = new Promise(function (resolve, reject) {
+		// resolve("ok");
+		throw new Error("test");
+	});
+	promise.then(function (value) {
+		console.log(value);
+	});
+	// .catch(function (error) {
+	// 	// console.log(error);
+	// });
+} catch (e) {
+	console.log(e, "catch");
+}

@@ -8,8 +8,6 @@
 
 众所周知，在Promise出现之前，我们都是通过回调函数的形式来实现异步编程的，即在一件事情执行完之后，再去执行另外一件事情，但是这种情况下很容易产生回调地狱，造成代码的阅读不便性；当嵌套层数过多时，很难处理错误，所以ES6就推出了Promise
 
-
-
 Promise可以理解为是一个容器，里面存储着未来某个事件发生的结果
 
 从语法上讲Promise是一个对象，可以获取异步操作的消息
@@ -26,13 +24,11 @@ Promise可以理解为是一个容器，里面存储着未来某个事件发生�
 
 #### Promise的缺点
 
-1. 无法取消Promise，一旦新建就会**立即**执行
-2. 如果不设置回调函数，那么内部抛出的错误，外部无法获取
+1. 无法取消Promise，一旦新建就会立即执行
+2. 如果不设置回调函数，那么内部抛出的错误，外部无法获取(不会阻断后续代码的执行)
 3. 当处于pending状态时，无法得知目前进展到哪个阶段
 
 ## 基本用法
-
-
 
 ### 常用方法
 
@@ -76,19 +72,17 @@ timeout(100).then((value) => {
 
 
 
-then方法返回的是一个`新的Promise实例`,因此可以链式调用then函数
+then方法返回的是一个`新的`Promise实例,因此可以链式调用then函数
 
 链式调用的时候，只有当前一个then函数return了之后下一个才会执行
 
 
 
-#### Promise.prorotype.catch
+#### Promise.prototype.catch
 
 `Promise.prototype.catch()`方法是`.then(null, rejection)`或`.then(undefined, rejection)`的别名，用于指定发生错误时的回调函数。
 
 当Promise内部有错误抛出时，就会被catch所捕获
-
-
 
 ```js
 const promise = new Promise(function(resolve, reject) {
@@ -100,12 +94,12 @@ promise.catch(function(error) {
 // Error: test
 ```
 
-**如果Promise的状态已经是resolve了，那么再抛出错误也是无效的**
+如果Promise的状态已经是resolve了，那么再抛出错误也是无效的，此时实例的状态已经凝固了
 
 ```js
 const promise = new Promise(function(resolve, reject) {
   resolve('ok');
-  throw new Error('test');
+  throw new Error('test'); // 无法被外部的try...catch捕获
 });
 promise
   .then(function(value) { console.log(value) })
@@ -181,7 +175,7 @@ setTimeout(() => { console.log(123) }, 2000);
    		console.log(res, "catch");
    	});
    // ok, then
-   // 未捕获的错误
+   // 未捕获的错误：test
    ```
 
    上面的代码中Promise是在下一轮事件循环中抛出错误，此时Promise已经执行完毕了，所以catch不会去捕获错误了,这种错误就已经抛出到Promise外部了，会阻断后续程序的执行
@@ -192,7 +186,7 @@ catch的返回值还是一个Promise,所以catch后面还可以跟then或者catc
 
 
 
-***Promise新建后就会立即执行***
+Promise新建后就会立即执行
 
 ```js
 let promise = new Promise(function(resolve, reject) {
@@ -258,11 +252,11 @@ let p2 = new Promise((resolve) => {
 
 上面的例子p1在2s后会进行resolve，然后p2 resolve的参数是p1，此时会先打印123，然后等到p1的状态改变了之后，才会resolve，然后then方法内打印456
 
-如果p1的状态是pending，那么resolve就会等待p1的状态改变之后执行，要注意的是，**其并不会阻断后面代码的执行**(调用`resolve`或`reject`并不会终结 Promise 的参数函数的执行。)，如果resolve(p1)后面有console.log(342), 那么342会在123之后进行打印
+如果p1的状态是pending，那么resolve就会等待p1的状态改变之后执行，要注意的是，其并不会阻断后面代码的执行(调用`resolve`或`reject`并不会终结 Promise 的参数函数的执行。)，如果resolve(p1)后面有console.log(342), 那么342会在123之后进行打印
 
 
 
-注意如果**resolve的参数是reject函数调用结果的话，那么就会造成当前promise对象的状态无效，取决于参数内的reject**
+注意如果resolve的参数是reject函数调用结果的话，那么就会造成当前promise对象的状态无效，取决于参数内的reject
 
 ```js
 
@@ -316,26 +310,22 @@ finally的参数是一个回调函数，回调函数内不接收参数，这意�
 finally方法的实现
 
 ```js
-
-```
-
-Promise.prototype.finally = function (*callback*) {
+Promise.prototype.finally = function (callback) {
 
   let P = this.constructor;
 
   return this.then(
 
-​    *value*  => P.resolve(callback()).then(() => value),
+    value  => P.resolve(callback()).then(() => value),
 
-​    *reason* => P.resolve(callback()).then(() => { throw reason })
+    reason => P.resolve(callback()).then(() => { throw reason })
 
   );
 
 };
-
 ```
 
-```
+
 
 上面代码中，不管前面的 Promise 是fulfilled还是rejected，都会执行回调函数callback。
 
@@ -363,55 +353,38 @@ const p = Promise.all([p1, p2, p3]);
 
 
 
-\#### 新的Promise状态的确定
+##### 新的Promise状态的确定
 
-调用Promise.all()返回的实例的状态会有一下两种情况
+调用Promise.all()返回的实例的状态会有以下两种情况
 
-1. 当p1、p2、p3的状态都为fullfilled的时候，p的状态才会是fullfilled，此时会返回一个由p1、p2、p3返回值组成的数组**顺序和传入Promise时的顺序相同**
-
-   
+1. 当p1、p2、p3的状态都为fullfilled的时候，p的状态才会是fullfilled，此时会返回一个由p1、p2、p3返回值组成的数组，顺序和传入Promise时的顺序相同
 
 2. 只要三个中有一个reject了，那么p的值就会变成reject，此时第一个reject实例的返回值会被返回，
 
    
 
-**注意：其中一个Promise rejected了之后，并不会影响其他Promise的执行**
+注意：其中一个Promise rejected了之后，并不会影响其他Promise的执行
 
 ```js
-let p1 = new Promise(*resolve* => {
-
+let p1 = new Promise(resolve => {
     console.log('p1')
-
     resolve(1);
-
 })
-
-
-
-let p2 = new Promise((*resolve*, *reject*) => {
-
+let p2 = new Promise((resolve, reject) => {
     console.log('p2')
-
     reject(1)
-
 })
 
-let p3 = new Promise((*resolve*, *reject*) => {
-
+let p3 = new Promise((resolve, reject) => {
     setTimeout(() => {
-
         console.log('p3');
-
         resolve(1)
-
     })
 })
 
-Promise.all([p1, p2, p3]).catch(*e* => {
-
+Promise.all([p1, p2, p3]).catch(e => {
     console.log(e)})
-
-
+})
 
 // p1 p2 1 p3(1s后打印)
 ```
@@ -420,38 +393,24 @@ Promise.all([p1, p2, p3]).catch(*e* => {
 
 
 
-如果p1自己定义了自己的catch方法，当p1报错时，Promise.all()后面的catch方法不会执行，这种情况下，p1返回的仍然是fullfilled，因为他的错误已经被捕获了
+如果p自己定义了自己的catch方法，当p2报错时，Promise.all()后面的catch方法不会执行，这种情况下，p2返回的仍然是fullfilled，因为他的错误已经被捕获了
 
 ```js
-const p1 = new Promise((*resolve*, *reject*) => {
-
+const p1 = new Promise((resolve, reject) => {
     resolve('hello');
-
 })
+    .then(result => result)
+    .catch(e => e);
 
-    .then(*result* => result)
-
-    .catch(*e* => e);
-
-
-
-const p2 = new Promise((*resolve*, *reject*) => {
-
+const p2 = new Promise((resolve, reject) => {
     throw new Error('报错了');
-
 })
-
-    .then(*result* => result)
-
-    .catch(*e* => e);
-
-
+    .then(result => result)
+    .catch(e => e);
 
 Promise.all([p1, p2])
-
-    .then(*result* => console.log(result, 'then'))
-
-    .catch(*e* => console.log(e));
+    .then(result => console.log(result, 'then'))
+    .catch(e => console.log(e));
 
 // [hello, 报错了], then
 ```
@@ -476,11 +435,10 @@ const p = Promise.race([p1, p2, p3])
 
 ##### p的状态
 
-p的状态和Promise.all 有些不同，只要某一个实例的状态发生变化，p的状态就会发生变化(和p1-p3中的状态一直)，率先变化的Promise实例的返回值，会传给p的回调函数
+p的状态和Promise.all 有些不同，只要某一个实例的状态发生变化，p的状态就会发生变化(和p1-p3中的状态一致)，率先变化的Promise实例的返回值，会传给p的回调函数
 
 ```js
 const p = Promise.race([p2, p1, p3]);
-
 p
 	.then((res) => {
 		console.log(res, "res");
@@ -496,7 +454,7 @@ console.log(p, "race");
 
 #### Promise.allSettled()
 
-Promise.allSettled()接受一组Promise实例作为参数，返回一个新的Promise实例，只有等到**所有的实例**都返回了(fullfilled || rejected)，新的Promise实例的状态才会发生改变(一旦发生改变，promise实例的状态总是fullfilled)
+Promise.allSettled()接受一组Promise实例作为参数，返回一个新的Promise实例，只有等到所有的实例都返回了(fullfilled || rejected)，新的Promise实例的状态才会发生改变(一旦发生改变，promise实例的状态总是fullfilled)
 
 ```js
 let p1 = new Promise((resolve) => {
@@ -513,13 +471,13 @@ p.then((res) => {
 	console.log(res);
 });
 // p1 p2 
-/* 
+/ 
 	res是一个数组
 	[
     { status: 'fulfilled', value: 1 },
     { status: 'rejected', reason: 1 }
   ]
-*/
+/
 ```
 
 Promise.allSettled()的返回值p，状态只能是fullfilled，他的监听函数then函数接受一个数组，数组内有两个对象，每个对象有一个status，用来标识这个实力的状态,只能是fullfilled或者rejected，然后fullfilled状态的实例还会返回一个value，用于显示resolve的值 ，rejected状态的实例会返回一个reason，用于显示rejected的值
