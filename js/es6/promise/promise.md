@@ -363,7 +363,7 @@ const p = Promise.all([p1, p2, p3]);
 
 
 
-\#### 新的Promise状态的确定
+#### 新的Promise状态的确定
 
 调用Promise.all()返回的实例的状态会有一下两种情况
 
