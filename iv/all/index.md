@@ -279,6 +279,7 @@ for(var i = 0; i < 5; i++) {
 这也是为什么我又写这个题的原因，以前只知道使用前两种方式去解决这个问题，
    但是自从我了解到setTimeout的第三个参数之后，我才知道原来还可以这样解决
    
+
 首先介绍setTimeout(fn, duration, params)
 参数
     - fn: 是一个回调函数
@@ -293,3 +294,19 @@ for (let i = 0; i < 5; i++) {
 }
 ```
 这样也可以完美解决了
+
+### 5. null和undefined的区别
+
+今天我们再来讨论一道非常简单的题目，这道题目也在之前的面试中也是一道高频的题目，前几天我发现我对他的理解貌似有些错误，所以特意写一下。
+
+首先null和undefined真的是非常的类似
+
+1. 首先null==undefined，在js中是返回true的
+2. 其次就是在条件语句中，null和undefined都会被转成为0，担任false的角色
+3. null和undefined都已经被分配内存了
+
+下面我们来了解一下他们之间的不同
+
+1. 首先在使用typeof进行判断时, typeof null == 'object'，而typeof undefined == 'undefined'，原因是由于js设计之初的一个bug
+2. null意味着是一个空的或者不存在的变量,垃圾回收器会回收这种变量，undefined表示这个变量已经存在了，但是他的值还没有定义
+
