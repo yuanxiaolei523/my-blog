@@ -137,12 +137,17 @@ WeakSet 和 Set 的结构类似，也是`不重复`的值的集合
 
 首先 Set 和 WeakSet 都是不重复的值的集合，但是两者还是有区别的
 
--   WeakSet 的成员只能是对象，而不能是其他类型
+-   是WeakSet的成员只能是非基本类型(数组、对象、函数)，不能是其他的数据结构
 
 ```js
 const b = [3, 4];
 const ws = new WeakSet(b);
 //Invalid value used in weak set
+
+let wsArr = new WeakSet([[1, 2]])
+let wsObj = new WeakSet([{name: 12}])
+let a = function () {}
+let wsFun = new WeakSet([a])
 ```
 
 -   WeakSet 中的对象都是弱引用的
@@ -152,7 +157,7 @@ const ws = new WeakSet(b);
 
 ### 构造函数 WeakSet
 
-WeakSet 可以接收一个数组或者类似对象的数组作为参数(任何具备 Iterator 接口的数据结构)，该数组的所有对象都会成为 WeakSet 实例对象的成员
+WeakSet 可以接收一个数组作为参数，数组的成员是数组或者类似数组的对象作为参数(任何具备 Iterator 接口的数据结构)，该数组的所有对象都会成为 WeakSet 实例对象的成员
 
 ```js
 const a = [
@@ -178,11 +183,12 @@ const ws = new WeakSet(a);
 2. delete()
    用于从 WeakSet 中删除成员
     ```js
+   let arr = [1,2];
     let ws = new WeakSet([
-    	[1, 2],
+    	a,
     	[3, 4],
     ]);
-    ws.delete([1, 2]);
+    ws.delete(a);
     ```
 3. has()
    用于判断 WeakSet 是否拥有某些成员
@@ -269,6 +275,11 @@ console.log(...map) // [ 1, 2 ]
 
 ## WeakMap
 WeakMap和Map的数据结构一致，也是用于生成键值对的集合
+```js
+let wm = new WeakMap();
+const key = {name : 1}
+wm.set(key, 1)
+```
 ### 与Map的不同
 1. 只能用对象作为key(null除外)
 2. 键名是弱引用

@@ -139,7 +139,7 @@ parseInt("abc123"); // NaN
 
 #### 使用场景
 
-防抖：input输入
+防抖：input 输入
 
 节流：resize、scroll
 
@@ -147,22 +147,21 @@ parseInt("abc123"); // NaN
 
 1. 防抖
 
-   ```js
-   function debounce (fn, delay) {
-     let timer;
-     return function () {
-       let args = [...arguments];
-       let context = this;
-       if (timer) {
-         clearTimeout(timer);
-       }
-       timer = setTimeout(() => {
-         fn.apply(this, args);
-       }, delay)
-     }
-   }
-   
-   ```
+    ```js
+    function debounce(fn, delay) {
+    	let timer;
+    	return function () {
+    		let args = [...arguments];
+    		let context = this;
+    		if (timer) {
+    			clearTimeout(timer);
+    		}
+    		timer = setTimeout(() => {
+    			fn.apply(this, args);
+    		}, delay);
+    	};
+    }
+    ```
 
 2. 节流
 
@@ -170,14 +169,14 @@ parseInt("abc123"); // NaN
 
 ```js
 function throttle(fn, delay) {
-  let startTime = Date.now();
-  return function (...args) {
-    let now = Date.now();
-    if (now - startTime > delay) {
-      fn.apply(this, args)
-      startTime = now;
-    }
-  }
+	let startTime = Date.now();
+	return function (...args) {
+		let now = Date.now();
+		if (now - startTime > delay) {
+			fn.apply(this, args);
+			startTime = now;
+		}
+	};
 }
 ```
 
@@ -185,42 +184,124 @@ function throttle(fn, delay) {
 
 ```js
 function throttle(fn, delay) {
-  let timer;
-  return function (...args) {
-    timer && clearTimeout(timer);
-    timer = setTimeout(() => {
-      fn.apply(this, args);
-    }, delay)
-  }
+	let timer;
+	return function (...args) {
+		timer && clearTimeout(timer);
+		timer = setTimeout(() => {
+			fn.apply(this, args);
+		}, delay);
+	};
 }
-
 ```
 
 上面的方法也有缺点，就是最后一次不会立即执行，有什么方法能让最后一次立即执行呢
 
 ```js
-function throttle (fn, delay) {
-  let startTime = Date.now();
-  let timer;
-  return function (...args) {
-    let now = Date.now();
-    let context = this;
-    let remaining = delay - (now - startTime);
-    timer && clearTimeout(timer);
-    if (remaining <= 0) {
-      fn.apply(context, args);
-      startTime = now;
-    } else {
-      timer = setTimeout(() => {
-        fn.apply(this, args)
-      }, remaining)
-    }
-    
-  }
+function throttle(fn, delay) {
+	let startTime = Date.now();
+	let timer;
+	return function (...args) {
+		let now = Date.now();
+		let context = this;
+		let remaining = delay - (now - startTime);
+		timer && clearTimeout(timer);
+		if (remaining <= 0) {
+			fn.apply(context, args);
+			startTime = now;
+		} else {
+			timer = setTimeout(() => {
+				fn.apply(this, args);
+			}, remaining);
+		}
+	};
 }
 ```
 
-### 3.  介绍下Set、Map、WeakSet、WeakMap的区别
+### 3. 介绍下 Set、Map、WeakSet、WeakMap 的区别
 
- 
+Set 是一种类似于数组的结构，构造函数可以传入一个数组(或者其他具有 iterator 接口的数据解构)，首先其内部存储的值是唯一的。具有 siz 属性，可以用于遍历
 
+WeakSet 和 Set 大致相同，主要的区别有三点，
+一是 WeakSet 的成员只能是非基本类型(数组、对象、函数)，不能是其他的数据结构；
+二是 WeakSet 中的对象都是弱引用的，可以有效的避免内存泄露
+三是 WeakSet 没有 size 属性，不支持遍历方法
+
+```js
+let wsArr = new WeakSet([[1, 2]]);
+let wsObj = new WeakSet([{ name: 12 }]);
+let a = function () {};
+let wsFun = new WeakSet([a]);
+
+let ws = new WeakSet([1]); // error
+```
+
+Map 是一种类似于对象的数据结构， 是一个键值对的集合，出现 Map 的原因就是因为传统的 Object 只能使用字符串作为 key，而 Map 可以使用任意类型的结构作为 key
+Map 是可遍历的，其构造函数可以传入一个二维数组
+
+WeakMap 和 Map 大致相似，其最主要的区别就是，
+
+1. WeakMap 的 key 只能是对象,null 除外
+2. WeakMap 的 key 是弱引用的
+3. 不能遍历
+
+### 4. 如何解决 for 循环下 setTimeout 的打印问题
+
+#### issue
+
+```js
+for (var i = 0; i < 5; i++) {
+	setTimeout(() => {
+		console.log(i);
+	}, i * 100);
+}
+// 会打印5个5
+```
+
+这是因为 setTimeout 是一个异步操作，是一个宏任务，需要等到同步代码执行完毕后再去执行
+，那么如何让它正常的打印呢
+
+#### resolve
+
+1. 借助于 let 的块级作用域
+
+```js
+for (let i = 0; i < 5; i++) {
+	setTimeout(() => {
+		console.log(i);
+	}, i * 100);
+}
+```
+
+2. 借助于闭包
+
+```js
+for (var i = 0; i < 5; i++) {
+	((j) => {
+		setTimeout(() => {
+			console.log(j);
+		}, j * 100);
+	})(i);
+}
+```
+
+3. 借助于 setTimeout 的第三个参数
+   这也是为什么我又写这个题的原因，以前只知道使用前两种方式去解决这个问题，
+   但是自从我了解到 setTimeout 的第三个参数之后，我才知道原来还可以这样解决
+
+首先介绍 setTimeout(fn, duration, params)
+参数 - fn: 是一个回调函数 - duration: 多长时间之后执行回调函数 - params: 会作为 fn 的参数
+下面我们来看下解决方法
+
+```js
+for (let i = 0; i < 5; i++) {
+	setTimeout(
+		(j) => {
+			console.log(j);
+		},
+		i * 100,
+		i
+	);
+}
+```
+
+这样也可以完美解决了
