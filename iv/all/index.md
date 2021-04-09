@@ -226,6 +226,15 @@ WeakSet 和 Set 大致相同，主要的区别有三点，
 二是 WeakSet 中的对象都是弱引用的，可以有效的避免内存泄露
 三是 WeakSet 没有 size 属性，不支持遍历方法
 
+# <<<<<<< HEAD
+
+WeakSet 和 Set 大致相同，主要的区别有三点，
+一是 WeakSet 的成员只能是非基本类型(数组、对象、函数)，不能是其他的数据结构；
+二是 WeakSet 中的对象都是弱引用的，可以有效的避免内存泄露
+三是 WeakSet 没有 size 属性，不支持遍历方法
+
+> > > > > > > 0e6df54b85cc0fae62d8bd65586866f9a559afdb
+
 ```js
 let wsArr = new WeakSet([[1, 2]]);
 let wsObj = new WeakSet([{ name: 12 }]);
@@ -305,3 +314,18 @@ for (let i = 0; i < 5; i++) {
 ```
 
 这样也可以完美解决了
+
+### 5. null 和 undefined 的区别
+
+今天我们再来讨论一道非常简单的题目，这道题目也在之前的面试中也是一道高频的题目，前几天我发现我对他的理解貌似有些错误，所以特意写一下。
+
+首先 null 和 undefined 真的是非常的类似
+
+1. 首先 null==undefined，在 js 中是返回 true 的
+2. 其次就是在条件语句中，null 和 undefined 都会被转成为 0，担任 false 的角色
+3. null 和 undefined 都已经被分配内存了
+
+下面我们来了解一下他们之间的不同
+
+1. 首先在使用 typeof 进行判断时, typeof null == 'object'，而 typeof undefined == 'undefined'，原因是由于 js 设计之初的一个 bug
+2. null 意味着是一个空的或者不存在的变量,垃圾回收器会回收这种变量，undefined 表示这个变量已经存在了，但是他的值还没有定义
