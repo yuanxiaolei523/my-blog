@@ -221,6 +221,75 @@ function throttle (fn, delay) {
 ```
 
 ### 3.  介绍下Set、Map、WeakSet、WeakMap的区别
+Set是一种类似于数组的结构，构造函数可以传入一个数组(或者其他具有iterator接口的数据解构)，首先其内部存储的值是唯一的。具有siz属性，可以用于遍历
 
- 
+WeakSet和Set大致相同，主要的区别有三点，
+一是WeakSet的成员只能是非基本类型(数组、对象、函数)，不能是其他的数据结构；
+二是WeakSet中的对象都是弱引用的，可以有效的避免内存泄露
+三是WeakSet没有size属性，不支持遍历方法
+```js
+let wsArr = new WeakSet([[1, 2]])
+let wsObj = new WeakSet([{name: 12}])
+let a = function () {}
+let wsFun = new WeakSet([a])
 
+let ws = new WeakSet([1]) // error
+```
+
+Map是一种类似于对象的数据结构， 是一个键值对的集合，出现Map的原因就是因为传统的Object只能使用字符串作为key，而Map可以使用任意类型的结构作为key
+Map是可遍历的，其构造函数可以传入一个二维数组
+
+WeakMap和Map大致相似，其最主要的区别就是，
+1. WeakMap的key只能是对象,null除外
+2. WeakMap的key是弱引用的
+3. 不能遍历
+
+### 4. 如何解决for循环下setTimeout的打印问题
+#### issue
+```js
+for (var i = 0; i < 5; i++) {
+    setTimeout(() => {
+        console.log(i)
+    }, i * 100)
+}
+// 会打印5个5
+```
+这是因为setTimeout是一个异步操作，是一个宏任务，需要等到同步代码执行完毕后再去执行
+，那么如何让它正常的打印呢
+#### resolve
+1. 借助于let的块级作用域
+```js
+for (let i = 0; i < 5; i++) {
+    setTimeout(() => {
+        console.log(i)
+    }, i * 100)
+}
+```
+2. 借助于闭包
+```js
+for(var i = 0; i < 5; i++) {
+    ((j) => {
+        setTimeout(() => {
+            console.log(j)
+        }, j * 100)
+    })(i)
+}
+```
+3. 借助于setTimeout的第三个参数
+这也是为什么我又写这个题的原因，以前只知道使用前两种方式去解决这个问题，
+   但是自从我了解到setTimeout的第三个参数之后，我才知道原来还可以这样解决
+   
+首先介绍setTimeout(fn, duration, params)
+参数
+    - fn: 是一个回调函数
+    - duration: 多长时间之后执行回调函数
+    - params: 会作为fn的参数
+下面我们来看下解决方法
+```js
+for (let i = 0; i < 5; i++) {
+    setTimeout((j) => {
+        console.log(j)
+    }, i * 100, i)
+}
+```
+这样也可以完美解决了
