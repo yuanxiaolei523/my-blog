@@ -226,15 +226,6 @@ WeakSet 和 Set 大致相同，主要的区别有三点，
 二是 WeakSet 中的对象都是弱引用的，可以有效的避免内存泄露
 三是 WeakSet 没有 size 属性，不支持遍历方法
 
-# <<<<<<< HEAD
-
-WeakSet 和 Set 大致相同，主要的区别有三点，
-一是 WeakSet 的成员只能是非基本类型(数组、对象、函数)，不能是其他的数据结构；
-二是 WeakSet 中的对象都是弱引用的，可以有效的避免内存泄露
-三是 WeakSet 没有 size 属性，不支持遍历方法
-
-> > > > > > > 0e6df54b85cc0fae62d8bd65586866f9a559afdb
-
 ```js
 let wsArr = new WeakSet([[1, 2]]);
 let wsObj = new WeakSet([{ name: 12 }]);
