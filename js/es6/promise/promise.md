@@ -14,7 +14,7 @@ Promise 可以理解为是一个容器，里面存储着未来某个事件发生
 
 1. 对象的状态不受外界的影响
 
-    `Promise`对象代表一个异步操作，有三种状态，pending、fullfilled、rejected，只有异步操作的结果，才能决定对象 的状态是哪一个，其他任何操作都无法改变
+    `Promise`对象代表一个异步操作，有三种状态，pending、fullfilled、rejected，只有异步操作的结果，才能决定对象的状态是哪一个，其他任何操作都无法改变
 
 2. 对象的状态一旦改变，就不会再变，`Promise`对象的状态改变，只有两种可能：从`pending`变为`fulfilled`和从`pending`变为`rejected`。只要这两种情况发生，状态就凝固了，不会再变了，会一直保持这个结果，这时就称为 resolved（已定型）。如果改变已经发生了，你再对`Promise`对象添加回调函数，也会立即得到这个结果。这与事件（Event）完全不同，事件的特点是，如果你错过了它，再去监听，是得不到结果的。
 
@@ -125,6 +125,8 @@ setTimeout(() => {
 
 上面的执行，因为 resolve(x+1), x 并没有声明，所以会报错，但是 2s 后仍然会打印 123，也就是说 Promise 内部的错误不会影响到外部的代码，promise 会将错误吃掉
 
+如果在 resolve 之前报错，那么当前 promise 实例的状态也是 rejected
+
 #### 在 resolve 之后报错
 
 1. 在 resolve 之后同步报错
@@ -229,7 +231,7 @@ let p2 = new Promise((resolve) => {
 
 上面的例子 p1 在 2s 后会进行 resolve，然后 p2 resolve 的参数是 p1，此时会先打印 123，然后等到 p1 的状态改变了之后，才会 resolve，然后 then 方法内打印 456
 
-如果 p1 的状态是 pending，那么 resolve 就会等待 p1 的状态改变之后执行，要注意的是，其并不会阻断后面代码的执行(调用`resolve`或`reject`并不会终结 Promise 的参数函数的执行。)，如果 resolve(p1)后面有 console.log(342), 那么 342 会在 123 之后进行打印
+如果 p1 的状态是 pending，那么 resolve 就会等待 p1 的状态改变之后执行，要注意的是，其并不会阻断后面同步代码(无论是构造函数内部还是外部)的执行(调用`resolve`或`reject`并不会终结 Promise 的参数函数的执行。)，如果 resolve(p1)后面有 console.log(342), 那么 342 会在 123 之后进行打印
 
 注意如果 resolve 的参数是 reject 函数调用结果的话，那么就会造成当前 promise 对象的状态无效，取决于参数内的 reject
 
@@ -482,7 +484,7 @@ Promise.resolve()的参数有四种情况
     };
     ```
 
-    `Promise.resolve()`方法会将这个对象转为 Promise 对象，然后就立即执行`thenable`对象的`then()`方法。
+    `Promise.resolve()`方法会将这个对象转为 Promise 对象，然后就立即执行(当成微任务)`thenable`对象的`then()`方法。
 
     ```js
     let thenable = {
@@ -496,7 +498,9 @@ Promise.resolve()的参数有四种情况
     p.then(function (value) {
     	console.log(value);
     });
-    // 123 42
+    console.log(345);
+
+    // 345 123 42
     ```
 
 -   参数不是 thenable 对象，或者不是一个对象
