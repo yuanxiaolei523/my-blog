@@ -43,40 +43,4 @@ var buildTree = function(preorder, inorder) {
     return node;
 };
 
-// console.log(buildTree([3,9,20,15,7], [9,3,15,20,7]))
-// [3,null,9,null,20,null,15,null,7]
-// [3,9,20,null,null,15,7]
-
-var buildTree2 = function(preorder, inorder) {
-    if (!preorder.length || !inorder.length) {
-        return null;
-    }
-
-    const rootVal = preorder[0];
-    const node = new TreeNode(rootVal);
-
-    let i = 0; // i有两个含义，一个是根节点在中序遍历结果中的下标，另一个是当前左子树的节点个数
-    for (; i < inorder.length; ++i) {
-        if (inorder[i] === rootVal) {
-            break;
-        }
-    }
-
-    node.left = buildTree(preorder.slice(1, i + 1), inorder.slice(0, i));
-    node.right = buildTree(preorder.slice(i + 1), inorder.slice(i + 1));
-    return node;
-};
-
-// console.log(buildTree2([3,9,20,15,7], [9,3,15,20,7]))
 let arr = [1, 2, 3, 4, 5, 6, 7]
-
-console.time()
-for (let i = 0; i < arr.length; i++) {
-    if (arr[i] === 6) {
-        break;
-    }
-}
-console.timeEnd()
-console.time()
-let index = arr.indexOf(6);
-console.timeEnd()
