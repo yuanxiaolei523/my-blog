@@ -36,7 +36,15 @@ var reversePrint = function(head) {
  * 输出：[2,3,1]
  * 0 <= 链表长度 <= 10000
  */
-
+var reversePrint = function(head) {
+    if(!head) return [];
+    let arr = [];
+    while (head !== null) {
+        arr.unshift(head.val);
+        head = head.next
+    }
+    return nums
+}
 
 
 

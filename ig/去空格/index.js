@@ -6,10 +6,10 @@
 */
 
 // 方式1
-let str = "  We  Are  Happy";
-function replaceTrim(str) {
-    return str.replaceAll(' ', '%20') // node不行，浏览器可以 ES2021
-}
+// let str = "  We  Are  Happy";
+// function replaceTrim(str) {
+//     return str.replaceAll(' ', '%20') // node不行，浏览器可以 ES2021
+// }
 
 let str2 = 'WeAreHappy'
 
@@ -19,7 +19,7 @@ function replaceTrim2(str) {
     if (!/\s*/g.test(str)) {
         return str;
     }
-    for(let i in str) {
+    for (var i = 0; i < str.length; i++) {
         if (str[i] == ' ') {
             newStr = newStr + '%20'
         } else {
@@ -29,5 +29,5 @@ function replaceTrim2(str) {
     return newStr
 }
 
-console.log(replaceTrim(str))
+// console.log(replaceTrim(str))
 console.log(replaceTrim2(str2))
