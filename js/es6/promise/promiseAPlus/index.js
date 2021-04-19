@@ -100,7 +100,7 @@ class MyPromise3 {
 				? onFullfilledCb
 				: (value) => {
 						console.log(value);
-						value;
+						return value;
 				  };
 		onRejectedCb =
 			typeof onRejectedCb === "function"
@@ -157,7 +157,6 @@ class MyPromise3 {
 function resolvePromise(promise2, x, resolve, reject) {
 	// 循环引用报错
 	if (x === promise2) {
-		// reject报错
 		return reject(new TypeError("Chaining cycle detected for promise"));
 	}
 	// 防止多次调用

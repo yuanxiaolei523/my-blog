@@ -1,4 +1,4 @@
-import MyPromise from "./index2.js";
+import MyPromise from "./index.js";
 
 let promise = new MyPromise((resolve, reject) => {
 	setTimeout(() => {
@@ -6,9 +6,8 @@ let promise = new MyPromise((resolve, reject) => {
 	}, 1000);
 });
 
-promise.then((value) => {
-	console.log(1);
-	console.log("resolve", value);
+promise.then(2).then((res) => {
+	console.log(res);
 });
 //
 // promise.then(value => {
