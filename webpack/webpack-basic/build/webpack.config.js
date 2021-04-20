@@ -2,7 +2,8 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin'); // 复制HTML并每次导入打包后的js
 const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-
+const MyLoader = require('../myLoader.js');
+console.log(MyLoader)
 module.exports = {
     mode: 'development',
     entry: path.resolve(__dirname, '../src/main.js'),
@@ -12,6 +13,11 @@ module.exports = {
     },
     module: {
         rules: [
+            {
+                test: /\.js$/i,
+                use: ['babel-loader'],
+                exclude: /node_modules/
+            },
             {
                 test: /\.css$/i,
                 use: [MiniCssExtractPlugin.loader, 'css-loader', 'postcss-loader']
@@ -26,6 +32,23 @@ module.exports = {
                         }
                     }
                 },'sass-loader']
+            },
+            {
+                test: '/\.jpe?g|png|gif$/i',
+                use: [
+                    {
+                        loader: 'url-loader',
+                        options: {
+                            limit: 10240,
+                            fallback: {
+                                loader: 'file-loader',
+                                options: {
+                                    name: '[name].[hash:8].[ext]'
+                                }
+                            }
+                        }
+                    }
+                ],
             }
         ]
     },
@@ -36,7 +59,7 @@ module.exports = {
         new CleanWebpackPlugin(),
         new MiniCssExtractPlugin({
             filename: '[name].[hash].css',
-            chunkFilename: '[id].css'
+            chunkFilename: '[name].css'
         })
     ]
 }
