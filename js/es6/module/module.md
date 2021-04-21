@@ -454,3 +454,92 @@ console.log('只会执行一次');
 // 只会执行一次
 ```
 2. ES6的import只是将模块引用进来，并不会去执行模块，当真正需要的时候，才会去执行该模块
+
+## CommonJS
+Nodejs提供Module模块，每个文件都是Module的实例，
+```js
+function Module (id, parent) {
+    this.id = id;
+    this.parent = parent;
+    this.exports = {}
+}
+```
+每个模块内部都有一个module属性，代表当前模块，其内部有这些属性
+- id: 一般是.
+- filename: 模块的文件名，带有绝对路径。
+- loaded: 返回一个布尔值，用于表示当前模块是否已经加载完毕
+- parent: 一个对象，用于表示哪些模块引用了当前模块
+- children: 返回一个数组，表示该模块要用到的其他模块
+- module.exports 表示模块对外输出的值。
+
+### module.exports
+module.exports属性表示当前模块对外输出的接口，其他模块加载该模块，就是在加载module.exports变量
+
+### exports变量
+为了方便，Node为每个模块提供一个exports变量，指向module.exports。这等同在每个模块头部，有一行这样的命令。
+`var exports = module.exports;`
+
+造成的结果是，在对外输出模块接口时，可以向exports对象添加方法。
+```js
+exports.area = function (r) {
+  return Math.PI * r * r;
+};
+
+exports.circumference = function (r) {
+  return 2 * Math.PI * r;
+};
+```
+**注意：不能将exports赋值给一个变量，否则会切断exports和module.exports之间的关系**
+
+> 如果一个模块对外输出的是一个单一的值，尽可能的使用module.exports输出
+
+### module.exports和exports的联系与区别
+#### 联系
+exports === module.exports
+#### 区别
+1. 通过exports变量导出a之后，我们在require时拿到的是一个对象obj，只有通过obj.a我们才能拿到导出的变量
+通过module.exports导出a之后，我们在require时可以直接拿到a
+   
+2. 通过require exports导出变量时，你必须知道你exports的变量名，而通过module.exports导出的变量则不需要
+3. 一个页面可以有多个exports但是只能有一个module.exports
+```js
+// index.js
+exports.name = 'zhangsan';
+const m = require('./index.js')
+console.log(m.name) // zhangsan
+
+let name = 'zhangsan'
+module.exports = name
+const name = require('./index.js')
+console.log(m) // zhangsan
+```
+### require命令
+require命令用于导入通过export或者module.exports导出的变量
+```js
+// index.js
+let name = 'zhangsan'
+module.exports = name
+//test.js
+const name = require('./index.js')
+console.log(m) // zhangsan
+```
+require时的规则
+require命令用于加载文件，后缀名默认为.js。
+
+
+1. 如果字符串以/ 开头，表示加载的是一个绝对路径的文件
+2. 如果是以./开头，表示加载的是一个相对路径的文件
+3. 如果不以上述两者开头，那么表示加载的是在node_modules中已经安装过的模块
+4. 如果参数字符串不以“./“或”/“开头，而且是一个路径，比如require('example-module/path/to/file')，则将先找到example-module的位置，然后再以它为参数，找到后续路径。
+5. 如果指定的模块文件没有发现，Node会尝试为文件名添加.js、.json、.node后，再去搜索。.js件会以文本格式的JavaScript脚本文件解析，.json文件会以JSON格式的文本文件解析，.node文件会以编译后的二进制文件解析
+6. 如果想得到require命令加载的确切文件名，使用require.resolve()方法。
+
+### 模块的加载
+第一次加载某个模块时，Node会缓存该模块。以后再加载该模块，就直接从缓存取出该模块的module.exports属性。
+
+如果想要多次执行某个模块，可以让该模块输出一个函数，然后每次require这个模块的时候，重新执行一下输出的函数。
+
+所有缓存的模块保存在require.cache之中，如果想删除模块的缓存，可以像下面这样写。
+
+注意，缓存是根据绝对路径识别模块的，如果同样的模块名，但是保存在不同的路径，require命令还是会重新加载该模块。
+
