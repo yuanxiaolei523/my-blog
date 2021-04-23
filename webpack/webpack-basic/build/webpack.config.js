@@ -2,7 +2,7 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin'); // 复制HTML并每次导入打包后的js
 const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const MyLoader = require('../myLoader.js');
+const MyLoader = require('../myLoader');
 console.log(MyLoader)
 module.exports = {
     mode: 'development',
@@ -15,7 +15,7 @@ module.exports = {
         rules: [
             {
                 test: /\.js$/i,
-                use: ['babel-loader'],
+                use: ['babel-loader', 'MyLoader'],
                 exclude: /node_modules/
             },
             {

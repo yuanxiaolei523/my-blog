@@ -1,7 +1,7 @@
 import './assets/index.scss';
 import './assets/index2.css';
-// const test1  = require('./test/index');
-// console.log(test1())
+const test1  = require('./test/index');
+console.log(test1())
 
 async function test() {
    return await test2()
