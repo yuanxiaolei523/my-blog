@@ -1,303 +1,203 @@
-/*
-自己动手实现一个Promise
- */
-// 首先Promise内会传入一个executor，是立即执行的，并且会有resolve和reject函数
-
-// class MyPromise1 {
-//     constructor (executor) {
-//         executor(this.resolve, this.reject);
-//     }
-//     resolve = () => {
-//
-//     }
-//     reject = () => {
-//
-//     }
-// }
-
-// 其次添加promise的状态
-const PENDING = 'pending';
-const FULLFILLED = 'fullfilled';
-const REJECTED = 'rejected';
+let PENDING = "pending";
+let FULLFILLED = "fullfilled";
+let REJECTED = "rejected";
+class MyPromise1 {
+	constructor(executor) {
+		this.status = PENDING;
+		this.value = undefined;
+		this.reason = undefined;
+		let resolve = (value) => {
+			if (this.status === PENDING) {
+				this.status = FULLFILLED;
+				this.value = value;
+			}
+		};
+		// 失败
+		let reject = (reason) => {
+			if (this.status === PENDING) {
+				this.status = REJECTED;
+				this.reason = reason;
+			}
+		};
+		executor(resolve, reject);
+	}
+	then(onFullfilledCb, onRejectedCb) {
+		if (this.status === FULLFILLED) {
+			onFullfilledCb(this.value);
+		} else if (this.status === REJECTED) {
+			onRejectedCb(this.reason);
+		}
+	}
+}
+// 上面我们已经基本上实现了一版Promise了，但是它的缺点就是，
+// 当setTimeout中resolve或reject时会then函数内部已经执行完毕了;
 class MyPromise2 {
-    constructor(executor) {
-        executor(this.resolve, this.reject);
-    }
-    status = PENDING;
-    value = null;
-    reason = null;
-
-
-    resolve = (value) => {
-        if (this.status === PENDING) {
-            this.status = FULLFILLED;
-            this.value = value;
-        }
-    }
-    reject = (reason) => {
-        if(this.status === REJECTED) {
-            this.status = REJECTED;
-            this.reason = reason
-        }
-    }
-    then = function (fullfillCallback, rejectCallback) {
-        if (this.status === FULLFILLED) {
-            fullfillCallback(this.value)
-        }
-        if (this.status === REJECTED) {
-            rejectCallback(this.reason)
-        }
-    }
+	constructor(executor) {
+		this.status = PENDING;
+		this.value = undefined;
+		this.reason = undefined;
+		this.onFullfilledCbs = [];
+		this.onRejectedCbs = [];
+		let resolve = (value) => {
+			if (this.status === PENDING) {
+				this.status = FULLFILLED;
+				this.value = value;
+				this.onFullfilledCbs.forEach((cb) => {
+					cb(this.value);
+				});
+			}
+		};
+		// 失败
+		let reject = (reason) => {
+			if (this.status === PENDING) {
+				this.status = REJECTED;
+				this.reason = reason;
+				this.onRejectedCbs.forEach((cb) => cb(this.reason));
+			}
+		};
+		executor(resolve, reject);
+	}
+	then(onFullfilledCb, onRejectedCb) {
+		if (this.status === FULLFILLED) {
+			onFullfilledCb(this.value);
+		} else if (this.status === REJECTED) {
+			onRejectedCb(this.reason);
+		} else if (this.status === PENDING) {
+			this.onFullfilledCbs.push(onFullfilledCb);
+			this.onRejectedCbs.push(onRejectedCb);
+		}
+	}
 }
 
-/**
- * 上面这一版已经可以简单的处理同步的promise了，但是面对异步的Promise还是无法处理的，所以我们做一下修改
- */
+// 上面一版已经可以解决setTimeout的问题了，但是我们都知道then是可以链式调用的
 class MyPromise3 {
-    constructor(executor) {
-        executor(this.resolve, this.reject);
-    }
-    status = PENDING;
-    value = null;
-    reason = null;
-    // 新增成功和失败后的处理函数
-    onFullfilledCallback = null;
-    onRejectedCallback = null;
+	constructor(executor) {
+		this.status = PENDING;
+		this.value = undefined;
+		this.reason = undefined;
+		this.onFullfilledCbs = [];
+		this.onRejectedCbs = [];
+		let resolve = (value) => {
+			if (this.status === PENDING) {
+				this.status = FULLFILLED;
+				this.value = value;
+				this.onFullfilledCbs.forEach((cb) => cb());
+			}
+		};
+		// 失败
+		let reject = (reason) => {
+			if (this.status === PENDING) {
+				this.status = REJECTED;
+				this.reason = reason;
+				this.onRejectedCbs.forEach((cb) => cb());
+			}
+		};
+		executor(resolve, reject);
+	}
+	then(onFullfilledCb, onRejectedCb) {
+		onFullfilledCb =
+			typeof onFullfilledCb === "function"
+				? onFullfilledCb
+				: (value) => {
+						console.log(value);
+						return value;
+				  };
+		onRejectedCb =
+			typeof onRejectedCb === "function"
+				? onRejectedCb
+				: (err) => {
+						throw err;
+				  };
+		let promise2 = new MyPromise3((resolve, reject) => {
+			if (this.status === FULLFILLED) {
+				setTimeout(() => {
+					try {
+						let x = onFullfilledCb(this.value);
+						resolvePromise(promise2, x, resolve, reject);
+					} catch (e) {
+						reject(e);
+					}
+				}, 0);
+			} else if (this.status === REJECTED) {
+				setTimeout(() => {
+					try {
+						let x = onRejectedCb(this.reason);
+						resolvePromise(promise2, x, resolve, reject);
+					} catch (e) {
+						reject(e);
+					}
+				}, 0);
+			} else if (this.status === PENDING) {
+				setTimeout(() => {
+					try {
+						this.onFullfilledCbs.push(() => {
+							let x = onFullfilledCb(this.value);
+							resolvePromise(promise2, x, resolve, reject);
+						});
+					} catch (e) {
+						reject(e);
+					}
+				}, 0);
+				setTimeout(() => {
+					try {
+						this.onRejectedCbs.push(() => {
+							let x = onRejectedCb(this.reason);
+							resolvePromise(promise2, x, resolve, reject);
+						});
+					} catch (e) {
+						reject(e);
+					}
+				}, 0);
+			}
+		});
 
-    resolve = (value) => {
-        if (this.status === PENDING) {
-            this.status = FULLFILLED;
-            this.value = value;
-            // 成功后的回调函数
-            this.onFullfilledCallback && this.onFullfilledCallback(value);
-        }
-    }
-    reject = (reason) => {
-        if(this.status === REJECTED) {
-            this.status = REJECTED;
-            this.reason = reason;
-            // 失败后的回调函数
-            this.onRejectedCallback && this.onRejectedCallback(reason);
-        }
-    }
-    then = function (fullfillCallback, rejectCallback) {
-        if (this.status === FULLFILLED) {
-            fullfillCallback(this.value)
-        }
-        if (this.status === REJECTED) {
-            rejectCallback(this.reason)
-        }
-        if(this.status === PENDING) {
-            // ==== 新增 ====
-            // 因为不知道后面状态的变化情况，所以将成功回调和失败回调存储起来
-            // 等到执行成功失败函数的时候再传递
-            this.onFullfilledCallback = fullfillCallback;
-            this.onRejectedCallback = rejectCallback;
-        }
-    }
+		return promise2;
+	}
 }
-
-/**
- * 上面的代码实现了异步的resolve或者reject，但是当异步resolve时，多次调用then函数只会打印最后一次的then的回调函数，下面我们来解决这个问题
- */
-
-class MyPromise4 {
-    constructor(executor) {
-        executor(this.resolve, this.reject);
-    }
-    status = PENDING;
-    value = null;
-    reason = null;
-    // 新增成功和失败后的处理函数
-    // onFullfilledCallback = null;
-    // onRejectedCallback = null;
-    onFulfilledCallbacks = [];
-    onRejectedCallbacks = [];
-
-    resolve = (value) => {
-        if (this.status === PENDING) {
-            this.status = FULLFILLED;
-            this.value = value;
-            // 成功后的回调函数
-            // this.onFullfilledCallback && this.onFullfilledCallback(value);
-            while (this.onFulfilledCallbacks.length) {
-                this.onFulfilledCallbacks.shift()(value)
-            }
-        }
-    }
-    reject = (reason) => {
-        if(this.status === REJECTED) {
-            this.status = REJECTED;
-            this.reason = reason;
-            // 失败后的回调函数
-            // this.onRejectedCallback && this.onRejectedCallback(reason);
-            while(this.onRejectedCallbacks.length) {
-                this.onRejectedCallbacks.shift()(value);
-            }
-        }
-    }
-    then = function (fullfillCallback, rejectCallback) {
-        if (this.status === FULLFILLED) {
-            fullfillCallback(this.value)
-        }
-        if (this.status === REJECTED) {
-            rejectCallback(this.reason)
-        }
-        if(this.status === PENDING) {
-            // ==== 新增 ====
-            // 因为不知道后面状态的变化情况，所以将成功回调和失败回调存储起来
-            // 等到执行成功失败函数的时候再传递
-            this.onFulfilledCallbacks.push(fullfillCallback);
-            this.onRejectedCallbacks.push(rejectCallback);
-            // this.onFullfilledCallback = fullfillCallback;
-            // this.onRejectedCallback = rejectCallback;
-        }
-    }
-}
-
-/**
- * 下面我们来实现一个链式调用
- */
-class MyPromise5 {
-    constructor(executor) {
-        executor(this.resolve, this.reject);
-    }
-    status = PENDING;
-    value = null;
-    reason = null;
-    // 新增成功和失败后的处理函数
-    // onFullfilledCallback = null;
-    // onRejectedCallback = null;
-    onFulfilledCallbacks = [];
-    onRejectedCallbacks = [];
-
-    resolve = (value) => {
-        if (this.status === PENDING) {
-            this.status = FULLFILLED;
-            this.value = value;
-            // 成功后的回调函数
-            // this.onFullfilledCallback && this.onFullfilledCallback(value);
-            while (this.onFulfilledCallbacks.length) {
-                this.onFulfilledCallbacks.shift()(value)
-            }
-        }
-    }
-    reject = (reason) => {
-        if(this.status === REJECTED) {
-            this.status = REJECTED;
-            this.reason = reason;
-            // 失败后的回调函数
-            // this.onRejectedCallback && this.onRejectedCallback(reason);
-            while(this.onRejectedCallbacks.length) {
-                this.onRejectedCallbacks.shift()(reason);
-            }
-        }
-    }
-    then = function (fullfillCallback, rejectCallback) {
-        return new MyPromise5((resolve, reject) => {
-            if (this.status === FULLFILLED) {
-                const x = fullfillCallback(this.value);
-                resolvePromise(x, resolve, reject);
-            }
-            if (this.status === REJECTED) {
-                rejectCallback(this.reason)
-            }
-            if(this.status === PENDING) {
-                // ==== 新增 ====
-                // 因为不知道后面状态的变化情况，所以将成功回调和失败回调存储起来
-                // 等到执行成功失败函数的时候再传递
-                this.onFulfilledCallbacks.push(fullfillCallback);
-                this.onRejectedCallbacks.push(rejectCallback);
-                // this.onFullfilledCallback = fullfillCallback;
-                // this.onRejectedCallback = rejectCallback;
-            }
-        })
-    }
-}
-
-/**
- * 判断是不是返回自己，避免循环调用
- */
-
-class MyPromise6 {
-    constructor(executor) {
-        executor(this.resolve, this.reject);
-    }
-    status = PENDING;
-    value = null;
-    reason = null;
-    // 新增成功和失败后的处理函数
-    // onFullfilledCallback = null;
-    // onRejectedCallback = null;
-    onFulfilledCallbacks = [];
-    onRejectedCallbacks = [];
-
-    resolve = (value) => {
-        if (this.status === PENDING) {
-            this.status = FULLFILLED;
-            this.value = value;
-            // 成功后的回调函数
-            // this.onFullfilledCallback && this.onFullfilledCallback(value);
-            while (this.onFulfilledCallbacks.length) {
-                this.onFulfilledCallbacks.shift()(value)
-            }
-        }
-    }
-    reject = (reason) => {
-        if(this.status === PENDING) {
-            this.status = REJECTED;
-            this.reason = reason;
-            console.log('reject123')
-            // 失败后的回调函数
-            // this.onRejectedCallback && this.onRejectedCallback(reason);
-            while(this.onRejectedCallbacks.length) {
-                this.onRejectedCallbacks.shift()(reason);
-            }
-        }
-    }
-    then = function (fullfillCallback, rejectCallback) {
-        const promise2 =  new MyPromise6((resolve, reject) => {
-            if (this.status === FULLFILLED) {
-                // ==== 新增 ====
-                // 创建一个微任务等待 promise2 完成初始化
-                queueMicrotask(() => {
-                    // 获取成功回调函数的执行结果
-                    const x = fullfillCallback(this.value);
-                    console.log(promise2, x)
-                    // 传入 resolvePromise 集中处理
-                    resolvePromise(promise2, x, resolve, reject);
-                })
-            }
-
-            if (this.status === REJECTED) {
-                rejectCallback(this.reason)
-            }
-            if(this.status === PENDING) {
-                // ==== 新增 ====
-                // 因为不知道后面状态的变化情况，所以将成功回调和失败回调存储起来
-                // 等到执行成功失败函数的时候再传递
-                this.onFulfilledCallbacks.push(fullfillCallback);
-                this.onRejectedCallbacks.push(rejectCallback);
-                // this.onFullfilledCallback = fullfillCallback;
-                // this.onRejectedCallback = rejectCallback;
-            }
-        });
-        return promise2;
-    }
-}
-
-
 function resolvePromise(promise2, x, resolve, reject) {
-    if (promise2 === x) {
-        return reject(new Error('Chaining cycle detected for promise #<Promise>'))
-    }
-    if(x instanceof MyPromise6) {
-        x.then(resolve, reject)
-    } else{
-        resolve(x)
-    }
+	// 循环引用报错
+	if (x === promise2) {
+		return reject(new TypeError("Chaining cycle detected for promise"));
+	}
+	// 防止多次调用
+	let called;
+	// x不是null 且x是对象或者函数
+	if (x != null && (typeof x === "object" || typeof x === "function")) {
+		try {
+			// A+规定，声明then = x的then方法
+			let then = x.then;
+			// 如果then是函数，就默认是promise了
+			if (typeof then === "function") {
+				// 就让then执行 第一个参数是this   后面是成功的回调 和 失败的回调
+				then.call(
+					x,
+					(y) => {
+						// 成功和失败只能调用一个
+						if (called) return;
+						called = true;
+						// resolve的结果依旧是promise 那就继续解析
+						resolvePromise(promise2, y, resolve, reject);
+					},
+					(err) => {
+						// 成功和失败只能调用一个
+						if (called) return;
+						called = true;
+						reject(err); // 失败了就失败了
+					}
+				);
+			} else {
+				resolve(x); // 直接成功即可
+			}
+		} catch (e) {
+			// 也属于失败
+			if (called) return;
+			called = true;
+			// 取then出错了那就不要在继续执行了
+			reject(e);
+		}
+	} else {
+		resolve(x);
+	}
 }
 
-
-
-export default MyPromise6
+export default MyPromise3;

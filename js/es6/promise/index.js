@@ -165,17 +165,50 @@ let p;
 // });
 
 // console.log(11222);
-try {
-	const promise = new Promise(function (resolve, reject) {
-		// resolve("ok");
-		throw new Error("test");
-	});
-	promise.then(function (value) {
-		console.log(value);
-	});
-	// .catch(function (error) {
-	// 	// console.log(error);
-	// });
-} catch (e) {
-	console.log(e, "catch");
-}
+// try {
+// 	const promise = new Promise(function (resolve, reject) {
+// 		// resolve("ok");
+// 		throw new Error("test");
+// 	});
+// 	promise.then(function (value) {
+// 		console.log(value);
+// 	});
+// 	// .catch(function (error) {
+// 	// 	// console.log(error);
+// 	// });
+// } catch (e) {
+// 	console.log(e, "catch");
+// }
+// p1 = new Promise((resolve) => {
+// 	setTimeout(() => {
+// 		resolve("p1 resolve");
+// 	}, 1000);
+// });
+
+// new Promise((resolve) => {
+// 	// throw new Error("ok");
+
+// 	resolve(p1);
+// 	console.log("pconsole");
+// })
+// 	.then((res) => {
+// 		console.log(res);
+// 	})
+// 	.catch((res) => {
+// 		console.log(res, "catch");
+// 	});
+// console.log(456);
+
+let thenable = {
+	then: function (resolve, reject) {
+		console.log(123);
+		resolve(42);
+	},
+};
+p = Promise.resolve(thenable);
+
+p.then(function (value) {
+	console.log(value);
+});
+
+console.log(3455);

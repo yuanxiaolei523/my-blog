@@ -15,7 +15,7 @@ let p3 = new Promise((resolve, reject) => {
 
 let p = Promise.all([p1, p2, p3])
 	.then((res) => {
-		console.log(res);
+		console.log(res); // 3s后打印123
 	})
 	.catch((res) => {
 		console.log(res);

@@ -520,3 +520,82 @@ p.then(null, function (s) {
 	console.log(s);
 });
 ```
+
+
+
+## 1. Promise A+ then
+
+### then方法
+
+Promise 必须提供一个 then 方法让他访问当前的或者最终的 value 或者 reason
+
+一个 Promise 的 then 方法可以接受两个参数
+
+```
+promise.then(onFulfilled, onRejected)
+```
+
+1. onFulfilled 和 onRejected 必须都是可选的
+
+   1. 如果 onFulfilled 不是一个函数，那么onFulfilled回调函数会被忽略
+   2. 如果 onRejected 不是一个函数，那么onRejected回调函数会被忽略
+
+2. 如果 onFulfilled 是一个函数
+
+   1. 他必须在promise的状态变为fulfilled之后调用，promise的value属性作为它的第一个参数
+   2. 他不能在promise的状态变为fulfilled之前调用
+   3. 他的调用不能超过一次
+
+3. 如果onRejected是一个函数
+
+   1. 他必须在promise的状态变为rejected之后调用，promise的reason属性作为它的第一个参数
+   2. 不能再promise的状态变为rejected之前调用
+   3. 它的调用不能超过一次
+
+4. 除非上下文中只包含平台代码，否则不能调用onfulfilled或者onrejected
+
+5. onFulfilled和onRejected必须作为一个函数调用
+
+6. 同一个promise对象可能调用多次then函数
+
+   1. 当promise的状态为fulfilled的时候，所有的onFulfilled回调函数必须按照他们注册的顺序调用
+   2. 当promise的状态为rejected的时候，所有的onRejected回调函数必须按照他们注册时的顺序调用
+
+7. then函数必须返回一个Promise实例
+
+   `promise2 = promise1.then(onFulfilled, onRejected)`
+
+   1. 如果onFulfilled和onRejected返回的是一个普通的值x，那么对x进行处理`[[Resolve]](promise2, x)`(2.The Promise Resolution Procedure)
+   2. 如果onFulfilled和onRejected返回的是一个报错的值e，那么promise2的状态就为rejected，并且以e作为reason
+   3. 如果onFulfilled不是一个函数，并且promise1的状态是fulfilled，那么promise2的状态就为fulfilled，并且promise2的value和promise1的相同
+   4. 如果onRejected不是一个函数，并且promise1的状态是rejected，那么promise2的状态就为rejected，并且promise2的reason和promise1的相同
+
+### 2. The Promise Resolution Procedure
+
+<p id="test">调到这里 </span>
+
+promise的处理程序是一个抽象的运算操作，它把一个promise或者一个value作为输入，我们将其表示为`[[Resolve]](promise, x)`，如果x是一个thenable对象，那么它将尝试让promise接受x作为状态，这是在x看来像一个promise的前提下，否则会将promise变为fulfilled并将会将x作为value
+
+thenable对象的处理是允许promise的实现去进行操作的，前提是thenable对象暴露一个和promise A+规范中相同的then方法，他同时允许Promise A+实现去吸收不合格的实现通过reason的then 方法
+
+运行`[[Resolve]](promise, x)`，表现为以下几步
+
+1. 如果promise和x是同一个对象，那么将promise的状态置为rejected并且抛出一个类型错误当做reason
+2. 如果x是一个promise，那么通过它的状态去进行处理
+   1. 如果x是pending，那么promise也必须是pending，直到x变为fulfilled或者rejected之前
+   2. 如果x是fulfilled，那么promise也变为fulfilled，同时value和x相同
+   3. 如果x是rejected，那么promise也变为rejected，通过reason和x相同
+3. 如果x是一个object或者function
+   1. 那么让`then=x.then`
+   2. 如果检查到x.then的结果中抛出了错误e，那么将promise的状态置为rejected并且将e作为reason
+   3. 如果x.then是一个函数，那么调用它并将x作为this，第一个参数是resolvePromise,第二个参数是rejectPromise
+      1. 如果resolvePromise调用后返回一个y，那么运行`[[Resolve]](promise, y)`
+      2. 如果rejectPromise调用后返回一个r，那么promise的状态变为reject并将r作为reason
+      3. 如果resolvePromise和rejectPromise都调用了，并且对同一个参数进行了多次调用，那么以第一次调用为准，其他的调用都被忽略
+      4. 如果调用过程中抛出了异常e
+         1. 如果resolvePromise或者rejectPromise调用了，那么将会被忽略掉
+         2. 否则将promise置为rejected同时将e作为reason
+   4. 如果then不是一个函数，将promise置为fulfilled并且将x作为value
+4. 如果x不是一个function，将promise置为fulfilled并且将x作为value
+
+如果promise resolve了一个循环调用的thenable对象，那么PromiseA+的标准建议将promise的状态置为rejected并且抛出错误异常
