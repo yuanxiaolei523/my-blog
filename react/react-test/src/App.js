@@ -1,13 +1,6 @@
 import React, {useState} from 'react'
-
-// function App() {
-//   let msg = useState('hello')
-//   return (
-//     <div className="App">
-//       {msg}
-//     </div>
-//   );
-// }
+import MyButton from './components/constructors/index'
+import MyProps from './components/constructors/props'
 
 // export default App;
 export default class App extends React.Component {
@@ -40,28 +33,17 @@ export default class App extends React.Component {
   componentWillMount () {
     this.init()
     console.log(123);
-    // this.setState({
-    //   msg2: 'world2'
-    // })
-    // setTimeout(() => {
-    //   this.setState({
-    //     msg: 'world'
-    //   })
-    // }, 2000)
-  }
-  componentDidMount() {
-
-    // setTimeout(() => {
-    //   this.setState({
-    //     msg2: 'world2'
-    //   });
-    // }, 1000);
   }
   render () {
+    let button = <MyButton/>
+    console.log(button)
+    let div = <div>hello</div>
+    console.log(div)
     return (
       <React.Fragment>
         <div>{this.state.msg}</div>
         <div>{this.state.msg2}</div>
+        <MyProps name={undefined} age={18} gender="male"></MyProps>
       </React.Fragment>
     )
   }
