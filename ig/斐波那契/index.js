@@ -29,7 +29,7 @@ function helper (arr, n) {
 console.log(fib3(7));
 
 /**
- * 尝试采用动态规划
+ * 尝试采用动态规划(并不是真正的动态规划)
  */
 function fib2 (n) {
     if(n < 1) return 0;
