@@ -104,3 +104,7 @@ Promise 其实在实例化的时候就已经执行了
 3. 手写一个 promise.all
    1.1 Promise.resolve 对参数类型的理解
    1.2 Promise.all 的输入参数和输出参数的顺序要保持一致
+
+## 算法
+
+1. 接雨水问题

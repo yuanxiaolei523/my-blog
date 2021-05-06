@@ -1,4 +1,4 @@
 Promise.resolve().then((res) => {
-	console.log(2);
+	console.log("index2");
 	return res;
 });

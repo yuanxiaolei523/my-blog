@@ -7,28 +7,21 @@
     <title>DomContentLoaded</title>
 </head>
 <body>
-    <!-- defer是异步加载js，不会堵塞html的解析 -->
-    <script src="http://code.jquery.com/jquery-1.4.4.min.js">
+    <script defer src="http://code.jquery.com/jquery-1.4.4.min.js">
     </script>
-    <script async src="./index.js"> // 0
-        // setTimeout(() => {
-        // })
-    </script>
-    <script defer src="./index2.js"> // 2
-        // setTimeout(() => {
-        // })
-    </script>
-    <script > // 3
-    console.log(123);
+    <script src="./index.js"></script> 
+    <script src="./index2.js"/></script>
+    <script>
+    console.log('inline');
         Promise.resolve().then(res=>{
-            console.log(3);
+            console.log('then');
         })
     </script>
     <div id="hello">hello world</div>
     
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            console.log(1);
+            console.log('DOMContentLoaded');
         })
     </script>
     
