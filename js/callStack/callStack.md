@@ -236,3 +236,4 @@ bar.[[scope]] = [
 
 这时候执行上下文的作用域链，我们命名为 Scope：
 `Scope = [AO].concat([[Scope]]);`
+至此作用域链创建完毕
