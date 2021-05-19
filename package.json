@@ -1,0 +1,23 @@
+{
+  "name": "my-blog",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yuanxiaolei523/my-blog.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/yuanxiaolei523/my-blog/issues"
+  },
+  "homepage": "https://github.com/yuanxiaolei523/my-blog#readme",
+  "devDependencies": {
+    "eslint": "^7.26.0"
+  }
+}
