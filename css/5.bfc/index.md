@@ -27,12 +27,12 @@ BFC是块级格式化上下文，它是页面中的一块渲染区域，并且�
 1. 根元素是body
 2. 浮动元素，float除none以外的值
 3. 绝对定位元素, position: absolute | fixed
-4. Display: inline-block | table-cells | flex
+4. Display: table-caption | table-cell | inline-block
 5. overflow：除去visible之外的值
 
 ### BFC的特性及应用
 
 1. 同一个BFC下垂直外边距会发生重叠
 2. BFC可以包含浮动的元素(计算高度时会将浮动元素计算在内)
-3. BFC可以阻止元素被浮动元素覆盖
-4. 
+3. BFC的区域不会与float的元素冲重叠
+4. 计算BFC的高度时，浮动子元素也计算在内
