@@ -27,7 +27,7 @@ Person.prototype.name = '123';
 Person.prototype.getName = function () {
     // console.log();
     return this.age;
-}
+};
 // var person = new2(Person, 'shine', 18)
 // console.log(person, person.name);
 
