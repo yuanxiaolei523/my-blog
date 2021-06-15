@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>counter</title>
+</head>
+
+<body>
+    <div class="content">
+        <h3>hello</h3>
+        <h3>world</h3>
+        <h3>123</h3>
+        <h3>456</h3>
+    </div>
+
+    <!-- <ul>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+    </ul> -->
+</body>
+
+<style>
+    .content {
+        counter-reset: chapter 0 chapter-count 1;
+    }
+
+    h3 {
+        counter-increment: chapter;
+    }
+
+    h3:before {
+        content: "Chapter "counter(chapter) ": ";
+    }
+
+    h3:not(:first-child) {
+        counter-increment: chapter-count;
+        /* counter-reset: none; */
+    }
+
+    h3:not(:first-child)::before {
+        content: "Chapter "counter(chapter-count) ": ";
+    }
+</style>
+
+</html>
