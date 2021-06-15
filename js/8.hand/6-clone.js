@@ -1,24 +1,29 @@
-/**
+/*
  * 深克隆的实现方法
  */
 
 // 1
-let obj = {
-    person: {
-        age: 14
-    }
-};
+// let obj = {
+//     person: {
+//         age: 14
+//     }
+// };
 // let obj2 = JSON.parse(JSON.stringify(obj));
 // obj2.person.age = 18;
 // console.log(obj, obj2);
 
+/**
+ * 
+ * @param {Object} obj 要克隆的对象
+ * @param {Map} map 用于解决循环应用
+ * @returns 
+ */
 function cloneDeep (obj, map = new Map()) {
-    // let objType = isObject(obj);
     if (obj !== null && typeof obj !== 'object') {
         throw new Error('obj必须是对象');
     }
-    // console.log(map);
-    // let isArray = objType === 'array';
+    console.log(map, obj);
+    
     let newObj = Array.isArray(obj) ? [] : {};
     if (typeof obj === 'object') {
         if (map.get(obj)) {
@@ -27,8 +32,6 @@ function cloneDeep (obj, map = new Map()) {
         map.set(obj, newObj);
         for (const key in obj) {
             if (Object.hasOwnProperty.call(obj, key)) {
-                // console.log(isObject(obj[key]) === 'other');
-                // const element = obj[key];
                 newObj[key] = typeof obj[key] === 'object' ? cloneDeep(obj[key], map) : obj[key];
             }
         }
@@ -36,30 +39,8 @@ function cloneDeep (obj, map = new Map()) {
     } else {
         return target;
     }
-    // else {
-    //     if (map.get(obj)) {
-    //         return obj;
-    //     } 
-    //     map.set(obj);
-        
-    // }
     return newObj;
 }
-
-
-// function isObject(obj) {
-//     // Array.isArray(obj)
-//     switch (Object.prototype.toString.call(obj)) {
-//         case '[object Array]':
-//             return 'array';
-//         case '[object Object]':
-//             return 'object';
-//         case '[object Null]':
-//             return 'null';
-//         default: 
-//             return 'other';
-//     }
-// }
 
 // let arr = [1, 2, 3];
 // cloneDeep(obj);
