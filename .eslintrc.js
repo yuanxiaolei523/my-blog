@@ -36,7 +36,7 @@ module.exports = {
                 'after': true
             }
         ],
-        'react/jsx-uses-vars': 2,
+        'react/jsx-uses-vars': 0,
         'no-debugger': 2,
         'no-const-assign': 2,
         'no-cond-assign': 2,
@@ -46,6 +46,7 @@ module.exports = {
         'no-case-declarations': 0,
         'no-ex-assign': 0,
         'arrow-spacing': 'error',
+        'no-sparse-arrays': 0,
         'semi-spacing': [
             2,
             {
@@ -66,6 +67,6 @@ module.exports = {
         ],
         'no-multi-spaces': 'error',
         'brace-style': 'error',
-        'space-infix-ops': 'error'
+        'space-infix-ops': 'error',
     },
 };

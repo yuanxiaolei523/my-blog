@@ -1,9 +1,9 @@
 const chalk = require('chalk');
 var obj = {
     name: 'shine'
-} 
+}; 
 function bar () {
-    this.age = 13
+    this.age = 13;
     // console.log(this.name);
     return { age: this.age };
 }
@@ -19,6 +19,6 @@ console.log(b);
 // console.log(b.age);
 
 console.log(chalk.blue('hello') + chalk.keyword('orange')('waring'));
-let  name = '123'
+let name = '123';
 console.log(chalk.bgRedBright.green('Hello %s'), name);
 

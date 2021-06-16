@@ -521,16 +521,21 @@ FunctionExectionContext = { // 函数执行上下文
 ### 如何实现add(1)(2)(3)(4)....
 
 ```js
-function add (x) {
-  function inner(y) {
-    x = x+y;
-    return x;
-  }
-  inner.toString = function () {
-    return x;
-  }
-  return add;
+function argsSum (args) { // 浏览器内调用
+    return args.reduce((prev, cur) => prev + cur);
 }
+
+function add (...args1) {
+    let sum = argsSum(args1);
+    let curry = (...args) => add(sum + argsSum(args));
+    curry.toString = function () {
+        return sum;
+    };
+    return curry;
+   
+}
+
+console.log(add(9, 2)(2)(3));
 ```
 
 
@@ -650,6 +655,82 @@ Function.prototype.myBind = function(ctx) {
   fNop.prototpye = this.prototype;
   fBound.prototype = new fNop();
   return fBound;
+}
+```
+
+
+
+### 大数相加
+
+```js
+function num2Str(num) {
+    return typeof num === 'number' ? num + '' : num;
+}
+
+
+function bigNumber (num1, num2) {
+    num1 = num2Str(num1);
+    num2 = num2Str(num2);
+    let len1 = num1.length;
+    let len2 = num2.length; 
+    if (len1 > len2) {
+        num2 = num2.padStart(len1, '0');
+    } else if (len1 < len2) {
+        num1 = num1.padStart(len2, '0');
+    }
+    let res = ''.padStart(18, '');
+    console.log(num1, num2);
+
+    for (let i = 0; i < num1.length; i++) {
+        res += (Number(num1[i]) + Number(num2[i]));
+    }
+    return res;
+}
+```
+
+
+
+### flat
+
+#### 特点
+
+1. 如果不传，默认扁平一层
+2. 如果传入小于等于0的，则返回原数组
+3. 如果传入的不是数组，报错
+4. 如果有空值，则忽略
+5. `Infinity` 关键字作为参数时，无论多少层嵌套，都会转为一维数组
+
+```js
+function flat2 (arr, num = 1) {
+    if (num <= 0) {
+        return arr;
+    }
+    if (!Array.isArray(arr)) {
+        throw new Error('必须是数组');
+    }
+    let res = [];
+    if (num === 'Infinity') {
+        num = Number.MAX_SAFE_INTEGER;
+    }
+    console.log(num);
+    for (let i = 0; i < arr.length; i++) {
+        if (Array.isArray(arr[i])) {
+            if (num > 0) { // 当可以扁平时，并且当前元素是数组，那么递归
+                let r = flat2(arr[i], --num);
+                res = res.concat(r);
+            } else if (arr !== undefined && arr[i] !== null && !arr[i]){ 
+                // 当层数大于扁平的时候并且当前元素是数组时，直接将其push进去
+                continue;
+            } else {
+                res.push(arr[i]);
+            }
+        } else if (arr !== undefined && arr[i] !== null && !arr[i]){ 
+            continue;
+        } else {
+            res.push(arr[i]);
+        }
+    }
+    return res;
 }
 ```
 
