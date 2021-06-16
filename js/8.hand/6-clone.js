@@ -36,8 +36,6 @@ function cloneDeep (obj, map = new Map()) {
             }
         }
         
-    } else {
-        return target;
     }
     return newObj;
 }

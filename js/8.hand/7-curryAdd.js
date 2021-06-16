@@ -32,32 +32,32 @@
 // }
 
 // 如何实现add(1)(2)(3)(4)....
-// function curry (x) {
-//     function add (y) {
-//         x = x + y;
-//         return x;
-//     }
-//     add.toString = function () {
-//         return x;
-//     };
-//     return add;
-// }
-
-// console.log(curry(1)(2));
-
-
-function add(...args){ 
-    let sum = args.reduce((acc, cur) => acc + cur);
-    console.log(args, sum, add.length);
-    // let newArgs;
-    return function curry (...nextArgs) { 
-        // newArgs = nextArgs;
-        return nextArgs.length !== 0 ? add(sum, ...nextArgs) : sum; 
+function curry (x) {
+    function add (y) {
+        x = x + y;
+        return x;
+    }
+    add.toString = function () {
+        return x;
     };
-    // return newArgs.length ? curry(sum, ...newArgs) : sum;
-    // curry.toString = function () {
-    //     return sum;
-    // };
-    // return curry;
+    return add;
 }
-console.log(add(1)(2));
+
+console.log(curry(1)(2)(3)(8));
+
+
+// function add(...args){ 
+//     let sum = args.reduce((acc, cur) => acc + cur);
+//     console.log(args, sum, add.length);
+//     // let newArgs;
+//     return function curry (...nextArgs) { 
+//         // newArgs = nextArgs;
+//         return nextArgs.length !== 0 ? add(sum, ...nextArgs) : sum; 
+//     };
+//     // return newArgs.length ? curry(sum, ...newArgs) : sum;
+//     // curry.toString = function () {
+//     //     return sum;
+//     // };
+//     // return curry;
+// }
+// console.log(add(1)(2));
