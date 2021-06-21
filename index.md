@@ -744,6 +744,65 @@ function flat2 (arr, num = 1) {
 
 
 
+### reverse
+
+```js
+// 1
+function reverse (strArr) {
+    return strArr.reverse();
+}
+
+// 2 双指针
+function reverse2(strArr) {
+    let left = 0;
+    let right = strArr.length - 1 - left;
+    while (left <= right) {
+        // 将right的值赋值给left，rightleft的值赋值给right
+        [strArr[left], strArr[right]] = [strArr[right], strArr[left]];
+        left++;
+        right--;
+    }
+    return strArr;
+}
+```
+
+
+
+### arr unique
+
+```js
+function repeat1 (arr) {
+    return [...new Set(arr)];
+}
+
+// 方式2 循环
+function repeat2(arr) {
+    let arr2 = [];
+    arr.forEach(num => {
+        if (!arr2.includes(num)) {
+            arr2.push(num);
+        }
+    });
+    return arr2;
+}
+repeat2(arr);
+
+function repeat3 (arr) {
+    return arr.filter((num, index, arr) => arr.indexOf(num) === index);
+}
+
+function repeat4 (arr) {
+    var obj = {};
+    return arr.filter(num => obj.hasOwnProperty(num) ? false : (obj[num] = true));
+}
+```
+
+
+
+
+
+
+
 ## VUE
 
 
