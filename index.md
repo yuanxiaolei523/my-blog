@@ -125,6 +125,32 @@ css的盒模型包括标准盒模型和怪异盒模型
 
 ## Html
 
+### 时间的捕获和冒泡
+
+
+
+1. 基本概念
+
+   事件流：首先是捕获阶段，然后是目标阶段，最后是冒泡阶段
+
+   捕获是自顶向下
+
+   冒泡是自下向上
+
+2. window.addEventListener('click', function () {})监听的是什么阶段的事件
+
+   当第三个参数不传或者为 false 时代表冒泡阶段
+
+   当第三个参数为 true 时代表捕获阶段
+
+3. 平常有哪些场景用到了这个机制
+
+   事件代理
+
+4. 场景考察：一个历史页面，有很多的 button，每个 button 都有自己的逻辑，有自己的 click 事件
+
+   新需求：给每个访问的用户一个 banned 属性，如果 banned 属性为 true，那么点击页面上的任何元素都不可响应原来的函数，而是直接 alert 你被封禁了
+
 ### 块级元素和行内元素的区别
 
 #### 块级元素
@@ -514,6 +540,80 @@ FunctionExectionContext = { // 函数执行上下文
 
 
 
+## ES6
+
+### 了解promise吗，平时用的多吗
+
+#### 1.promise.all有什么特性
+
+Promise.all 接受一个数组或者具有Iterator接口的数据结构作为参数
+
+Promise.all返回的promise的状态有两种可能
+
+1. 当所有的promise都fullfilled，返回的promise的状态就是fullfilled
+2. 只要有一个promise的实例rejected，那么返回的promise的状态就是rejected
+
+#### 2.当一个promise reject之后，其他的promise还会执行吗
+
+会。因为Promise是在实例化的时候就开始执行了，所以并不会中断，而且也无法中断
+
+#### 3.手写一个promise.all
+
+1. promise.resolve对参数类型的理解
+2. Promise.all的输入参数和输出参数要保持一致
+
+```js
+function MyPromiseAll (promiseArr) {
+  if (!Array.isArray(promiseArr)) {
+    throw new Error('必须是数组')
+  }
+  return new Promise((resolve, reject) => {
+    if (promiseArr.length === 0) {
+      resolve([]);
+    }
+    let res = [];
+    let len = promiseArr.length
+    let count = 0;
+    for(let i = 0; i < len; i++) {
+      Promise.resolve(promiseArr[i]).then(value => {
+        count++;
+        res[i] = value;
+        if (count === len) {
+          resolve(res)
+        }
+      }).catch(err => reject(e))
+    }
+  })
+}
+```
+
+
+
+### 4.如何使用Promise的缓存来缓存一些比较常用的固定的结果
+
+利用装饰器，结合Promise一创建就会初始化的特性实现
+
+```js
+const cacheMap = new Map();
+function enableCache(target, name, descriptor) {
+  const val = descriptor.value;
+  descriptor.value = async function (...args) {
+    const cacheKey = name + JSON.stringify(args);
+    if (!cacheMap.get(cacheKey)) {
+      const cacheValue = Promise.resolve(val.apply(this, args)).catch(_ => {catchMap.set(cacheKey, null)});
+      cacheMap.set(cacheKey, cacheValue);
+    }
+  }
+}
+
+class PromiseClass {
+	@enableCache
+	static async getInfo() {}
+}
+```
+
+
+
 
 
 ## 手写
@@ -744,6 +844,100 @@ function flat2 (arr, num = 1) {
 
 
 
+### 回文数
+
+```js
+var isPalindrome = function(x) {
+    if(x < 0) {
+        return false;
+    }
+    let str = x + '';
+    let left = 0;
+    let right = str.length - 1 ;
+    while(left < right) {
+        if(str[left] !== str[right]) {
+            return false;
+        }
+        left++;
+        right--;
+    }
+    return true;
+};
+```
+
+
+
+### 素数
+
+```js
+
+/*
+ 判断一个数是否是素数/质数
+ 素数/质数：只能被1和自己整除
+*/
+/**
+ * 因为1不是素数，所以循环从2开始，到num-1，只要有一个能做num的约数，那么就说明是素数，否则不是
+ * @param {number} x 
+ * @returns boolean
+ */
+function isPrime(x) {
+    for (let i = 2; i <= x - 1; i++) {
+        if (x % i === 0) {
+            return false;
+        }
+    } 
+    return true;
+}
+/**
+ * 优化：因为一个数如果是质数，那么他的约数一个要大于等于该数的平方根，一个要小于等于该数的平方根，
+ * 所以只要循环从2到当前数的平方根即可，如果有能被整除的，则说明是，如果没有则不是
+ * @param {number}} num 
+ * @returns 
+ */
+function isPrime2(num) {
+    for (let i = 2; i <= Math.sqrt(num); i++) {
+        if (num % i === 0) {
+            return false;
+        }
+    }
+    return true;
+ 
+}
+console.log(isPrime2(6));
+/**
+ * 大于等于5的质数一定和6的倍数相邻
+ * 大于5的质数: 5、7、11、13、17、19、23
+ * @param {number}} num 
+ * @returns boolean
+ */
+function isPrime3(num) {
+    if (num === 2 || num === 3) {
+        return true;
+    }
+   
+    if (num % 6 !== 1 && num % 6 !== 5) {
+        return false;
+    }
+    // let tmp = Math.sqrt(num);
+    for (let i = 5; i <= Math.sqrt(num); i += 6) {
+        // 如果num不是整除6的倍数-1或者6的倍数+1， 那么就不是质数
+        if (num % i == 0 || num % (i + 2) == 0) {
+            return false;
+        }
+        // for (let i = 5; i <= tmp; i += 6 )
+        //     if (num % i == 0 || num % (i + 2) == 0 )
+        //         return false;
+
+    }
+    return true;
+}
+console.log(isPrime3(23));
+```
+
+
+
+
+
 ## VUE
 
 
@@ -753,6 +947,34 @@ function flat2 (arr, num = 1) {
 
 
 ## Ig
+
+### 接雨水问题(字节)
+
+给定n个非负整数表示每个宽度为1的柱子的高度图，计算按此排列的柱子，下雨之后能接多少雨水
+
+示例1：
+
+输入： height = [0,1,0,2,1,0,1,3,2,1,2,1];
+
+输入：6
+
+interpretation:上面是由数组[0,1,0,2,1,0,1,3,2,1,2,1]表示的高度图，在这种情况下，可以接6个单位的雨水
+
+示例2：
+
+输入： height=[4,2,0,3,2,5]
+
+输出：9
+
+```js
+let arr = [0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1];
+
+function trap(arr) {
+  
+}
+```
+
+
 
 
 
@@ -837,11 +1059,59 @@ function flat2 (arr, num = 1) {
 2. 清除：将垃圾数据清除
 3. 内存整理：标记-整理策略，将所有的活动对象整理到一起，方便留出充足的内存空间
 
-## 增量标记
+### 增量标记
 
 因为V8浏览器会自动执行垃圾回收，一单旦执行，那么就会打断js的执行，所以会造成页面的卡顿，所以V8决定采用增量标记算法回收
 
 **增量标记**允许堆的标记发生在几次5-10ms的小停顿中，增量标记在堆的大小达到一定的阈值时启用，启用之后每当一定量的内存分配后，脚本的执行就会停顿并进行一次增量标记，增量标记也是深度优先搜索(活跃对象黑色，死对象白色)
 
+### 你了解浏览器的事件循环吗
 
+浏览器的事件循环是：每执行一个宏任务，就去清空微任务队列
 
+#### 为什么浏览器会有事件循环的机制
+
+因为js是`单线程`的，举一个例子，我们都知道js是可以操作DOM的，如果我们同时对一个DOM进行两个操作，一个是删除DOM，一个是修改DOM，那么到底以哪个为准呢，所以js就是单线程的，既然是单线程的，也就是说某个时间段，只能执行一个任务
+
+#### 你了解过event loop吗
+
+了解过
+
+#### 那你知道两种任务类型吗
+
+**宏任务**：整体的script代码，setTimeout，setInterval，I\O操作等等都是宏任务
+
+**微任务** ：new Promise的then、catch、finally的回调，MutationObserver
+
+#### 聊聊 MutationObserver 主要是做什么的
+
+MutationObserver 主要是用来监视对 DOM 的修改，new 的时候会创建并返回一个新的 MutationObserver，他会在指定的 DOM 发生变化时被调用
+
+#### 为什么要同时有宏任务和微任务，只有宏任务可以吗
+
+不可以，因为宏任务是一个队列结构，具有先进先出的性质，如果此时有一个紧急的任务，那么只能排队等候了
+
+#### nodejs和浏览器的事件循环有什么不同呢？
+
+nodejs中宏任务的执行顺序
+
+1. timer定时器：执行已经被安排过的setTimeout和setInterval的回调函数
+2. pending、callback回调：执行延迟到下一个事件循环的I\O回调
+3. idle、prepare：内部使用
+4. poll：检索新的I\O事件，执行相关的I\O回调函数
+5. check：执行setImmediate的回调函数
+6. close callback：关闭socket
+
+宏任务和微任务的执行顺序
+
+V10之前：
+
+1. 执行一个阶段内的所有的宏任务
+2. 执行nextTick的内容
+3. 清空微任务队列
+
+V10之后：
+
+1. 执行一个宏任务
+2. 执行nextTick
+3. 清空微任务队列

@@ -32,29 +32,29 @@
  * @returns
  */
 function trapRainFall(arr = []) {
-	if (arr.length === 0) return 0;
-	const n = arr.length;
-	let res = 0;
+    if (arr.length === 0) return 0;
+    const n = arr.length;
+    let res = 0;
 
-	for (let i = 1; i < n - 1; i++) {
-		let l_max = 0,
-			r_max = 0;
+    for (let i = 1; i < n - 1; i++) {
+        let l_max = 0,
+            r_max = 0;
 
-		for (let j = i; j < n; j++) {
-			// 用来找右边最高的数字
-			r_max = Math.max(r_max, arr[j]);
-		}
-		for (let j = 0; j < i; j++) {
-			l_max = Math.max(l_max, arr[j]);
-		}
-		res += Math.max(0, Math.min(l_max, r_max) - arr[i]);
-	}
-	return res;
+        for (let j = i; j < n; j++) {
+            // 用来找右边最高的数字
+            r_max = Math.max(r_max, arr[j]);
+        }
+        for (let j = 0; j < i; j++) {
+            l_max = Math.max(l_max, arr[j]);
+        }
+        res += Math.max(0, Math.min(l_max, r_max) - arr[i]);
+    }
+    return res;
 }
 
 let arr = [0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1];
 
 let result = trapRainFall(arr);
 
-let res2 = trapRainFall([4,2,0,3,2,5])
+let res2 = trapRainFall([4, 2, 0, 3, 2, 5]);
 console.log(result, res2);
