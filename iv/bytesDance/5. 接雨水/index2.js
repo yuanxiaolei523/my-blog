@@ -32,28 +32,28 @@
  * @returns
  */
 function trapRainFall(arr = []) {
-	if (arr.length === 0) return 0;
-	const n = arr.length;
-	let res = 0;
+    if (arr.length === 0) return 0;
+    const n = arr.length;
+    let res = 0;
 
-	let l_max = new Array(n);
-	let r_max = new Array(n);
-	l_max[0] = arr[0];
-	r_max[n - 1] = arr[n - 1];
-	// 计算l_max
-	for (let i = 1; i < n; i++) {
-		// 用来找右边最高的数字
-		l_max[i] = Math.max(l_max[i - 1], arr[i]);
-		// res += Math.max(0, Math.min(l_max, r_max) - arr[i]);
-	}
-	// 计算r_max，从右到左
-	for (let i = n - 2; i >= 0; i--) {
-		r_max[i] = Math.max(arr[i], r_max[i + 1]);
-	}
-	for (let i = 1; i < n - 1; i++) {
-		res += Math.max(0, Math.min(l_max[i], r_max[i]) - arr[i]);
-	}
-	return res;
+    let l_max = new Array(n);
+    let r_max = new Array(n);
+    l_max[0] = arr[0];
+    r_max[n - 1] = arr[n - 1];
+    // 计算l_max
+    for (let i = 1; i < n; i++) {
+        // 用来找右边最高的数字
+        l_max[i] = Math.max(l_max[i - 1], arr[i]);
+        // res += Math.max(0, Math.min(l_max, r_max) - arr[i]);
+    }
+    // 计算r_max，从右到左
+    for (let i = n - 2; i >= 0; i--) {
+        r_max[i] = Math.max(arr[i], r_max[i + 1]);
+    }
+    for (let i = 1; i < n - 1; i++) {
+        res += Math.max(0, Math.min(l_max[i], r_max[i]) - arr[i]);
+    }
+    return res;
 }
 
 let arr = [0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1];

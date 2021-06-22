@@ -30,28 +30,28 @@
 let arr = [0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1];
 
 function trap(arr) {
-	if (arr.length === 0) return 0;
+    if (arr.length === 0) return 0;
 
-	let len = arr.length;
-	let res = 0;
+    let len = arr.length;
+    let res = 0;
 
-	for (let i = 1; i < len - 1; i++) {
-		let l_max = 0;
-		let r_max = 0;
-		for (let j = 0; j < i; j++) {
-			l_max = Math.max(l_max, arr[j]);
-		}
-		for (let j = i; j < len; j++) {
-			r_max = Math.max(r_max, arr[j]);
-		}
-		res += Math.max(Math.min(l_max, r_max) - arr[i], 0);
+    for (let i = 1; i < len - 1; i++) {
+        let l_max = 0;
+        let r_max = 0;
+        for (let j = 0; j < i; j++) {
+            l_max = Math.max(l_max, arr[j]);
+        }
+        for (let j = i; j < len; j++) {
+            r_max = Math.max(r_max, arr[j]);
+        }
+        res += Math.max(Math.min(l_max, r_max) - arr[i], 0);
         console.log(l_max, r_max, res, arr[i]);
 
-	}
-	return res;
+    }
+    return res;
 }
 
 console.log(trap(arr));
 
-let arr2 = [4,2,0,3,2,5];
+let arr2 = [4, 2, 0, 3, 2, 5];
 console.log(trap(arr2));
