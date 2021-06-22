@@ -6,7 +6,7 @@
 
 1. 首屏时间
 2. 首次可交互时间
-3. 首次有意义内容渲染时间
+3. 首次有意义内容渲染时间：比如百度的搜索功能，很重要
 
 页面性能检测：https://developers.google.com/speed/pagespeed/insights/?url=www.qunar.com
 
@@ -24,12 +24,13 @@ pollyfill： https://polyfill.io/v3/url-builder
    nodejs 使用`compression`插件
    图片格式的优化(是否真的需要 1080 的分辨率)、压缩、根据屏幕分辨率展示不同分辨率的图片、webp
    https://tinypng.com/ 压缩 png 图片(压缩 80%)
-   尽量控制 cookie 大小
+   尽量控制 cookie 大小：因为每次都会携带cookie(同域名的请求)
 3. 时序优化
    js promise.all
    ssr(可以做缓存、有利于 seo)
    prefetch、prerender、preload
-       <link rek="des-prefetch" href="xxx.com"> // 表示碰到这一行代码时，会去进行 dns 的预解析
+       <link rek="des-prefetch" href="xxx.com"> // 如果没有这一行，会在第一个请求的时候才回去解析dns
+       加了这一行之后会再解析到这一行就去进行 dns 的预解析
        <link rek="preconnect" href="xxx1.com"> //和 prefetch 差不多
        <link rek="preload" as="image" href="xxx1.com/p.png"> //加载优先级比较高的图片可以优先加载
 
