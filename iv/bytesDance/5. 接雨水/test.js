@@ -1,58 +1,42 @@
-let arr = [0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1];
-function trap(arr) {
-    if (arr.length === 0) {
+/**
+ * 求某一列能装多少水？
+ * 普通方法：循环遍历
+ */
+
+let height = [0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1];
+function trap(height) {
+    if (!Array.isArray(height)) {
+        throw new Error('参数必须是数组');
+    }
+    let n = height.length;
+    if (n === 0) {
         return 0;
     }
-
-    const len = arr.length;
     let res = 0;
-    let left = 0;
-    let right = len - 1;
-    let l_max = arr[0];
-    let r_max = arr[len - 1];
-
-    while (left < right) { // 只要左指针小于右指针
-        // 取左边最大的数
-        l_max = Math.max(arr[left], l_max); 
-        // 取右边最大的数
-        r_max = Math.max(arr[right], r_max);
-        // 当左边最大的数，比右边最大的数小的时候
-        if (l_max < r_max) {
-            res += l_max - arr[left]; // 左边的最大的数减去当前左边的值
-            left++;
-        } else {
-            res += r_max - arr[right];//// 右边的最大的数减去当前右边的值
-            right--;
+    for (let i = 1; i < n - 1; i++) {
+        let l_max = 0;
+        for (let j = 0; j < i; j++) {
+            if (height[j] > l_max) {
+                l_max = height[j];
+            }
         }
+        let r_max = 0;
+        for (let j = i + 1; j < n; j++) {
+            if (height[j] > r_max) {
+                r_max = height[j];
+            }
+        }
+        // 当前这一列中可以存的雨水
+        // let min = Math.min(l_max, r_max);
+        // // 只有较小的一端大于当前列的高度时，该列才能存水
+        // if (min > height[i]) {
+        //     res += min - height[i];
+        // }
+        res += Math.max(0, Math.min(l_max, r_max) - height[i]);
+        
     }
     return res;
-
-    // let left = 0;
-    // let right = arr.length - 1;
-    // // let max = arr[left];
-    // let max = arr.sort((a, b) => {
-    //     return a - b;
-    // })[arr.length - 1];
-    // let index = arr.indexOf(max);
-    // let leftMin = arr[left];
-    // let rightMin = arr[right];
-    // // let mid = 
-    // while (left < index) {
-    //     if (leftMin > arr[right]) {
-    //         leftMin = arr[right];
-    //         // swap(arr[right], arr[right - 1]);
-    //     }
-    //     left++;
-    // }
-    // while (index < right) {
-    //     if (rightMin > arr[right]) {
-    //         rightMin = arr[right];
-    //     }
-    //     right--;
-    // }
-    // console.log(max, leftMin, rightMin);
-    // return (max - leftMin) + (max - rightMin);
-
 }
 
-console.log(trap(arr));
+console.log(trap(height));
+console.log(trap([4, 2, 0, 3, 2, 5]));

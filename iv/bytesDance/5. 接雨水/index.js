@@ -24,7 +24,7 @@
  * right_max
  *
  * 那么i能装的最多的水是多少？
- * Math.min(left_max, right_max);
+ * Math.min(left_max, right_max) - arr[i];
  */
 /**
  * 方法一：穷举法
@@ -56,5 +56,5 @@ let arr = [0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1];
 
 let result = trapRainFall(arr);
 
-let res2 = trapRainFall([4, 2, 0, 3, 2, 5]);
-console.log(result, res2);
+// let res2 = trapRainFall([4, 2, 0, 3, 2, 5]);
+console.log(result);

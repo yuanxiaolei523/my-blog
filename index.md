@@ -985,13 +985,6 @@ function repeat4 (arr) {
 
 
 
-
-
-<<<<<<< HEAD
-=======
-
-
->>>>>>> 2dc36825bc4b7a8caa1467c596bb1ad62952ffb0
 ## VUE
 
 
@@ -1021,11 +1014,118 @@ interpretation:上面是由数组[0,1,0,2,1,0,1,3,2,1,2,1]表示的高度图，�
 输出：9
 
 ```js
+/*
+	穷举法：我们计算dp[i]中能接多少雨水
+		我们首先找到当前元素左边最大的，然后找到当前元素右边最大的，找到之后然后用两个中更小的那个(木桶)减去dp[i]的高度就是
+		dp[i]中可以接到的雨水了
+*/
 let arr = [0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1];
 
 function trap(arr) {
+  if (!Array.isArray(arr)) {
+    throw new Error('参数必须是数组');
+  }
+  let n = arr.length;
+  if (n === 0) {
+    return 0;
+  }
   
+  let res = 0;
+  for(let i =1; i < n - 1; i++) {
+    let l_max = arr[0];
+  	let r_max = arr[n - 1];
+    for(let j = 1; j < i; j++) {
+      l_max = Math.max(l_max, arr[j]);
+    }
+    for (let j = i - 1; j < n; j++) {
+      r_max = Math.max(r_max, arr[j])
+    }
+    res += Math.max(0, Math.min(l_max, r_max) - arr[i]);
+  }
 }
+/*
+时间复杂度 o(n^2);
+空间复杂度 o(1)
+*/
+```
+
+```js
+/*
+	动态规划解题：
+
+*/
+let arr = [0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1];
+function trap(arr) {
+  if (!Array.isArray(arr)) {
+    throw new Error('参数必须是数组');
+  }
+  let n = arr.length;
+  if (n === 0) {
+    return 0;
+  }
+  
+  let res = 0;
+  let leftArr = new Array(n).fill(0);
+  let rightArr = new Array(n).fill(0);
+  leftArr[0] = arr[0];
+  rightArr[n - 1] = arr[n - 1];
+  for(let i = 1; i < n; i++) {
+    leftArr[i] = Math.max(leftArr[i - 1], arr[i]);
+  }
+  for (let j = n - 2; j >= 0; j--) {
+    rightArr[j] = Math.max(rightArr[j + 1], arr[j])
+  }
+  for (let i = 0; i < n; i++) {
+    let min = Math.min(leftArr[i], rightArr[i])
+    if (min > arr[i]) {
+      res += min - arr[i]
+    }
+  }
+  return res;
+}
+/*
+	时间复杂度O(n), 空间复杂度O(n)
+*/
+```
+
+```js
+/*
+	双指针
+	
+*/
+let arr = [0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1];
+
+function trap(arr) {
+  if (!Array.isArray(arr)) {
+    throw new Error('参数必须是数组');
+  }
+  let n = arr.length;
+  if (n === 0) {
+    return 0;
+  }
+  
+  let r_max = 0;
+  let l_max = 0;
+  let left = 0;
+  let right = 0;
+  let res = 0;
+  while (left <= right) {
+    l_max = Math.max(l_max, arr[left]);
+    r_max = Math.max(r_max, arr[right]);
+    if (l_max < r_max) {
+      res += l_max - arr[left];
+      left++;
+    } else {
+      res += r_max - arr[right];
+      right--;
+    }
+  }
+  return res;
+}
+/*
+	时间复杂度：o(n)
+	空间复杂度：o(1)
+*/
 ```
 
 
