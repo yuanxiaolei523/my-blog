@@ -55,7 +55,7 @@ const urls = [
 ];
 
 function loadImg(url) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         console.log('-----' + url.info + ' start!');
         setTimeout(() => {
             console.log('-----' + url.info + ' ok!');
@@ -65,3 +65,21 @@ function loadImg(url) {
 }
 
 limitLoad(urls, loadImg, 3);
+
+
+function limitLoad2(urls, handle, count) {
+    let sequence = [].concat(urls);
+    let promises = [];
+    promises = sequence.splice(0, count).map((url, index) => {
+        return handle(url).then(() => {
+            return index;
+        });
+    }); 
+    let p = Promise.race(promises);
+    for (let i = 0; i < sequence.length; i++) {
+        p = p.then(res => { // res 就是index
+            promises[res] = handle(sequence[i]).then(() => res);
+            return Promise.race(promises); // 返回的还是下标
+        });
+    }
+}

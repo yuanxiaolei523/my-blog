@@ -198,6 +198,13 @@ Input,img
 
 ## JS
 
+### this
+
+1. 在构造函数中的this是指向当前构造函数的
+2. 在普通的函数中this是指向调用者的
+3. 构造函数的静态属性，实例是访问不到的
+4. 在构造函数中通过this.xxx定义的，实例访问的时候，会先在构造函数中查找，找不到顺着原型链找(返回的不是对象或者返回this)
+
 ### ==和===的区别
 
 1. ==会做类型转换，===不会做类型转换
@@ -1159,6 +1166,29 @@ function trap(arr) {
 
 
 ## Chrome
+
+### webp
+
+我们首先要知道webp是有兼容性问题的。所以如何检测浏览器是否支持webp就变成了一个首要前提。所以我们下面通过一个函数来判断浏览器是否支持webp
+
+```js
+function supportWebp() {
+  // 防止有些浏览器不支持webp报错
+  try {
+    return doucument.createElement('canvas').toDataURL('image/webp').indexOf('data:image/webp') === 0;
+  } catch (e) {
+    return false;
+  }
+}
+```
+
+上述代码中，我们创建了一个canvas元素，通过canvas元素的toDataURL()方法将webp转成base64形式的图片，如果转换之后的url包含
+
+`data:image/webp`, 那么就说明浏览器支持wbep，否则就说明不支持
+
+
+
+toDataURL中的参数，默认是`image/png,如果传入参数后，返回的url还是以data:image/png开头的话，那么就说明浏览器不支持这个类型
 
 ### 垃圾回收器的优缺点
 
