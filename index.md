@@ -1037,7 +1037,7 @@ function trap(arr) {
     for(let j = 1; j < i; j++) {
       l_max = Math.max(l_max, arr[j]);
     }
-    for (let j = i - 1; j < n; j++) {
+    for (let j = i + 1; j < n; j++) {
       r_max = Math.max(r_max, arr[j])
     }
     res += Math.max(0, Math.min(l_max, r_max) - arr[i]);
@@ -1107,7 +1107,7 @@ function trap(arr) {
   let r_max = 0;
   let l_max = 0;
   let left = 0;
-  let right = 0;
+  let right = n - 1;
   let res = 0;
   while (left <= right) {
     l_max = Math.max(l_max, arr[left]);

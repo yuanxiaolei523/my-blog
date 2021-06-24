@@ -13,28 +13,19 @@ function trap(height) {
         return 0;
     }
     let res = 0;
+
     for (let i = 1; i < n - 1; i++) {
-        let l_max = 0;
-        for (let j = 0; j < i; j++) {
-            if (height[j] > l_max) {
-                l_max = height[j];
-            }
+        let l_max = height[0];
+        let r_max = height[n - 1];
+        for (let j = 1; j < i; j++) {
+            l_max = Math.max(l_max, height[j]);
         }
-        let r_max = 0;
-        for (let j = i + 1; j < n; j++) {
-            if (height[j] > r_max) {
-                r_max = height[j];
-            }
+        for (let j = n - 1; j >= i + 1; j--) {
+            r_max = Math.max(r_max, height[j]);
         }
-        // 当前这一列中可以存的雨水
-        // let min = Math.min(l_max, r_max);
-        // // 只有较小的一端大于当前列的高度时，该列才能存水
-        // if (min > height[i]) {
-        //     res += min - height[i];
-        // }
         res += Math.max(0, Math.min(l_max, r_max) - height[i]);
-        
     }
+    
     return res;
 }
 
