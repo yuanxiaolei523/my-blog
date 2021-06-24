@@ -32,26 +32,20 @@ function trap (arr) {
         return 0;
     }
     let sum = 0;
-    let leftMaxArr = new Array(n).fill(0);
-    let rightMaxArr = new Array(n).fill(0);
-    leftMaxArr[0] = arr[0];
-    rightMaxArr[n - 1] = arr[n - 1];
-    
-    for (let i = 1; i < n - 1; i++) {
-        // leftMaxArr中每一项都是当项目左边最大的数
-        leftMaxArr[i] = Math.max(leftMaxArr[i - 1], arr[i]);
+    let leftArr = new Array(n).fill(0);
+    let rightArr = new Array(n).fill(0);
+    leftArr[0] = arr[0];
+    rightArr[n - 1] = arr[n - 1];
+    for (let i = 1; i < n; i++) {
+        leftArr[i] = Math.max(leftArr[i - 1], arr[i]);
     }
     for (let i = n - 2; i >= 0; i--) {
-        rightMaxArr[i] = Math.max(rightMaxArr[i + 1], arr[i]);
+        rightArr[i] = Math.max(rightArr[i + 1], arr[i]);
     }
-
-    for (let i = 1; i < n - 1; i++) {
-        let min = Math.min(leftMaxArr[i], rightMaxArr[i]);
-        if (min > arr[i]) {
-            sum += min - arr[i];
-        }
+    for (let i = 0; i < n; i++) {
+        sum += Math.max(0, Math.min(leftArr[i], rightArr[i]) - arr[i]);
     }
-    return sum;
+    return sum; 
     
 }
 

@@ -11,14 +11,14 @@ function trap(arr) {
         return 0;
     }
     let left = 0;
-    let l_max = arr[0];
-    let r_max = arr[n - 1];
+    let l_max = 0;
     let right = n - 1;
+    let r_max = 0;
     let res = 0;
     while (left <= right) {
         l_max = Math.max(l_max, arr[left]);
         r_max = Math.max(r_max, arr[right]);
-        // 当左边的比右边的小的时候
+
         if (l_max < r_max) {
             res += l_max - arr[left];
             left++;
