@@ -2,21 +2,32 @@ function limitLoad(urls, handler, limit) {
     const sequence = [].concat(urls); // 尽量不要影响到外在的数组或对象
     let promises = []; // 用来存储要执行的promise
     promises = sequence.splice(0, limit).map((url, index) => {
-        return handler(url).then((res) => {
+        return handler(url).then(() => {
             return index;
         });
     });
 
-    let p = Promise.race(promises);
+    // 此时是最快的那个执行完毕了
+    let p = Promise.race(promises); 
+    // 已经完成一个了，那么在并发数小于limit的条件下，在原位置增加一个新的promise执行
     for (let i = 0; i < sequence.length; i++) {
         p = p.then((res) => {
             // res 为索引
             promises[res] = handler(sequence[i]).then(() => {
                 return res;
             });
-            return Promise.race(promises);
+            return Promise.race(promises); // then内部返回的是
         });
     }
+}
+function loadImg(url) {
+    return new Promise((resolve) => {
+        console.log('-----' + url.info + ' start!');
+        setTimeout(() => {
+            console.log('-----' + url.info + ' ok!');
+            resolve();
+        }, url.time);
+    });
 }
 
 const urls = [
@@ -54,15 +65,7 @@ const urls = [
     },
 ];
 
-function loadImg(url) {
-    return new Promise((resolve) => {
-        console.log('-----' + url.info + ' start!');
-        setTimeout(() => {
-            console.log('-----' + url.info + ' ok!');
-            resolve();
-        }, url.time);
-    });
-}
+
 
 limitLoad(urls, loadImg, 3);
 

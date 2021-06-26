@@ -43,37 +43,61 @@ function loadImg(url) {
     });
 }
 
-function limitLoad(urls, handler, limit) {
-    let sequence = [].concat(urls);
-    let promises = [];
+// function limitLoad(urls, handler, limit) {
+//     let sequence = [].concat(urls);
+//     let promises = [];
 
-    promises = sequence.splice(0, limit).map((url, index) => {
-        return handler(url).then(() => {
-            return index; // 执行了，然后把执行完的index返回
-        });
-    });
+//     promises = sequence.splice(0, limit).map((url, index) => {
+//         return handler(url).then(() => {
+//             return index; // 执行了，然后把执行完的index返回
+//         });
+//     });
 
-    let p = Promise.race(promises); // 这里拿到index
+//     let p = Promise.race(promises); // 这里拿到index
 
-    // 将剩余的遍历
-    // sequence.forEach((item, index) => {
-    // 	// 采用链式调用的方式保证limit的个数
-    // 	p = p.then((res) => {
-    // 		promises[res] = handler(sequence[index]).then(() => {
-    // 			return res;
-    // 		});
-    // 		return Promise.race(promises);
-    // 	});
-    // });
-    for (let i = 0; i < sequence.length; i++) {
-        p = p.then((res) => {
-            // res为下标
-            promises[res] = handler(sequence[i]).then(() => {
-                return res;
-            });
-            return Promise.race(promises); // 再次获取一个执行的最快的
-        });
-    }
-}
+//     // 将剩余的遍历
+//     // sequence.forEach((item, index) => {
+//     // 	// 采用链式调用的方式保证limit的个数
+//     // 	p = p.then((res) => {
+//     // 		promises[res] = handler(sequence[index]).then(() => {
+//     // 			return res;
+//     // 		});
+//     // 		return Promise.race(promises);
+//     // 	});
+//     // });
+//     for (let i = 0; i < sequence.length; i++) {
+//         p = p.then((res) => {
+//             // res为下标
+//             promises[res] = handler(sequence[i]).then(() => {
+//                 return res;
+//             });
+//             return Promise.race(promises); // 再次获取一个执行的最快的
+//         });
+//     }
+// }
 
-limitLoad(urls, loadImg, 3);
+// limitLoad(urls, loadImg, 3);
+
+let p1 = new Promise((resolve) => {
+    setTimeout(() => {
+        resolve(2);
+    }, 2000);
+}).then(res => {
+    // console.log(res);
+    return res;
+});
+
+let p2 = new Promise((resolve) => {
+    setTimeout(() => {
+        resolve(1);
+    }, 3000);
+}).then(res => {
+    // console.log(res);
+    return res;
+});
+
+let p = Promise.race([p1, p2]);
+console.log(p);
+setTimeout(() => {
+    console.log(p);
+}, 3000);
