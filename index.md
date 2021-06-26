@@ -205,6 +205,115 @@ Input,img
 3. 构造函数的静态属性，实例是访问不到的
 4. 在构造函数中通过this.xxx定义的，实例访问的时候，会先在构造函数中查找，找不到顺着原型链找(返回的不是对象或者返回this)
 
+
+
+### 平时有关注过前端的内存处理吗
+
+#### 1. 内存的生命周期
+
+* 内存分配：声明变量、函数、对象的时候，js会自动分配内存
+* 内存使用：使用变量、对象或者调用函数的时候
+* 内存回收：垃圾回收机制
+
+#### 2. js的垃圾回收机制
+
+1. 引用计数法：
+
+   a对象对b对象有访问权限，那么称为a引用b对象
+
+   **弊端**：循环应用的时候，会造成内存泄露
+
+2. 标记清除法
+
+   从js的根部开始，然后如果某个变量没有达到，那么就表示该被回收了
+
+   1. 在运行的时候给存储在内存的所有变量加上标记
+   2. 从根部触发，能触及的对象，把标记清除
+   3. 有标记的就是要删除的变量
+
+#### 3. js中有哪些常见的内存泄露
+
+1. 意外的全局变量
+
+2. 对dom的引用
+
+   ```js
+   const element = {
+     image: document.getElementById('image');
+   }
+   document.body.removeChild(document.getElementById('image'))
+   // 此时还会有内存泄露，只要对象没有被回收，但是还是会被保存在内存中
+   elements.image = nulll
+   ```
+
+3. 闭包
+
+   内部函数有权访问外部函数的变量的函数，就称为闭包
+
+4. 未被清除的定时器
+
+#### 4. 如何避免内存泄露
+
+1. 减少不必要的全局变量
+2. 用完数据后，及时解除应用
+
+### 实现一个sizeOf函数，传入一个函数Object，计算这个Object占用了多少bytes
+
+```js
+const testData = {
+    a: 111,
+    b: 'cccc',
+    2222: false,
+};
+
+function calculator(obj) {
+    const objType = typeof obj;
+    switch (objType) {
+        case 'number':
+            return 8;
+        case 'string':
+            return 2 * obj.length;
+        case 'boolean':
+            return 4;
+        case 'object': 
+            if (Array.isArray(obj)) {
+                return obj.map(calculator).reduce((prev, cur) => prev + cur, 0);
+            } else {
+                return sizeOfObject(obj);
+            }
+    }
+}
+
+let ws = new WeakSet();
+
+function sizeOfObject (obj) {
+    if (obj === null) {
+        return 0;
+    }
+    let bytes = 0;
+    let keys = Object.keys(obj);
+    for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
+        const val = obj[key];
+        bytes += calculator(key);
+        if (typeof val === 'object' && !val) {
+            if (ws.has(val)) {
+                continue;
+            }
+            ws.add(val);
+            
+        }
+        bytes += calculator(val);
+    }
+    return bytes;
+}
+console.log(calculator(testData));
+```
+
+
+
+
+
 ### ==和===的区别
 
 1. ==会做类型转换，===不会做类型转换
@@ -1147,6 +1256,33 @@ function trap(arr) {
 
 
 
+## HTTP
+
+### 聊一下HTTP请求相关
+
+#### 1. 平时怎么解决跨域问题
+
+1. jsonp
+2. cors
+3. Node 正向代理：如果有一个api，跨域了，此时我们可以将其转发到同域的node服务上，然后在node服务上继续请求/api，然后将数据返回给前端(跨域只限于浏览器端)
+4. Nginx 反向代理， proxy_pass. /api --> /same/api
+
+#### 2. 有做过全局的请求处理吗？比如统一处理登录态。统一处理全局错误？
+
+adaptar
+
+interceptor request和response做拦截
+
+#### 3. 你能给xhr添加hook，实现在各个阶段打日志吗
+
+```js
+ 
+```
+
+
+
+
+
 
 
 
@@ -1184,7 +1320,7 @@ function supportWebp() {
 
 上述代码中，我们创建了一个canvas元素，通过canvas元素的toDataURL()方法将webp转成base64形式的图片，如果转换之后的url包含
 
-`data:image/webp`, 那么就说明浏览器支持wbep，否则就说明不支持
+`data:image/webp`, 那么就说明浏览器支持wbep，否则就说明不支持  
 
 
 
@@ -1239,7 +1375,7 @@ toDataURL中的参数，默认是`image/png,如果传入参数后，返回的url
 
 主要流程
 
-1. 标记：遍历调用栈，看老生代区域堆中的对象是否被引用，被引用的对象标记为活动回想，没有被引用的对象标记为垃圾数据
+1. 标记：遍历调用栈，看老生代区域堆中的对象是否被引用，被引用的对象标记为活动对象 ，没有被引用的对象标记为垃圾数据
 2. 清除：将垃圾数据清除
 3. 内存整理：标记-整理策略，将所有的活动对象整理到一起，方便留出充足的内存空间
 
