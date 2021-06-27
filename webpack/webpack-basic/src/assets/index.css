@@ -1,0 +1,11 @@
+.head {
+  background-color: red;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.head .head-content {
+  background-color: #00abf3;
+}
+/*# sourceMappingURL=index.css.map */
