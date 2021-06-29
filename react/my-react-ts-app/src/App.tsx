@@ -1,13 +1,14 @@
 import React from 'react';
 import './App.css';
-import Hello from './components/basic/Hello';
-import Hello2 from './components/basic/Hello2'
+// import Hello from './components/basic/Hello';
+// import Hello2 from './components/basic/Hello2'
+import ByeWorld from './components/decorator/ByeWorld';
+
 
 function App() {
   return (
     <div className="App">
-      <Hello name={'zhangsan'}></Hello>
-      <Hello2 name={'lisi'}></Hello2>
+      <ByeWorld name='zhangsan'></ByeWorld>
     </div>
   );
 }
