@@ -3,12 +3,14 @@ import './App.css';
 // import Hello from './components/basic/Hello';
 // import Hello2 from './components/basic/Hello2'
 import ByeWorld from './components/decorator/ByeWorld';
+import RefDemoComponent from './components/ref';
+import HijackDemoComponent from './components/hijack'
 
 
 function App() {
   return (
     <div className="App">
-      <ByeWorld name='zhangsan'></ByeWorld>
+      <HijackDemoComponent name='zhangsan'></HijackDemoComponent>
     </div>
   );
 }

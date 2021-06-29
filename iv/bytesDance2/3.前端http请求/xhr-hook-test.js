@@ -32,7 +32,7 @@ class XHRHook {
     }
 
     overwrite (proxyXHR) {
-        // 这里的key就是官方的XML上的各种属性和方法
+        // 这里的key就是原先的的XML上的各种属性和方法，因为调用的时候，也是调用实例上的各种属性和方法
         for (const key in proxyXHR._xhr) {
             if (typeof proxyXHR._xhr[key] === 'function') {
                 this.overwriteMethod(proxyXHR, key);

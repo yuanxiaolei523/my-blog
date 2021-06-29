@@ -108,7 +108,16 @@ let fn2 = func(sayBye)
     1.2 操作组件实例
 2. 继承/劫持
     
+### 什么是React Hooks，有什么优势？
+可以不写class组件的情况下，使用state和其他react特性
+useState
+useEffect
+useMeno
 
+为什么不写class 而转向了hook的写法
+#### class的缺点
+1. 组件间的状态逻辑很难复用
+组件间如果有state逻辑是相似的，class模式下基本上是用高阶组件完成的
 
 ## 手写代码实现useState
 
