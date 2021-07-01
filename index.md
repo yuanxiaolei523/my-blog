@@ -729,6 +729,72 @@ class PromiseClass {
 }
 ```
 
+### 5. 利用Promise实现一个并发控制，限制加载个数
+
+```js
+function LimitLoad (urls, handler, limit) {
+  let sequence = urls.concat([]);
+  let promises = [];
+  promises = sequence.splice(0, limit).map((url, index) => {
+    return handler(url).then(res => index;)
+  });
+  
+  let p = Promise.race(promises);
+  for (let i = 0; i < sequence.length; i++) {
+    p = p.then(res => {// res为下标
+      promises[res] = handler(sequence[i]).then(() => res;)
+      return Promise.race(promises);
+    })
+  }
+}
+
+function loadImg(url) {
+    return new Promise((resolve) => {
+        console.log('-----' + url.info + ' start!');
+        setTimeout(() => {
+            console.log('-----' + url.info + ' ok!');
+            resolve();
+        }, url.time);
+    });
+}
+
+const urls = [
+    {
+        info: 'link1',
+        time: 3000,
+    },
+    {
+        info: 'link2',
+        time: 2000,
+    },
+    {
+        info: 'link3',
+        time: 5000,
+    },
+    {
+        info: 'link4',
+        time: 1000,
+    },
+    {
+        info: 'link5',
+        time: 1200,
+    },
+    {
+        info: 'link6',
+        time: 2000,
+    },
+    {
+        info: 'link7',
+        time: 800,
+    },
+    {
+        info: 'link8',
+        time: 3000,
+    },
+];
+
+```
+
 
 
 
@@ -1112,6 +1178,58 @@ function repeat4 (arr) {
 
 ## Ig
 
+### 查看某个数据结构占用多少内存(字节)
+
+```js
+const testData = {
+    a: 111,
+    b: 'cccc',
+    2222: false,
+};
+function calculator (obj) {
+  let objType = typeof obj;
+  switch(objType) {
+  	case 'string':
+      return object.length * 2;
+    case 'boolean':
+      return 4;
+    case 'number':
+      return 8;
+    case 'object': {
+      if (Array.isArray(obj)) {
+        return obj.map(calculator).reduce((prev, cur) => prev + cur, 0)
+      } else {
+        return sizeOfObject(obj);
+      }
+    },
+    default: 
+      return 0;
+  }
+}
+let ws = new WeakSet();
+function sizeOfObject(obj) {
+  let bytes = 0;
+  let keys = Object.keys(obj);
+  for(let i = 0; i < keys.length; i++) {
+    bytes += calculator(keys[i]);
+    let key = keys[i];
+    if (typeof obj[key] === 'object' && object[key] !== null) {
+      if (ws.has(obj[key])) {
+        continue;
+      } 
+      ws.add(obj[key]);
+    }
+    bytes += calculator(obj[key])
+    
+  }
+  return bytes
+}
+```
+
+
+
+
+
 ### 接雨水问题(字节)
 
 给定n个非负整数表示每个宽度为1的柱子的高度图，计算按此排列的柱子，下雨之后能接多少雨水
@@ -1265,6 +1383,138 @@ function trap(arr) {
 
 ## Webpack
 
+### webpack中的module指的什么
+
+module就是模块，一个文件就是一个模块
+
+webpack支持ESModule， CommonJS，AMD，Asset.(image, font, video, audio)
+
+#### ESM
+
+export: 允许你将ESM中的内容暴露给其他模块
+
+ import: 允许其他模块引入ESM中的内容      
+
+```js
+import {aa} from './a.js'
+export {bb}
+```
+
+
+
+#### CommonJS
+
+module.exports: 允许你将CommonJS中的内容暴露给其他模块
+
+require: 允许其他模块引入CommonJS中的内容
+
+
+
+### Webpack Modules如何表达自己的各种依赖关系
+
+通过ESM的import语句或者CommonJS的require语句来引入其他模块
+
+
+
+### 我们常说的chunk和bundle有什么区别(!!!!)
+
+#### chunk
+
+chunk是webpack打包过程中的Modules的集合，是打包过程中的概念
+
+webpack从一个入口模块开始，引入其他模块，其他模块又引入了另外的模块，webpack通过引用关系逐步打包模块，这些模块形成了一个chunk
+
+如果有多个入口模块，那么就会有多条打包路径，每条路径都会形成一个chunk
+
+#### bundle
+
+bundle是webpack打包后的产物，是webpack打包之后最终输出的一个或者多个打包好的文件
+
+#### chunk和bundle的关系
+
+一个chunk对应一个bundle，当设置了sourcemap的时候，一个chunk会对应两个bundle
+
+chunk是过程中的代码块，bundle是打包结果输出的代码块，chunk完成构建后就呈现为bundle
+
+
+
+#### 下面的配置会产生几个chunk
+
+```js
+module.exports = {
+    mode: 'production',
+    entry: {
+        // 这种情况下产生的还是一个chunk
+        // index: ['./src/index.js', './src/add.js']
+        // 下面这种情况会有两个chunk，因为有devtool，所以会有四个bundle(dist文件中的就是bundle) 
+        index: './src/index.js',
+        other: './src/multiply.js'
+    },
+    output: {
+        filename: '[name].js'
+    },
+    // devtool: 'source-map', // 会产生double bundle
+    optimization: {
+        runtimeChunk: 'single',
+        splitChunks: {
+            cacheGroups: {
+                commons:{
+                    chunks: 'initial',
+                    minChunks: 2, // 如果两个文件用到了同一行，那么就生成一个chunk
+                    minSize: 0 //提出来的commonChunk最小的体积为0时才能生成一个chunk
+                },
+                vendor: { // 打包第三方包
+                    test: /node_modules/,
+                    chunks: 'initial',
+                    name: 'vendor',
+                    enforce: true
+                }
+            }
+        }
+    }
+};
+```
+
+
+
+### Plugin和Loader分别是做什么的？怎么工作的？
+
+#### Loader
+
+模块转换器，将非js模块转换为webpack能识别的js模块
+
+本质上，webpack loader将所有类型的文件，转换为应用程序的依赖图可以直接饮用的模块
+
+
+
+#### plugin
+
+本质上是一个扩展，运行在webpack打包的各个阶段，webpack打包的各个阶段都会广播出对应的事件。然后插件就是去监听对应的事件
+
+
+
+#### Compiler
+
+是一个对象，包含了webpack环境的所有配置信息，包含options、loaders、plugins，在webpack启动的时候实例化，他在全局是唯一的，也可以将其理解为webpack的实例
+
+
+
+#### Compliation
+
+包含了当前的模块资源、编译生成资源等等，当webpack在开发模式下运行的时候，每当检测一个文件变化时，就会创建一次新的Compliation
+
+### 简单描述一下webpack的打包过程
+
+1. 初始化参数：shell webpack.config.js中配置的
+2. 开始编译：初始化一个Compiler对象，加载所有的配置，开始执行编译
+3. 确认入口：根据entru中的配置找到所有的入口文件
+4. 编译模块：从入口文件开始，调用所有的loader，再去递归的找模块的依赖关系
+5. 完成模块的编译：得到每个模块被翻译成的最终内容，以及他们之间的依赖关系
+6. 输出资源：根据刚才得到的依赖关系，组装成一个个包含多个module的chunk
+7. 输出完成：根据配置，确定要输出的文件名以及文件路径
+
+
+
 
 
 ## Node
@@ -1282,17 +1532,6 @@ function trap(arr) {
 3. Node 正向代理：如果有一个api，跨域了，此时我们可以将其转发到同域的node服务上，然后在node服务上继续请求/api，然后将数据返回给前端(跨域只限于浏览器端)
 4. Nginx 反向代理， proxy_pass. /api --> /same/api
 
-#### 2. 有做过全局的请求处理吗？比如统一处理登录态。统一处理全局错误？
-
-adaptar
-
-interceptor request和response做拦截
-
-#### 3. 你能给xhr添加hook，实现在各个阶段打日志吗
-
-```js
- 
-```
 
 
 
@@ -1307,6 +1546,13 @@ interceptor request和response做拦截
 
 
 
+
+
+
+
+
+
+## TS
 
 
 
@@ -1330,6 +1576,20 @@ function supportWebp() {
   } catch (e) {
     return false;
   }
+}
+
+function getWebomageUrl (url) {
+  if (!url){
+    throw
+  }
+  if (url.startsWith('data:')) {
+    return url
+    
+  }
+  if (!supportWebp) {
+    return url;
+  }
+  return url + '?x-oss-xxxx';
 }
 ```
 

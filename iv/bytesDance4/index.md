@@ -24,7 +24,7 @@ require: 允许其他模块引入CommonJS中的内容
 
 ## 我们常说的chunk和bundle的区别是什么？(important!!!)
 1. chunk
-chunk是webpack**打包工程中**Modules的集合，是打包过程中的概念。
+chunk是webpack**打包过程中**Modules的集合，是打包过程中的概念。
 webpack从一个入口模块开始，入口模块引入其他模块，其他模块引用其他模块，webpack通过引用关系逐步打包模块，
 这些module形成了一个chunk。
 

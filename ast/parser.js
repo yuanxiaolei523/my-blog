@@ -1,4 +1,4 @@
-const recast = require("recast");
+const recast = require('recast');
 
 const code =
   `
@@ -7,9 +7,9 @@ const code =
       // 有什么奇怪的东西混进来了
       b
   }
-  `
+  `;
 // 用螺丝刀解析机器
 const ast = recast.parse(code);
-const add  = ast.program.body[0]
+const add = ast.program.body[0];
 
-console.log(add)
+console.log(add);

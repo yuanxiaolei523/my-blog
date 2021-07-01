@@ -1,16 +1,20 @@
 import React, { Component } from 'react'
 interface Props {
-    name: string,
-    enthusiasmLevel ?: number
+    // name: string,
+    // enthusiasmLevel?: number,
+    onClick: Function
 }
 
 export default class Hello2 extends Component<Props, object> {
     render() {
-        let {name, enthusiasmLevel = 1} = this.props;
+        console.log(456);
+
+        // let { name, enthusiasmLevel = 1 } = this.props;
         return (
             <div className="hello">
                 <div className="greeting">
-                    Hello {name + getExclamationMarks(enthusiasmLevel)}
+                    hello world
+                    {/* Hello {name + getExclamationMarks(enthusiasmLevel)} */}
                 </div>
             </div>
         )

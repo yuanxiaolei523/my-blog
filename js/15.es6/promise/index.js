@@ -14,21 +14,21 @@
 // 	console.log(res);
 // });
 let p1 = new Promise((resolve) => {
-	console.log("p1");
-	resolve(1);
+    console.log('p1');
+    resolve(1);
 });
 
 let p2 = new Promise((resolve, reject) => {
-	console.log("p2");
-	reject(1);
+    console.log('p2');
+    reject(1);
 }).catch((res) => {
-	console.log(res);
+    console.log(res);
 });
 let p3 = new Promise((resolve, reject) => {
-	setTimeout(() => {
-		console.log("p3");
-		resolve(1);
-	}, 1000);
+    setTimeout(() => {
+        console.log('p3');
+        resolve(1);
+    }, 1000);
 });
 
 let p;
@@ -199,16 +199,22 @@ let p;
 // 	});
 // console.log(456);
 
-let thenable = {
-	then: function (resolve, reject) {
-		console.log(123);
-		resolve(42);
-	},
-};
-p = Promise.resolve(thenable);
+// let thenable = {
+//     then: function (resolve, reject) {
+//         console.log(123);
+//         resolve(42);
+//     },
+// };
+// p = Promise.resolve(thenable);
 
-p.then(function (value) {
-	console.log(value);
+// p.then(function (value) {
+//     console.log(value);
+// });
+
+// console.log(3455);
+
+
+p = Promise.race([p1, p2, p3]);
+p.then(res => {
+    console.log(res, 'then');
 });
-
-console.log(3455);
