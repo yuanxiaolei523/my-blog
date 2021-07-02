@@ -1104,6 +1104,57 @@ function repeat4 (arr) {
 
 ## VUE
 
+### 把你了解的Vue响应式原理说一下
+
+首先Vue内部有三个核心类：
+
+1. Observer：给对象的属性添加getter和setter，用于收集依赖和派发更新
+2. Watcher：观察者对象，有Render  Watcher、computed watcher和use Watcher
+3. Dep：用于收集当前响应式对象的依赖关系，每一个响应式对象都有一个dep实例，当数据发生变更的时候，会通过notify()去通知各个watcher
+
+* 依赖收集
+  * initState：对computed属性初始化的时候，就会触发computed watcher依赖收集
+  * 对watcher属性初始化的时候，会触发user watcher依赖收集
+  * render：渲染的时候触发render watcher
+
+* 派发更新
+
+  Object.defineProperty()
+
+  * 组件中对响应的数据进行了修改，会触发setter逻辑。
+  * dep.notify()
+  * 遍历所有的subs，调用每一个watcher的update方法
+
+当创建Vue实例的时候，Vue会编译data内的属性，通过使用Object.defineProperty为属性添加getter/setter进行劫持, getter用于收集依赖，setter用于派发更新，且每个组件的实例都会有相应的watcher实例
+
+### 计算属性的实现原理
+
+computed watcher持有一个dep实例，通过dirty属性标记计算属性是否需要重新求值。
+
+当computed的依赖值改变后，就会通知订阅的watcher进行更新，对于computed watcher会将dirty属性设置为true，并且进行计算属性方法的调用
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ## React
@@ -1265,6 +1316,60 @@ function trap(arr) {
 
 ## Webpack
 
+### webpack里面的中的module指的是什么？
+
+module就是模块，一个文件就是一个模块
+
+webpack目前支持AMD、CMD、CommonJS、ESModule
+
+#### 1.ESM
+
+ESM有两个关键字，一个是export，一个是import。export允许你将当前模块内的内容暴露给其他模块，import允许你引入其他模块的内容
+
+在package.json中设置type: module -- 强制webpack下所有的模块都以ESM的方式打包
+
+#### 2. CommonJS
+
+module.exports: 允许你将CommonJS中的内容暴露给其他模块
+
+require: 允许其他模块引入CommonJS中的内容
+
+### webpack modules, 如何表达自己的各种依赖关系
+
+通过ESM import语句和CommonJS的require和AMD中的define、require以及css/sass/less
+
+### 我们常说的chunk和bundle的区别是什么？(important!!!)
+
+1. chunk
+
+   chunk是webpack**打包过程中**Modules的集合，是打包过程中的概念
+
+   webpack从一个入口模块开始，入口模块引入其他模块， 如此循环，webpack会通过引入关系逐步打包模块，这些module形成了一个chunk
+
+2. bundle
+
+   bundle是webpack**打包之后**输出的一个或者多个打包好的文件
+
+3. chunk和bundle的关系
+
+   一个chunk可能对应一个bundle，但是也有例外，当加了sourcemap，一个entry，会产生一个chunk对应两个bundle
+
+   chunk是过程中代码块，bundle是打包结果输出的代码块，chunk在构建完成就呈现为bundle
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ## Node
@@ -1282,17 +1387,7 @@ function trap(arr) {
 3. Node 正向代理：如果有一个api，跨域了，此时我们可以将其转发到同域的node服务上，然后在node服务上继续请求/api，然后将数据返回给前端(跨域只限于浏览器端)
 4. Nginx 反向代理， proxy_pass. /api --> /same/api
 
-#### 2. 有做过全局的请求处理吗？比如统一处理登录态。统一处理全局错误？
 
-adaptar
-
-interceptor request和response做拦截
-
-#### 3. 你能给xhr添加hook，实现在各个阶段打日志吗
-
-```js
- 
-```
 
 
 
