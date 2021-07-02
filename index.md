@@ -483,7 +483,7 @@ function Child () {
 }
 
 Child.prototype = new Parent(); //用来获取父类原型上的属性和方法
-
+Child.prototype.constructor = Child;
 let c = new Child();
 console.log(c.name, c.age) // shine 14
 c.sayName(); 
