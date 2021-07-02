@@ -18,7 +18,7 @@
 // c1.names.push("shineStone");
 // console.log(c1.names, c2.names);
 
-function Parent(name, age) {
+function Parent(name) {
     this.name = name;
 }
 Parent.prototype.age = 14;
