@@ -8,7 +8,7 @@
 
 * 依赖收集
 1. initState：对computed属性初始化的时候，就会触发computed watcher依赖收集
-2. initState：对watcher属性初始化的时候，会触发user watcher依赖收集
+2. 对watcher属性初始化的时候，会触发user watcher依赖收集
 3. render：渲染的时候触发render watcher
 
 * 派发更新
