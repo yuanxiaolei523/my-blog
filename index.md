@@ -198,6 +198,54 @@ Input,img
 
 ## JS
 
+### 原型和原型链
+
+#### 原型
+
+首先我们要先来了解三个对象，一个是constructor，一个是原型对象，一个实例
+
+* 原型对象：当你在创建对象的时候，会自动帮你关联一个对象，他可以说是你创建的那个对象的父类，我们可以从它那继承过来一些属性和方法，每一个原型对象都有一个constructor属性，用来执行当前的构造函数
+* 构造函数：每个构造函数都有一个**prototype**属性，**prototype**属性是指向我们的原型对象的；实例是通过构造函数new出来的
+* 实例：每个构造函数new出来的实例，都有一个**\_\_proto\_\_**属性，这个属性也是指向我们的原型对象的；实例的constructor属性指向构造函数(借用prototype的constructor属性)
+
+#### 原型链
+
+刚才我们提到原型也是一个对象，上面我们也说到对象(除null外)都会有一个原型对象，所以原型对象也是有他自己的原型对象的，这种方式其实构成了**原型链**
+
+当我们在访问对象obj的某个属性时，如果在这个对象上没有找到这个属性，那么js就会去obj的原型对象上去找，如果找不到还是会往obj原型对象的原型对象上找，一直往上找，直至某个原型的原型对象为null为止，此时如果没有找到，那么就说明对象obj中没有这个属性。
+
+#### 几个特殊的原型对象
+
+Object.prototype.\_\_proto__ === null
+
+Function.prototype.\_\_proto__ === Object.prototype
+
+
+
+
+
+<img src="/Users/qitmac001126/Library/Application Support/typora-user-images/image-20210506180412328.png" alt="image-20210506180412328" style="zoom:25%;" />
+
+### instanceof
+
+我们知道**`instanceof`** ***运算符***用于检测构造函数的 `prototype` 属性是否出现在某个实例对象的原型链上。
+
+```js
+Function instanceof Object; // true
+
+Object instanceof Function; // true
+```
+
+#### **Function instanceof Object;**
+
+因为Function是一个构造函数，Function.prototype数一个对象，所以对象的原型是Object.Prototype，所以原型链就变成了这样
+
+Function --> Function.prototype --> Object.prototype --> null(可以理解为)
+
+#### **Object instanceof Function**
+
+首先Object(作为实例对象)是一个构造函数，构造函数的原型对象肯定是Function的原型对象,所以Object.\_\_proto__===Function.prototype，而Function.prototype的原型对象指向Object.prototype，所以Object instanceof Function 正确
+
 ### this
 
 1. 在构造函数中的this是指向返回的那个实例的 
@@ -257,59 +305,6 @@ Input,img
 
 1. 减少不必要的全局变量
 2. 用完数据后，及时解除应用
-
-### 实现一个sizeOf函数，传入一个函数Object，计算这个Object占用了多少bytes
-
-```js
-const testData = {
-    a: 111,
-    b: 'cccc',
-    2222: false,
-};
-
-function calculator(obj) {
-    const objType = typeof obj;
-    switch (objType) {
-        case 'number':
-            return 8;
-        case 'string':
-            return 2 * obj.length;
-        case 'boolean':
-            return 4;
-        case 'object': 
-            if (Array.isArray(obj)) {
-                return obj.map(calculator).reduce((prev, cur) => prev + cur, 0);
-            } else {
-                return sizeOfObject(obj);
-            }
-    }
-}
-
-let ws = new WeakSet();
-
-function sizeOfObject (obj) {
-    if (obj === null) {
-        return 0;
-    }
-    let bytes = 0;
-    let keys = Object.keys(obj);
-    for (let i = 0; i < keys.length; i++) {
-        const key = keys[i];
-        const val = obj[key];
-        bytes += calculator(key);
-        if (typeof val === 'object' && !val) {
-            if (ws.has(val)) {
-                continue;
-            }
-            ws.add(val);
-            
-        }
-        bytes += calculator(val);
-    }
-    return bytes;
-}
-console.log(calculator(testData));
-```
 
 
 
@@ -433,7 +428,7 @@ c.sayName(); // shine
 
 **缺点**
 
-1. 子类实例会共享父类的所有的属性和方法，一旦修改，则会，其他的实例的属性也会被修改
+1. 子类实例会共享父类的所有的属性和方法，一旦修改，则会，其他的实例继承过来的属性也会被修改
 2. 无法向父类的构造函数传参
 
 #### 构造函数继承
@@ -734,6 +729,191 @@ class PromiseClass {
 
 
 ## 手写
+
+### 实现一个sizeOf函数，传入一个函数Object，计算这个Object占用了多少bytes
+
+```js
+const testData = {
+    a: 111,
+    b: 'cccc',
+    2222: false,
+};
+
+function calculator(obj) {
+    const objType = typeof obj;
+    switch (objType) {
+        case 'number':
+            return 8;
+        case 'string':
+            return 2 * obj.length;
+        case 'boolean':
+            return 4;
+        case 'object': 
+            if (Array.isArray(obj)) {
+                return obj.map(calculator).reduce((prev, cur) => prev + cur, 0);
+            } else {
+                return sizeOfObject(obj);
+            }
+    }
+}
+
+let ws = new WeakSet();
+function sizeOfObject (obj) {
+    if (obj === null) {
+        return 0;
+    }
+    let bytes = 0;
+    let keys = Object.keys(obj);
+    for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
+        const val = obj[key];
+        bytes += calculator(key);
+        if (typeof val === 'object' && !val) {
+            if (ws.has(val)) {
+                continue;
+            }
+            ws.add(val);
+            
+        }
+        bytes += calculator(val);
+    }
+    return bytes;
+}
+console.log(calculator(testData));
+```
+
+
+
+### 实现一个Event Bus
+
+```js
+class EventEmitter {
+    constructor() {
+        this.events = [];
+    }
+    // 注册监听
+    on(event, cb) {
+        if (!this.events[event]) {
+            this.events[event] = [];
+        }
+        this.events[event].push(cb);
+        return this;
+    }
+    // 注册监听且只实现一次
+    once (event, cb) {
+        const fn = (...args) => {
+            this.off(event, fn);
+            cb.apply(this, args);
+        };
+        this.on(event, fn);
+        return this;
+    }
+    // 触发监听
+    emit(event, ...args) {
+        let cbs = this.events[event];
+        if (!cbs) {
+            throw new Error('没有这个事件');
+        }
+        cbs.forEach(cb => {
+            cb.apply(this, args);
+        });
+        return this;
+    }
+    // 卸载监听
+    off(event, cb) {
+        if (!cb) {
+            this.events[event] = null;
+        }
+        this.events[event] = this.events[event].filter(curCb => {
+            return curCb !== cb;
+        });
+        return this;
+    }
+}
+```
+
+### 能给 xhr 添加 hook，实现在各个阶段打印日志吗？
+
+```js
+class XhrHook {
+    // 两个hooks，一个在调用的方法之前触发，一个在调用之后触发
+    constructor(beforeHooks = {}, afterHooks = {}) {
+        this.XHR = window.XMLHttpRequest;
+        this.beforeHooks = beforeHooks;
+        this.afterHooks = afterHooks;
+        this.init();
+    }
+
+    init() {
+        let _this = this;
+        // 不能使用箭头函数
+        window.XMLHttpRequest = function () {
+            this._xhr = new _this();
+            _this.overwrite(this);
+        };
+    }
+
+    overwrite(proxyXHR) {
+        for (const key in proxyXHR._xhr) {
+            if (typeof proxyXHR._xhr[key] === 'function') {
+                this.overwriteMethod(key, proxyXHR);
+                continue;
+            }
+            this.overwriteAttributes(key, proxyXHR);
+        }
+    }
+    overwriteMethod(key, proxyXHR) {
+        let beforeHooks = this.beforeHooks; // 我们应该可以拦截原有行为
+        let afterHooks = this.afterHooks;
+        proxyXHR[key] = (...args) => {
+            if (beforeHooks[key]) {
+                const res = beforeHooks[key].call(proxyXHR, args);
+                if (res === false) return; //假设如果返回false，则不执行后续的
+            }
+            const res = proxyXHR._xhr[key].apply(proxyXHR._xhr, args);
+            afterHooks[key] && afterHooks[key].call(proxyXHR._xhr, res);
+            return res;
+        };
+    }
+
+    overwriteAttributes(key, proxyXHR) {
+        Object.defineProperties(
+            proxyXHR,
+            key,
+            this.setPropertyDescriptor(key, proxyXHR)
+        );
+    }
+    setPropertyDescriptor(key, proxyXHR) {
+        let obj = Object.create(null);
+        let _this = this;
+        obj.set = function (val) {
+            if (!key.startsWith('on')) {
+                proxyXHR['__' + key] = val;
+                return;
+            }
+            // 如果beforeHooks中有这个属性，则需要做处理
+            if (_this.beforeHooks[key]) {
+                this._xhr[key] = function (...args) {
+                    _this.beforeHooks[key].call(proxyXHR);
+                    val.apply(proxyXHR, args);
+                };
+                return;
+            }
+            // 如果beforeHooks中没有这个属性，则可以直接赋值
+            this._xhr[key] = val;
+        };
+
+        obj.get = function () {
+            return proxyXHR['__' + key] || this._xhr[key];
+        };
+        return obj;
+    }
+}
+```
+
+
+
+
 
 ### 如何实现add(1)(2)(3)(4)....
 
@@ -1299,8 +1479,6 @@ function trap(arr) {
 
 
 ### 01背包问题
-
-
 
 ```js
 
