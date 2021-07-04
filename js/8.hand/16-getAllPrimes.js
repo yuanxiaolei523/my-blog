@@ -27,7 +27,7 @@
 
 
 function prime2 (n) {
-    if (n < 3) {
+    if (n < 2) {
         return 0;
     }
     let res = 0;
@@ -46,6 +46,17 @@ function isPrime(x) {
         }        
     } 
     return true;
+}
+
+function prime3 (num) {
+    if (num < 2) {
+        return 0;
+    }
+    let res = 0;
+    for (let i = 0; i < num; i++) {
+        res += isPrime(i);
+    }
+    return res;
 }
 
 

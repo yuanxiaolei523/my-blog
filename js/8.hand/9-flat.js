@@ -36,4 +36,46 @@ function flat2 (arr, num = 1) {
     return res;
 }
 
-console.log(flat2([1, 2, [2, 3, [4, [6, [1, [1]]]], , 5], 6], 'Infinity'));
+// console.log(flat2([1, 2, [2, 3, [4, [6, [1, [1]]]], , 5], 6], 'Infinity'));
+
+function flat3 (arr, deep) {
+    return arr.flat(deep);
+}
+
+function flat4(arr, deep = 1) {
+    if (deep < 0) {
+        return arr;
+    }
+    let res = [];
+    if (!Array.isArray(arr)) {
+        return;
+    }
+    arr.forEach((item) => {
+        // console.log(item);
+        if (Array.isArray(item)) {
+            if (deep > 0) {
+                res = res.concat(flat4(item, --deep));
+            } else {
+                res.push(item);
+            }
+        } else {
+            res.push(item);
+        }
+    });
+    return res;
+}
+// flat4([1, 2, [2, 3, [4, [6,, [1, [1]]]], , 5], 6]);
+// console.log(flat4([1, 2, [2, 3, [4, [6,, [1, [1]]]], , 5], 6], 2));
+
+function flat5 (arr, deep = 1) {
+    if (deep < 0) {
+        return arr;
+    }
+    if (!Array.isArray(arr)) {
+        return;
+    }
+    return deep > 0 
+        ? arr.reduce((prev, cur) => prev.concat(Array.isArray(cur) ? flat5(cur, --deep) : cur), [])
+        : arr.slice();
+}
+console.log(flat5([1, 2, [2, 3, [4, [6,, [1, [1]]]], , 5], 6], 2));

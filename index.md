@@ -121,6 +121,43 @@ css的盒模型包括标准盒模型和怪异盒模型
 
 
 
+### 回流(重排)和重绘
+
+重排：布局或者几何属性需要改变
+
+重绘：当节点需要更改外观，而不是影响布局的是重绘
+
+#### 导致重排的操作
+
+1. 页面首次渲染
+
+2. 浏览器窗口大小改变
+
+3. 元素尺寸或者位置发生变化
+
+4. 元素内容、字体大小发生变化
+
+5. 添加和删除可见的dom
+
+6. 激活css伪类
+
+7. 查询某些属性或者调用某些和方法
+
+   offsetTop、offsetHeight
+
+#### 如何减少重绘的频率
+
+使用createDocumentFragment，避免将元素一个个添加到dom树上
+
+
+
+#### 如何避免重排
+
+1. 尽可能在DOM最末端修改class
+2. 让其脱离文档流，通过隐藏元素和文档片段等方法
+3. 避免使用calc
+4. 避免设置多层内敛样式
+
 
 
 ## Html
@@ -197,6 +234,108 @@ Input,img
 
 
 ## JS
+
+### 前端捕获异常的方式
+
+#### unhandledrejection
+
+#### error
+
+
+
+#### try...catch能捕获所有的异常吗
+
+答案肯定是不能
+
+1. **SyntaxError**不能被正常捕获
+
+   ```js
+   try{
+     xiaoming.girl；
+   }catch (e) {
+     console.log(e)
+   }
+   
+   ```
+
+2. 异步错误
+
+   ```js
+   try {
+     setTimeout(() => {
+       undefined.map(v => v)
+     })
+   }.catch(e) {
+     console.log(e)
+   }
+   ```
+
+#### 有哪些捕获异常的方式
+
+1. 静态资源加载异常
+
+   * 使用onerror捕获
+
+     ```html
+     <script src="http://cdn.xxx.com/js/test.js" onerror="errorHandler(this)"></script>
+     <script>
+      function errorHandler(error) {log(error)}
+     </script>
+     ```
+
+     
+
+   * 使用addEventListener('error')捕获
+
+     ```html
+     <!DOCTYPE html>
+     <html lang="zh">
+      
+     <head>
+       <meta charset="UTF-8">
+       <meta name="viewport" content="width=device-width, initial-scale=1.0">
+       <title>error</title>
+       <script>
+         window.addEventListener('error', (error) => {
+           console.log('捕获到异常：', error);
+         }, true)
+       </script>
+     </head>
+      
+     <body>
+       ![](https://itemcdn.zcycdn.com/15af41ec-e6cb-4478-8fad-1a47402f0f25.png)
+     </body>
+      
+     </html>
+     ```
+
+     由于网络请求异常不会事件冒泡，所以必须在捕获阶段将其捕获才行
+
+### 伪数组转数组
+
+```js
+// 1
+Array.from(arguments);
+//2 
+[...arguments];
+//3
+[].slice.call(arguments);
+//4 
+[].splice.call(arguments, 0);
+
+```
+
+
+
+### 正则
+
+#### 特殊符号
+
+\*：表示任意次
+
+?：表示0次或者1次
+
+\+：表示至少1次
 
 ### 原型和原型链
 
@@ -796,6 +935,31 @@ const urls = [
 
 ## 手写
 
+### 数字转千位分隔符
+
+```js
+function thousand(num) {
+  let arr = (num + '').split('.');
+  let str = arr[0].split('').reverse().join();
+  let res = [];
+  for (let i = 0; i < str.length; i++) {
+    if (i % 3 === 0 && i !== 0) {
+      res.push(',')
+    }
+    res.push(str[i]);
+  }
+  res.reverse();
+  if (arr[1]) {
+    res = res.concat('.' + arr[1]);
+  }
+  return res.join('');
+}
+```
+
+
+
+
+
 ### 实现一个sizeOf函数，传入一个函数Object，计算这个Object占用了多少bytes
 
 ```js
@@ -1164,36 +1328,41 @@ function bigNumber (num1, num2) {
 5. `Infinity` 关键字作为参数时，无论多少层嵌套，都会转为一维数组
 
 ```js
-function flat2 (arr, num = 1) {
-    if (num <= 0) {
+function flat(arr, deep = 1) {
+    if (deep < 0) {
+        return arr;
+    }
+    let res = [];
+    if (!Array.isArray(arr)) {
+        return;
+    }
+    arr.forEach((item) => {
+        // console.log(item);
+        if (Array.isArray(item)) {
+            if (deep > 0) {
+                res = res.concat(flat4(item, --deep));
+            } else {
+                res.push(item);
+            }
+        } else {
+            res.push(item);
+        }
+    });
+    return res;
+}
+```
+
+```js
+function flat5 (arr, deep = 1) {
+    if (deep < 0) {
         return arr;
     }
     if (!Array.isArray(arr)) {
-        throw new Error('必须是数组');
+        return;
     }
-    let res = [];
-    if (num === 'Infinity') {
-        num = Number.MAX_SAFE_INTEGER;
-    }
-    console.log(num);
-    for (let i = 0; i < arr.length; i++) {
-        if (Array.isArray(arr[i])) {
-            if (num > 0) { // 当可以扁平时，并且当前元素是数组，那么递归
-                let r = flat2(arr[i], --num);
-                res = res.concat(r);
-            } else if (arr !== undefined && arr[i] !== null && !arr[i]){ 
-                // 当层数大于扁平的时候并且当前元素是数组时，直接将其push进去
-                continue;
-            } else {
-                res.push(arr[i]);
-            }
-        } else if (arr !== undefined && arr[i] !== null && !arr[i]){ 
-            continue;
-        } else {
-            res.push(arr[i]);
-        }
-    }
-    return res;
+    return deep > 0 
+        ? arr.reduce((prev, cur) => prev.concat(Array.isArray(cur) ? flat5(cur, --deep) : cur), [])
+        : arr.slice();
 }
 ```
 
@@ -1202,7 +1371,28 @@ function flat2 (arr, num = 1) {
 ### debounce
 
 ```js
+function debounce (fn ,delay) {
+  let t = null
+  return function () {
+    if (t) clearTimeout(t);
+    let ctx = this;
+    let args = [...arguments];
+    t = setTimeout(() => {
+      fn.apply(ctx, args);
+    }, delay);
+  }
+}
 
+function throttle(fn, delay) {
+  let startTime = Date.now();
+  return function() {
+    let now = Date.now();
+    if (now - startTime > delay) {
+      fn.apply(this, arguments);
+      startTime = now;
+    }
+  }
+}
 ```
 
 
@@ -1239,7 +1429,7 @@ function reverse (strArr) {
 function reverse2(strArr) {
     let left = 0;
     let right = strArr.length - 1 - left;
-    while (left <= right) {
+    while (left < right) {
         // 将right的值赋值给left，rightleft的值赋值给right
         [strArr[left], strArr[right]] = [strArr[right], strArr[left]];
         left++;
@@ -1302,16 +1492,11 @@ function isPrime3(num) {
     if (num % 6 !== 1 && num % 6 !== 5) {
         return false;
     }
-    // let tmp = Math.sqrt(num);
     for (let i = 5; i <= Math.sqrt(num); i += 6) {
         // 如果num不是整除6的倍数-1或者6的倍数+1， 那么就不是质数
         if (num % i == 0 || num % (i + 2) == 0) {
             return false;
         }
-        // for (let i = 5; i <= tmp; i += 6 )
-        //     if (num % i == 0 || num % (i + 2) == 0 )
-        //         return false;
-
     }
     return true;
 }
@@ -1569,7 +1754,6 @@ function trap(arr) {
   if (n === 0) {
     return 0;
   }
-  
   let r_max = 0;
   let l_max = 0;
   let left = 0;
@@ -1759,22 +1943,48 @@ module.exports = {
 3. Node 正向代理：如果有一个api，跨域了，此时我们可以将其转发到同域的node服务上，然后在node服务上继续请求/api，然后将数据返回给前端(跨域只限于浏览器端)
 4. Nginx 反向代理， proxy_pass. /api --> /same/api
 
-<<<<<<< HEAD
+
+
+### 三次握手四次挥手
+
+#### 三次握手
+
+1. 第一次握手：客户端发送一个请求连接报文
+2. 第二次握手：服务端收到客户端发送的请求连接报文之后，给客户端发送一个响应报文，表示我已经收到了
+3. 第三次握手：客户端发送请求，表示自己要发送数据了(防止已经失效的请求报文段突然传到了服务端，然后服务端以为是客户端新传过来的，发送响应报文，建立连接)
 
 
 
-=======
->>>>>>> 3dd4488859240865ddd53dcc52d867d31ffce12b
+#### 四次挥手
 
+1. 客户端向服务端发送释放报文段，并停止发送数据
+2. 服务端收到了之后，发出响应报文段，表示自己已经知道了，此时处于半关闭状态，即A没有数据发送到b了，但是b还可以发送给数据到a
+3. 服务端没有要发送的数据之后，此时服务端向客户端发送释放请求报文
+4. 客户端收到了之后，向服务端发送响应报文，收已经收到
 
+#### 输入URL到页面渲染的整个流程
 
+1. 首先在页面中输入一个url地址的时候，会做一个DNS查询，通过DNS查询到具体的IP
 
+   查询过程：
 
+   1. 首先会在本地缓存中查询ip
+   2. 没有的话就去系统配置的本地DNS服务器中查询
+   3. 如果还没有的话，就会直接去DNS根服务器查询
+   4. 然后去该服务器查询二级域名
+   5. 接下来三级域名的查询是我们自己配置的
 
+2. 客户端和服务端经过三次握手，简历TCP连接，浏览器向服务器发送http请求
 
+3. 服务器处理请求，并返回状态码和html文件
 
+4. 此时浏览器会判断状态码是什么，如果是200就解析，如果是400、500就报错，如果是300就重定向
 
+5. 之后浏览器会开始解析html结构，加载外部脚本以及资源文件，解析执行脚本，根据html构建解析dom树，css构建cssom树，如果遇到script标签，会判断是否存在async或者defer，前者会并行下载并执行js，后者会先下载文件，等待html解析完成后顺序执行，渲染显示。然后cssom和dom树结合构造出render tree.
 
+6. 构造完毕之后，就是layout，计算出每个阶段在屏幕中的位置
+
+7. 绘制，遍历render树，佳凝器渲染到页面上
 
 
 

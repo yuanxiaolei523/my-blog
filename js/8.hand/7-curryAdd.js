@@ -74,14 +74,28 @@ function argsSum (args) {
     return args.reduce((prev, cur) => prev + cur);
 }
 
-function add (...args1) {
-    let sum = argsSum(args1);
-    let curry = (...args) => add(sum + argsSum(args));
-    curry.toString = function () {
-        return sum;
-    };
-    return curry;
+// function add (...args1) {
+//     let sum = argsSum(args1);
+//     let curry = (...args) => add(sum + argsSum(args));
+//     curry.toString = function () {
+//         return sum;
+//     };
+//     return curry;
    
-}
+// }
 
-console.log(add(9, 2)(2)(3));
+// console.log(add(9, 2)(2)(3));
+
+function getSum (args) {
+    return args.reduce((prev, cur) => prev + cur);
+
+}
+function add2(...args1) {
+    let res = getSum(args1);
+    const func = (...args) => add2(res + getSum(args));
+    func.toString = function () {
+        return res;
+    };
+    return func;
+}
+console.log(add2(1)(2)(3));

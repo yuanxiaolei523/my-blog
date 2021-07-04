@@ -6,7 +6,7 @@ function throttle1 (fn, wait) {
             fn.apply(this, arguments);
             prev = now;
         }
-    }
+    };
 }
 
 /*
@@ -19,9 +19,9 @@ function throttle2(fn, wait) {
             timer = setTimeout(() => {
                 fn.apply(this, arguments);
                 timer = null;
-            }, wait)
+            }, wait);
         }
-    }
+    };
 }
 
 /*
@@ -34,8 +34,8 @@ function throttle (fn, wait) {
     return function () {
         let now = new Date();
         let context = this;
-		let args = arguments;
-		let remaining = delay - (now - startTime);
+        let args = arguments;
+        let remaining = delay - (now - startTime);
         if (remaining <= 0) { // 表示间隔的时间小于上次执行的时间的间隔
             fn.apply(context, args);
             startTime = now;
@@ -45,5 +45,5 @@ function throttle (fn, wait) {
             }, wait);
         }
         
-    }
+    };
 }

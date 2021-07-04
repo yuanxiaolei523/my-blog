@@ -2,7 +2,6 @@ function MyPromiseAll(promiseArr) {
     if (!Array.isArray(promiseArr)) {
         throw new Error('');
     }
-    console.time();
     return new Promise((resolve, reject) => {
         let res = [];
         if (promiseArr.length === 0) {
@@ -20,7 +19,6 @@ function MyPromiseAll(promiseArr) {
                 res[i] = value;
                 if (count === promiseArr.length) {
                     resolve(res);
-                    console.timeEnd();
                 }
             }).catch((e) => reject(e));
             

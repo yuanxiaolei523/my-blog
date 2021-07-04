@@ -17,7 +17,7 @@ console.timeEnd();
 function reverse2(s) {
     let left = 0;
     let right = s.length - 1 - left;
-    while (left <= right) {
+    while (left < right) {
         // 将right的值赋值给left，rightleft的值赋值给right
         [s[left], s[right]] = [s[right], s[left]];
         left++;

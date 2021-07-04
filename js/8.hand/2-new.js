@@ -20,8 +20,11 @@
 function Person(name, age) {
     this.age = age;
     this.strength = 60;
-
+    return [];
 }
+
+let p = new Person();
+console.log(p);
 
 Person.prototype.name = '123';
 Person.prototype.getName = function () {
@@ -52,3 +55,11 @@ function myNew() {
 // let p = new Person('shine', 18);
 // p.name = '456'
 // console.log(p.age, p.strength, p.getName(), p.name, p.__proto__);
+
+function myNew2 () {
+    let obj = {};
+    let Cons = [].shift.call(arguments);
+    obj.__proto__ = Cons.prototype;
+    var ret = Cons.apply(obj, arguments);
+    return typeof ret === 'object' ? ret : obj;
+}

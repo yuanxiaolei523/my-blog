@@ -22,8 +22,6 @@ function bigNumber (num1, num2) {
     }
     let res = ''.padStart(18, '');
 
-    console.log(num1, num2);
-
     for (let i = 0; i < num1.length; i++) {
         res += (Number(num1[i]) + Number(num2[i]));
     }

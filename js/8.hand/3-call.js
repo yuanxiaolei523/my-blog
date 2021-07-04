@@ -6,8 +6,8 @@
 Function.prototype.myCall = function (ctx) {
     ctx.fn = this;
     ctx.fn();
-    delete ctx.fn()
-}
+    delete ctx.fn();
+};
 var foo = {
     value: 1
 };
@@ -29,4 +29,13 @@ Function.prototype.myCall2 = function (ctx) {
     let ret = ctx.fn(...args);
     delete ctx.fn();
     return ret;
-}
+};
+
+Function.prototype.myCall3 = function (ctx) {
+    ctx = ctx || window;
+    ctx.fn = this;
+    let args = [].slice.call(arguments, 1);
+    let ret = ctx.fn(...args);
+    delete ctx.fn;
+    return ret;
+};

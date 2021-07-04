@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>error</title>
+    <script>
+        window.addEventListener('error', (error) => {
+            console.log('捕获到异常：', error);
+        }, true)
+    </script>
+</head>
+
+<body>
+    ![](https://itemcdn.zcycdn.com/15af41ec-e6cb-4478-8fad-1a47402f0f25.png)
+</body>
+<script>
+    window.addEventListener("unhandledrejection", function (e) {
+        console.log(e);
+        e.preventDefault();
+        console.log("捕获到 promise 错误了");
+        return true;
+    });
+
+    Promise.reject("promise error");
+    new Promise((resolve, reject) => {
+        reject("promise error");
+    });
+    new Promise((resolve) => {
+        resolve();
+    }).then(() => {
+        throw "promise2 error";
+    });
+</script>
+
+</html>

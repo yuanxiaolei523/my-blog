@@ -57,5 +57,27 @@ const target = {
     field4: [2, 4, 8]
 };
 target.target = target;
-let obj2 = cloneDeep(target);
+// let obj2 = cloneDeep(target);
+// console.log(obj2);
+
+function cloneDeep2(obj, map = new Map()) {
+    if (typeof obj !== 'object' && obj !== null) {
+        throw new Error('传入的必须是对象哦');
+    }
+    let resObj = Array.isArray(obj) ? [] : {};
+    if (map.get(obj)) {
+        return map.get(obj);
+    }
+    // 当前对象为key，拷贝对象为value
+    map.set(obj, resObj);
+    for (const key in obj) {
+        if (typeof obj[key] === 'object') {
+            resObj[key] = cloneDeep2(obj[key], map);
+        } else {
+            resObj[key] = obj[key];
+        }
+    }
+    return resObj;
+}
+let obj2 = cloneDeep2(target);
 console.log(obj2);

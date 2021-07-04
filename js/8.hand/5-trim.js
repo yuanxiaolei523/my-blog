@@ -10,7 +10,7 @@ function myTrim2(str) {
 console.log(myTrim(str));
 
 function myTrim3(str) {
-    while(str) {
+    while (str) {
         if (str.startsWith(' ')) {
             str = str.substring(1);
         } else if (str.endsWith(' ')) {
@@ -19,6 +19,8 @@ function myTrim3(str) {
             break;
         }
     }
-    return str
+    return str;
 }
 console.log(myTrim3(str));
+
+
