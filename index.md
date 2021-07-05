@@ -1986,11 +1986,109 @@ module.exports = {
 
 7. 绘制，遍历render树，佳凝器渲染到页面上
 
+### HTTP状态码、方法、请求头
+
+#### 请求头
+
+1. Accept：**text/html**  浏览器可接受的MIME类型
+
+2. Accept-Charset：浏览器可接受的字符集
+
+3. **Accept-Encoding: gzip, deflate** 浏览器申明自己接收的编码方法，通常指定压缩方法，是否支持压缩，支持什么压缩方法（gzip，deflate），（注意：这不是只字符编码）。
+
+4. **Accept-Language:zh-CN,zh;q=0.9** 浏览器申明自己接收的语言。
+
+5. **Connection: keep-alive** 当一个网页打开完成后，客户端和服务器之间用于传输HTTP数据的TCP连接不会关闭，如果客户端再次访问这个服务器上的网页，会继续使用这一条已经建立的连接。
+
+6. Cache-Control：强缓存
+
+7. Cookie：cookie
+
+8. Content-Length: 表示请求消息的正文长度
+
+9. **Host:www.baidu.com** 请求报头域主要用于指定被请求资源的Internet主机和端口号，它通常从HTTP URL中提取出来的。
+
+10. If-Modified-since: 只有当所请求的内容在指定的日期之后又经过修改才返回它，否则返回304“Not Modified”应答
+
+11. If-None-Match：如果内容未改变返回304代码，参数为服务器先前发送的Etag，与服务器回应的Etag比较判断是否改变
+
+12. **Referer:https://www.baidu.com/?tn=62095104_8_oem_dg** 当浏览器向web服务器发送请求的时候，一般会带上Referer，告诉服务器我是从哪个页面链接过来的，服务器籍此可以获得一些信息用于处理。
+
+13. User-Agent：浏览器类型，如果Servlet返回的内容与浏览器类型有关则该值非常有用。
+
+14. Cache-Control
+
+    1. **Cache-Control:private** 默认为private 响应只能够作为私有的缓存，不能再用户间共享
+
+       **`\**Cache-Control:public\** `**响应会被缓存，并且在多用户间共享。正常情况, 如果要求HTTP认证,响应会自动设置为 private.
+
+       **Cache-Control:must-revalidate** 响应在特定条件下会被重用，以满足接下来的请求，但是它必须到服务器端去验证它是不是仍然是最新的。
+
+       **Cache-Control:no-cache** 表示客户端可以缓存资源，每次使用缓存资源前都必须重新验证其有效性。(协商缓存验证)。这意味着每次都会发起 HTTP 请求
+
+       **Cache-Control:max-age=10** 设置缓存最大的有效时间，但是这个参数定义的是时间大小（比如：60）而不是确定的时间点。单位是[秒 seconds]。
+
+       **`Cache-Control:no-store `**缓存不应存储有关客户端请求或服务器响应的任何内容，即不使用任何缓存。
+
+15. **Range:bytes=0-5** 指定第一个字节的位置和最后一个字节的位置。用于告诉服务器自己想取对象的哪部分。
+
+    
+
+    
+
+#### 响应头
+
+1. Location：表示重定向的地址
+2. Date：是服务端发送资源时的服务器时间
+3. **Content-Type：text/html;charset=UTF-8** 告诉客户端，资源文件的类型，还有字符编码，客户端通过utf-8对资源进行解码，然后对资源进行html解析。通常我们会看到有些网站是乱码的，往往就是服务器端没有返回正确的编码。
+4. **Content-Encoding:gzip** 告诉客户端，服务端发送的资源是采用gzip编码的，客户端看到这个信息后，应该采用gzip对资源进行解码。
+5. **Last-Modified: Dec, 26 Dec 2015 17:30:00 GMT** 所请求的对象的最后修改日期
+6. **Connection：keep-alive** 这个字段作为回应客户端的Connection：keep-alive，告诉客户端服务器的tcp连接也是一个长连接，客户端可以继续使用这个tcp连接发送http请求。
+7. **Refresh: 5; url=http://baidu.com** 用于重定向，或者当一个新的资源被创建时。默认会在5秒后刷新重定向。
+8. **Access-Control-Allow-Origin: \***  *号代表所有网站可以跨域资源共享，如果当前字段为*那么Access-Control-Allow-Credentials就不能为true
+9. **Access-Control-Allow-Methods：GET,POST,PUT,DELETE** 允许哪些方法来访问
+10. **Access-Control-Allow-Credentials: true** 是否允许发送cookie。默认情况下，Cookie不包括在CORS请求之中。设为true，即表示服务器明确许可，Cookie可以包含在请求中，一起发给服务器。这个值也只能设为true，如果服务器不要浏览器发送Cookie，删除该字段即可。如果access-control-allow-origin为*，当前字段就不能为true
+
+#### 方法
+
+1. get
+2. post
+3. put
+4. delete
+5. patch
+6. trace
+
+##### get请求可以发送body吗
+
+get请求可以向post请求一样发送body，但是get里面使用body不符合语义，同时get请求里发送body也可能导致目前现有的HTTP实现方拒绝请求
 
 
 
+#### 状态码
 
+1xx：服务器收到请求，需要请求者继续执行操作
 
+2xx：成功，操作被成功接收并处理
+
+3xx：重定向，需要进一步的操作以完成请求
+
+4xx：表示客户端错误，请求包含语法错误或者无法完成请求
+
+5xx：服务器错误，服务器在处理请求的过程中发生了错误
+
+1. 200：表示请求已成功
+2. 201：表示请求已经被实现，而且有一个新的资源已经根据请求的需要而简历，且其URI已经随Location头信息返回
+3. 301：用于重定向，将来对此资源的引用都应该使用本响应返回的若干url之一
+4. 302：临时重定向，请求的资源现在临时从不同的 URI 响应请求。由于这样的重定向是临时的，客户端应当继续向原有地址发送以后的请求。
+5. 304：表示读缓存，如果客户端发送了一个带条件的get请求且该请求已被允许，而文档的内容并没有改变，那么服务器应当返回这个状态码
+6. 307：临时重定向，请求的资源现在临时从不同的URI 响应请求。由于这样的重定向是临时的，客户端应当继续向原有地址发送以后的请求。
+7. 400：不好的请求：一为语义有误，当前请求无法被服务器理解，二为请求参数错误
+8. 401：未授权
+9. 403：forbidden：决绝执行
+10. 404：找不到资源
+11. 405：请求方法不允许
+12. 500：服务器遇到了不知道该如何处理的错误
+13. 502：服务器挂了
 
 ## TS
 
