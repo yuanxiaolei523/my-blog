@@ -53,7 +53,7 @@ main()
 // script start -> async1 start -> async2 -> promise1 -> script end -> async1 end -> promise2 -> setTimeout
 
 有什么捕获异常的方式吗
-try...catch可以捕获所有异常吗
+try...catch可以捕获所有异常吗 // finish
 https的加密
 是对称还是非对称
 http的请求方法、状态码、头部
@@ -73,3 +73,7 @@ cookie 的domian属性
 添加事件时同步的吗 
     WebAPIs是由C++实现的浏览器创建的线程，处理诸如DOM事件、http请求、定时器等异步事件;
     Event Loop是由javascript宿主环境（像浏览器）来实现的;
+洋葱模型
+eslint的配置 // finish
+eslint想要使用jquery的全局的$
+  env: {jquery: true}

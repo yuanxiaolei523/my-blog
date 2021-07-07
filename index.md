@@ -1986,7 +1986,19 @@ module.exports = {
 
 7. 绘制，遍历render树，佳凝器渲染到页面上
 
+### 前端缓存
 
+#### 强缓存
+
+强缓存是
+
+1. Expires
+
+   
+
+2. Cache-Control
+
+#### 协商缓存
 
 
 
@@ -2150,3 +2162,80 @@ V10之后：
 1. 执行一个宏任务
 2. 执行nextTick
 3. 清空微任务队列
+
+
+
+## ESLint
+
+### env
+
+```json
+{
+  env: {
+    browser: true, // 可以使用浏览器作用域中的全局变量
+    node: true, // Node.js 全局变量和 Node.js 作用域。
+    commonjs: true, //可以使用CommonJS的全局变量
+    es6: true, // 可以使用es6 
+    jquery: true, //使用jquery
+    
+  }
+}
+```
+
+### .gitignore
+
+
+
+### rules：规则
+
+
+
+### extends:共享配置
+
+```json
+eslint:recommended:表示引入eslint的核心功能，并且报告一些常见的共同错误。
+eslint:all:表示引入当前版本eslint的所有核心规则。
+```
+
+### plugins:插件
+
+```js
+plugins: ["react"]
+```
+
+
+
+### globals(全局变量)
+
+```js
+"globals": {
+        "document": true,
+        "navigator": true,
+        "window": true,
+        "think": true
+}
+```
+
+### parserOptions: 解析器选项
+
+```js
+"parserOptions": {
+     "ecmaVersion": 6,          //ES的版本，默认为5
+     "sourceType": "module",    //指定源代码存在的位置，script | module，默认为script。
+     "ecmaFeatures": {          //指定要使用其他那些语言对象
+         "experimentalObjectRestSpread": true,//启用对对象的扩展
+         "jsx": true,                       //启用jsx语法
+         "globalReturn":true,               //允许return在全局使用
+         "impliedStrict":true               //启用严格校验模式
+     }
+}
+```
+
+
+
+### parser: 解析器
+
+```js
+"parser": "babel-eslint"
+```
+
