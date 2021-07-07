@@ -57,6 +57,9 @@ try...catch可以捕获所有异常吗 // finish
 https的加密
 是对称还是非对称
 http的请求方法、状态码、头部
+    form表单的content-type类型
+    get请求可以有请求体吗
+    post可以吗
 缓存:强缓存和协商缓存。包括分别返回的状态码
 session两个窗口打开同一个页面
 单点登录
