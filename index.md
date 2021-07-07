@@ -1990,15 +1990,47 @@ module.exports = {
 
 #### 强缓存
 
-强缓存是
+强缓存是根据返回头的cache-controll和expires两个字段控制的，都是表示资源的缓存有效时间。
 
-1. Expires
+
+
+1. Expires：是http1.0的产物，其值是一个GMT的时间，该时间代表资源失效的时间，如果当前时间在这个时间点之前，那么一定会命中缓存。
+
+   * 缺点：依赖于本地时间，本地时间是可更改的
 
    
 
-2. Cache-Control
+2. Cache-Control：http1.1的产物，一般根据该字段的max-age值进行判断，是一个相对时间，根据请求返回的Date值加上max-age的值，在这段时间内就是强缓存，有时候会在有效时间内重新访问资源返回`304 not modified`这是由于服务器的时间与本地的时间不同造成的。
+
+   * no-store: 不缓存
+   * no-cache：不使用本地缓存，使用协商缓存
+   * `public` 可以被所有用户缓存，包括终端用户和 cdn 等中间件代理服务器。
+   * `private` 只能被终端用户的浏览器缓存。
+
+如果同时存在cache-controll和expires，以Cache-Control为准
 
 #### 协商缓存
+
+协商缓存是由服务器来确定缓存资源是否可访问，
+
+1. Last-Modified/If-Modified-Since: 二者的值都是GMT的时间，Last-Modified表示文件的最后修改时间，下一次请求时，请求头上会带上if-Modified-since，告诉服务器我本地缓存的文件最后修改的时间，在服务器上根据文件的最后修改时间判断资源是否有变化， 如果文件没有变更则返回 `304 Not Modified` ，请求不会返回资源内容，浏览器直接使用本地缓存。当服务器返回 `304 Not Modified` 的响应时，`response header` 中不会再添加 `Last-Modified` 去试图更新本地缓存的 `Last-Modified`，如果资源有变化，就正常返回返回资源内容，新的 `Last-Modified` 会在 `response header` 返回，并在下次请求之前更新本地缓存的 `Last-Modified`，下次请求时，`If-Modified-Since`会启用更新后的 `Last-Modified`。
+2. Etag/If-None-Match：值都是由服务器为每一个资源生成的唯一标识串，只要资源有变化，那么其值就会发生改变，服务器根据文件本身算出一个哈希值并通过 `ETag`字段返回给浏览器，接收到 `If-None-Match` 字段以后，服务器通过比较两者是否一致来判定文件内容是否被改变。与 `Last-Modified` 不一样的是，当服务器返回 `304 Not Modified` 的响应时，由于在服务器上`ETag` 重新计算过，`response header`中还会把这个 `ETag` 返回，即使这个 `ETag` 跟之前的没有变化。
+
+###### 为什么要有 Etag
+
+- 某些文件修改非常频繁，比如在秒以下的时间内进行修改，(比方说 1s 内修改了 N 次)，`If-Modified-Since` 能检查到的粒度是秒级的，使用 `Etag` 就能够保证这种需求下客户端在 1 秒内能刷新 N 次 cache。
+- 某些时候，可能会文件内容并没有改变，但是文件的修改时间已经被改变了，这个时候我们并不希望客户端认为这个文件被修改了
+- 某些服务器不能精确的得到文件的最后修改时间。
+
+```
+Cache-Control > expires > Etag > Last-Modified
+```
+
+#### 强缓存和协商缓存的区别
+
+1. 强缓存命中缓存后，返回的状态码是200，协商缓存命中缓存后，返回的状态码是304
+2. 强缓存如果命中缓存不会向服务端发送请求，协商缓存需要向服务器发送请求确定是否使用缓存资源
+
 ### HTTP状态码、方法、请求头
 
 #### 请求头

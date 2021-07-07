@@ -60,7 +60,7 @@ http的请求方法、状态码、头部
     form表单的content-type类型
     get请求可以有请求体吗
     post可以吗
-缓存:强缓存和协商缓存。包括分别返回的状态码
+缓存:强缓存和协商缓存。包括分别返回的状态码  // finish
 session两个窗口打开同一个页面
 单点登录
 为什么要有宏任务和微任务队列
@@ -80,3 +80,5 @@ cookie 的domian属性
 eslint的配置 // finish
 eslint想要使用jquery的全局的$
   env: {jquery: true}
+
+跨域
