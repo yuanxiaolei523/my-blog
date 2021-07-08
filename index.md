@@ -235,13 +235,136 @@ Input,img
 
 ## JS
 
+### js的数据类型
+
+#### Symbol
+
+let s = Symbol()
+
+1. typeof s === 'symbol'
+2. Symbol不能使用new命令
+3. instanceof的结果为false
+4. **Symbol 函数可以接受一个字符串作为参数，表示对 Symbol 实例的描述，主要是为了在控制台显示，或者转为字符串时，比较容易区分。**
+5. **如果 Symbol 的参数是一个对象，就会调用该对象的 toString 方法，将其转为字符串，然后才生成一个 Symbol 值。**
+6. **Symbol 函数的参数只是表示对当前 Symbol 值的描述，相同参数的 Symbol 函数的返回值是不相等的。**
+7. **Symbol 值可以显式转为字符串。**
+8. **Symbol 值可以作为标识符，用于对象的属性名，可以保证不会出现同名的属性。**
+9. **如果我们希望使用同一个 Symbol 值，可以使用 Symbol.for。它接受一个字符串作为参数，然后搜索有没有以该参数作为名称的 Symbol 值。如果有，就返回这个 Symbol 值，否则就新建并返回一个以该字符串为名称的 Symbol 值。**
+10. **Symbol 作为属性名，该属性不会出现在 for...in、for...of 循环中，也不会被 Object.keys()、Object.getOwnPropertyNames()、JSON.stringify() 返回。但是，它也不是私有属性，有一个 Object.getOwnPropertySymbols 方法，可以获取指定对象的所有 Symbol 属性名。**
+
+#### bigInt
+
+##### 一、为什么要引入bigInt类型
+
+因为js的所有的数字都保存成64位的浮点数，这给数值的表示带来了两大限制
+
+1. 数值的精度只能到53个二进制位，大于这个范围的整数js是无法精确表示的
+2. 大于等于2的1024次方的数值，js无法表示，会返回Infinity
+
+基于此js引入了bigInt类型，BigInt 只用来表示整数，没有位数的限制，任何位数的整数都可以精确表示。
+
+##### bigInt的注意事项
+
+1. typeof 122n === 'bigint'
+2. 42n === 42 // false;
+3. 42n == 42 // true
+4. bigInt是**常量**
+5. 右移运算符(>>>)和求正运算符(+)不能用于bigInt中
+6. bigInt类型不能和普通的数字进行运算
+
+#### Number
+
+##### 一、Number类型的存储
+
+一个Number类型的数据是占8个字节的，就是64位，而因为有正负数和小数的存在，所以64位被分成了三部分
+
+* 1位是符号位
+* 11位用于指数
+* 52位用于尾数位，代表的是尾数，超出的部分自动进一舍零
+
+##### 二、将一个数存入计算机的步骤
+
+一个数存进计算机，需要经历三步
+
+1. 转换成二进制
+2. 用科学计数法表示
+3. 表示成 IEEE 754 形式
+
+**十进制转二进制**168.45
+
+1. **整数部分**。它的转换方法是，**除 2 取余，逆序排列**。即每次将整数部分除以 2，余数为该位权上的数，而商继续除以 2，余数又为上一个位权上的数，这个步骤一直持续下去，直到商为 0 为止，最后读数时候，从最后一个余数读起，一直到最前面的一个余数。
+
+```js
+第一步，将 168 除以 2，商 84，余数为 0。
+第二步，将商 84 除以 2，商 42 余数为 0。
+第三步，将商 42 除以 2，商 21 余数为 0。
+第四步，将商 21 除以 2，商 10 余数为 1。
+第五步，将商 10 除以 2，商 5 余数为 0。
+第六步，将商 5 除以 2，商 2 余数为 1。
+第七步，将商 2 除以 2，商 1 余数为 0。
+第八步，将商 1 除以 2，商 0 余数为 1。
+第九步，读数。因为最后一位是经过多次除以 2 才得到的，因此它是最高位。读数的时候，从最后的余数向前读，即 10101000。
+```
+
+2. **小数部分**。它的转换方法是，**乘 2 取整，顺序排列**。即将小数部分乘以 2，然后取整数部分，剩下的小数部分继续乘以 2，然后再取整数部分，剩下的小数部分又乘以 2，一直取到小数部分为 0 为止。如果永远不能为零，就同十进制数的四舍五入一样，按照要求保留多少位小数时，就根据后面一位是 0 还是 1 进行取舍。如果是 0 就舍掉，如果是 1 则入一位，换句话说就是，0 舍 1 入。读数的时候，要从前面的整数开始，读到后面的整数。
+
+```js
+第一步，将 0.45 乘以 2，得 0.9，则整数部分为 0，小数部分为 0.9。
+第二步, 将小数部分 0.9 乘以 2，得 1.8，则整数部分为 1，小数部分为 0.8。
+第三步, 将小数部分 0.8 乘以 2，得 1.6，则整数部分为 1，小数部分为 0.6。
+第四步，将小数部分 0.6 乘以 2，得 1.2，则整数部分为 1，小数部分为 0.2。
+第五步，将小数部分 0.2 乘以 2，得 0.4，则整数部分为 0，小数部分为 0.4。
+第六步，将小数部分 0.4 乘以 2，得 0.8，则整数部分为 0，小数部分为 0.8。
+...
+```
+
+##### 三、数字的存储
+
+虽然 0.1 转成二进制时是一个无限循环的数，但计算机总要储存吧，我们知道 ECMAScript 使用 64 位字节来储存一个浮点数，那具体是怎么储存的呢？这就要说回 IEEE754 这个标准了，毕竟是这个标准规定了存储的方式。
+
+这个标准认为，一个浮点数 (Value) 可以这样表示：
+
+> value = sign * exponent * fraction
+
+比如 -1020，用科学计数法表示就是:
+
+> -1 * 10^3 * 1.02
+
+而当只做二进制科学计数法的表示时，这个 Value 的表示可以再具体一点变成：
+
+> V = (-1)^S * (1 + Fraction) * 2^E
+
+ 0.1 的二进制 0.00011001100110011……可以表示为
+
+> 0.1 = (-1)^0 + (1 + 0.1001100110011)*2^-4
+
+如果是 1020.75，对应二进制数就是 1111111100.11，对应二进制科学计数法就是 1 * 1.11111110011 * 2^9，E 的值就是 9，而如果是 0.1 ，对应二进制是 1 * 1.1001100110011…… * 2^-4，` E `的值就是 -4，也就是说，E 既可能是负数，又可能是正数，那问题就来了，那我们该怎么储存这个 E 呢？
+
+我们这样解决，假如我们用 8 位字节来存储 E 这个数，如果只有正数的话，储存的值的范围是 0 ~ 254，而如果要储存正负数的话，值的范围就是 -127~127，我们在存储的时候，把要存储的数字加上 127，这样当我们存 -127 的时候，我们存 0，当存 127 的时候，存 254，这样就解决了存负数的问题。对应的，当取值的时候，我们再减去 127。
+
+所以呢，真到实际存储的时候，我们并不会直接存储 E，而是会存储 E + bias，当用 8 个字节的时候，这个 bias 就是 127。
+
+所以，如果要存储一个浮点数，我们存 S 和 Fraction 和 E + bias 这三个值就好了，那具体要分配多少个字节位来存储这些数呢？IEEE754 给出了标准：
+
+* 用 1 位存储 S，0 表示正数，1 表示负数。
+
+* 用 11 位存储 E + bias，对于 11 位来说，bias 的值是 2^(11-1) - 1，也就是 1023。
+* 用 52 位存储 Fraction。
+
+举个例子，就拿 0.1 来看，对应二进制是 1 * 1.1001100110011…… * 2^-4， Sign 是 0，E + bias 是 -4 + 1023 = 1019，1019 用二进制表示是 1111111011，Fraction 是 1001100110011……
+
+##### 四：安全数范围
+
+1. 2^53-1： Number.MAX_SAFE_INTEGER
+2. -2^53+1
+
+
+
+
+
+
+
 ### 前端捕获异常的方式
-
-#### unhandledrejection
-
-#### error
-
-
 
 #### try...catch能捕获所有的异常吗
 
@@ -270,46 +393,61 @@ Input,img
    }
    ```
 
+3. 被catch住的promise错误
+
+
+
 #### 有哪些捕获异常的方式
 
-1. 静态资源加载异常
 
-   * 使用onerror捕获
 
-     ```html
-     <script src="http://cdn.xxx.com/js/test.js" onerror="errorHandler(this)"></script>
-     <script>
-      function errorHandler(error) {log(error)}
-     </script>
-     ```
+1. 普通的js运行时错误、资源加载错误(仅限后者)：使用onerror、addEventListener('error')捕获
 
-     
+```html
+<script src="http://cdn.xxx.com/js/test.js" onerror="errorHandler(this)"></script>
+<script>
+ function errorHandler(error) {log(error)}
+</script>
+```
 
-   * 使用addEventListener('error')捕获
+2. #### Uncaught (in promise)：使用window.addEventListener('unhandledrejection')捕获处理捕获
 
-     ```html
-     <!DOCTYPE html>
-     <html lang="zh">
-      
-     <head>
-       <meta charset="UTF-8">
-       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-       <title>error</title>
-       <script>
-         window.addEventListener('error', (error) => {
-           console.log('捕获到异常：', error);
-         }, true)
-       </script>
-     </head>
-      
-     <body>
-       ![](https://itemcdn.zcycdn.com/15af41ec-e6cb-4478-8fad-1a47402f0f25.png)
-     </body>
-      
-     </html>
-     ```
+```html
+<!DOCTYPE html>
+<html lang="zh">
+ 
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>error</title>
+    window.addEventListener('error', (error) => {
+      console.log('捕获到异常：', error);
+    }, true)
+  </script>
+</head>
+ 
+<body>
+  ![](https://itemcdn.zcycdn.com/15af41ec-e6cb-4478-8fad-1a47402f0f25.png)
+</body>
+ 
+</html>
+```
 
-     由于网络请求异常不会事件冒泡，所以必须在捕获阶段将其捕获才行
+由于网络请求异常不会事件冒泡，所以必须在捕获阶段将其捕获才行
+
+3. console.error:重写console.error
+
+   ```js
+   var consoleError = window.console.error; 
+   window.console.error = function () { 
+       alert(JSON.stringify(arguments)); // 自定义处理
+       consoleError && consoleError.apply(window, arguments); 
+   };
+   ```
+
+4. 请求错误
+
+   自己封装XMLHTTPRequest或fetch
 
 ### 伪数组转数组
 
