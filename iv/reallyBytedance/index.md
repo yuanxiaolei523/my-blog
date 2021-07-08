@@ -56,7 +56,7 @@ main()
 try...catch可以捕获所有异常吗 // finish
 https的加密
 是对称还是非对称
-http的请求方法、状态码、头部
+http的请求方法、状态码、头部 // finish
     form表单的content-type类型
     get请求可以有请求体吗
     post可以吗

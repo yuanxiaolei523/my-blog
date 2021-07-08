@@ -1986,50 +1986,7 @@ module.exports = {
 
 7. 绘制，遍历render树，佳凝器渲染到页面上
 
-### 前端缓存
 
-#### 强缓存
-
-强缓存是根据返回头的cache-controll和expires两个字段控制的，都是表示资源的缓存有效时间。
-
-
-
-1. Expires：是http1.0的产物，其值是一个GMT的时间，该时间代表资源失效的时间，如果当前时间在这个时间点之前，那么一定会命中缓存。
-
-   * 缺点：依赖于本地时间，本地时间是可更改的
-
-   
-
-2. Cache-Control：http1.1的产物，一般根据该字段的max-age值进行判断，是一个相对时间，根据请求返回的Date值加上max-age的值，在这段时间内就是强缓存，有时候会在有效时间内重新访问资源返回`304 not modified`这是由于服务器的时间与本地的时间不同造成的。
-
-   * no-store: 不缓存
-   * no-cache：不使用本地缓存，使用协商缓存
-   * `public` 可以被所有用户缓存，包括终端用户和 cdn 等中间件代理服务器。
-   * `private` 只能被终端用户的浏览器缓存。
-
-如果同时存在cache-controll和expires，以Cache-Control为准
-
-#### 协商缓存
-
-协商缓存是由服务器来确定缓存资源是否可访问，
-
-1. Last-Modified/If-Modified-Since: 二者的值都是GMT的时间，Last-Modified表示文件的最后修改时间，下一次请求时，请求头上会带上if-Modified-since，告诉服务器我本地缓存的文件最后修改的时间，在服务器上根据文件的最后修改时间判断资源是否有变化， 如果文件没有变更则返回 `304 Not Modified` ，请求不会返回资源内容，浏览器直接使用本地缓存。当服务器返回 `304 Not Modified` 的响应时，`response header` 中不会再添加 `Last-Modified` 去试图更新本地缓存的 `Last-Modified`，如果资源有变化，就正常返回返回资源内容，新的 `Last-Modified` 会在 `response header` 返回，并在下次请求之前更新本地缓存的 `Last-Modified`，下次请求时，`If-Modified-Since`会启用更新后的 `Last-Modified`。
-2. Etag/If-None-Match：值都是由服务器为每一个资源生成的唯一标识串，只要资源有变化，那么其值就会发生改变，服务器根据文件本身算出一个哈希值并通过 `ETag`字段返回给浏览器，接收到 `If-None-Match` 字段以后，服务器通过比较两者是否一致来判定文件内容是否被改变。与 `Last-Modified` 不一样的是，当服务器返回 `304 Not Modified` 的响应时，由于在服务器上`ETag` 重新计算过，`response header`中还会把这个 `ETag` 返回，即使这个 `ETag` 跟之前的没有变化。
-
-###### 为什么要有 Etag
-
-- 某些文件修改非常频繁，比如在秒以下的时间内进行修改，(比方说 1s 内修改了 N 次)，`If-Modified-Since` 能检查到的粒度是秒级的，使用 `Etag` 就能够保证这种需求下客户端在 1 秒内能刷新 N 次 cache。
-- 某些时候，可能会文件内容并没有改变，但是文件的修改时间已经被改变了，这个时候我们并不希望客户端认为这个文件被修改了
-- 某些服务器不能精确的得到文件的最后修改时间。
-
-```
-Cache-Control > expires > Etag > Last-Modified
-```
-
-#### 强缓存和协商缓存的区别
-
-1. 强缓存命中缓存后，返回的状态码是200，协商缓存命中缓存后，返回的状态码是304
-2. 强缓存如果命中缓存不会向服务端发送请求，协商缓存需要向服务器发送请求确定是否使用缓存资源
 
 ### HTTP状态码、方法、请求头
 
@@ -2084,14 +2041,45 @@ Cache-Control > expires > Etag > Last-Modified
 #### 响应头
 
 1. Location：表示重定向的地址
+
 2. Date：是服务端发送资源时的服务器时间
+
 3. **Content-Type：text/html;charset=UTF-8** 告诉客户端，资源文件的类型，还有字符编码，客户端通过utf-8对资源进行解码，然后对资源进行html解析。通常我们会看到有些网站是乱码的，往往就是服务器端没有返回正确的编码。
+
+   * Text/html
+
+   * Text/plain
+
+   * text/css
+
+   * text/javascript
+
+   * application/x-www-form-urlencoded：通过Enctype设置
+
+     主要用于post提交数据、form表单提交
+
+   * Multipart/form-data
+
+     主要用于表单上传文件时，指定enctype的值为multipart/form-data
+
+   * Application/json
+
+   * application/xml
+
+   * image/png
+
 4. **Content-Encoding:gzip** 告诉客户端，服务端发送的资源是采用gzip编码的，客户端看到这个信息后，应该采用gzip对资源进行解码。
+
 5. **Last-Modified: Dec, 26 Dec 2015 17:30:00 GMT** 所请求的对象的最后修改日期
+
 6. **Connection：keep-alive** 这个字段作为回应客户端的Connection：keep-alive，告诉客户端服务器的tcp连接也是一个长连接，客户端可以继续使用这个tcp连接发送http请求。
+
 7. **Refresh: 5; url=http://baidu.com** 用于重定向，或者当一个新的资源被创建时。默认会在5秒后刷新重定向。
+
 8. **Access-Control-Allow-Origin: \***  *号代表所有网站可以跨域资源共享，如果当前字段为*那么Access-Control-Allow-Credentials就不能为true
+
 9. **Access-Control-Allow-Methods：GET,POST,PUT,DELETE** 允许哪些方法来访问
+
 10. **Access-Control-Allow-Credentials: true** 是否允许发送cookie。默认情况下，Cookie不包括在CORS请求之中。设为true，即表示服务器明确许可，Cookie可以包含在请求中，一起发给服务器。这个值也只能设为true，如果服务器不要浏览器发送Cookie，删除该字段即可。如果access-control-allow-origin为*，当前字段就不能为true
 
 #### 方法
@@ -2146,6 +2134,124 @@ get请求可以向post请求一样发送body，但是get里面使用body不符�
 
 
 ## Chrome
+
+### 前端缓存
+
+#### http缓存
+
+##### 强缓存
+
+强缓存是根据返回头的cache-controll和expires两个字段控制的，都是表示资源的缓存有效时间。
+
+1. Expires：是http1.0的产物，其值是一个GMT的时间，该时间代表资源失效的时间，如果当前时间在这个时间点之前，那么一定会命中缓存。
+
+   * 缺点：依赖于本地时间，本地时间是可更改的
+
+   
+
+2. Cache-Control：http1.1的产物，一般根据该字段的max-age值进行判断，是一个相对时间，根据请求返回的Date值加上max-age的值，在这段时间内就是强缓存，有时候会在有效时间内重新访问资源返回`304 not modified`这是由于服务器的时间与本地的时间不同造成的。
+
+   * no-store: 不缓存
+   * no-cache：不使用本地缓存，使用协商缓存
+   * `public` 可以被所有用户缓存，包括终端用户和 cdn 等中间件代理服务器。
+   * `private` 只能被终端用户的浏览器缓存。
+
+如果同时存在cache-controll和expires，以Cache-Control为准
+
+##### 协商缓存
+
+协商缓存是由服务器来确定缓存资源是否可访问，
+
+1. Last-Modified/If-Modified-Since: 二者的值都是GMT的时间，Last-Modified表示文件的最后修改时间，下一次请求时，请求头上会带上if-Modified-since，告诉服务器我本地缓存的文件最后修改的时间，在服务器上根据文件的最后修改时间判断资源是否有变化， 如果文件没有变更则返回 `304 Not Modified` ，请求不会返回资源内容，浏览器直接使用本地缓存。当服务器返回 `304 Not Modified` 的响应时，`response header` 中不会再添加 `Last-Modified` 去试图更新本地缓存的 `Last-Modified`，如果资源有变化，就正常返回返回资源内容，新的 `Last-Modified` 会在 `response header` 返回，并在下次请求之前更新本地缓存的 `Last-Modified`，下次请求时，`If-Modified-Since`会启用更新后的 `Last-Modified`。
+2. Etag/If-None-Match：值都是由服务器为每一个资源生成的唯一标识串，只要资源有变化，那么其值就会发生改变，服务器根据文件本身算出一个哈希值并通过 `ETag`字段返回给浏览器，接收到 `If-None-Match` 字段以后，服务器通过比较两者是否一致来判定文件内容是否被改变。与 `Last-Modified` 不一样的是，当服务器返回 `304 Not Modified` 的响应时，由于在服务器上`ETag` 重新计算过，`response header`中还会把这个 `ETag` 返回，即使这个 `ETag` 跟之前的没有变化。
+
+###### 为什么要有 Etag
+
+- 某些文件修改非常频繁，比如在秒以下的时间内进行修改，(比方说 1s 内修改了 N 次)，`If-Modified-Since` 能检查到的粒度是秒级的，使用 `Etag` 就能够保证这种需求下客户端在 1 秒内能刷新 N 次 cache。
+- 某些时候，可能会文件内容并没有改变，但是文件的修改时间已经被改变了，这个时候我们并不希望客户端认为这个文件被修改了
+- 某些服务器不能精确的得到文件的最后修改时间。
+
+```
+Cache-Control > expires > Etag > Last-Modified
+```
+
+##### 强缓存和协商缓存的区别
+
+1. 强缓存命中缓存后，返回的状态码是200，协商缓存命中缓存后，返回的状态码是304
+2. 强缓存如果命中缓存不会向服务端发送请求，协商缓存需要向服务器发送请求确定是否使用缓存资源
+
+#### 浏览器缓存
+
+##### cookie
+
+cookie是服务器发送到用户浏览器并保存在本地的一小块数据，它会在浏览器下次向同一服务器再发起请求时被携带并发送到服务器上，用于告诉服务端两个请求是否来自同一浏览器
+
+* 会话期的cookie：浏览器关闭之后它会被自动删除
+* 持久性cookie：取决于过期时间expires或有效期(max-age)
+
+HttpOnly：可以阻止js访问cookie，即js无法使用document.cookie api，可以有效地防范XSS攻击
+
+Cookie的作用域
+
+1. Domain: 指定哪些主机可以接受cookie，如果不指定，默认值origin，不包含子域名，如果指定了domain，则包含子域名
+2. path：指定了主机下的那些路径可以接受cookie，该url路径必须存在于请求的url中
+
+SameSite：cookie允许服务器要求某个cookie在跨站请求时不会被发送，从而可以阻止CSRF
+
+* Strict：表示只在访问相同站点时发送cookie
+* Lax：与strict相似，用户用外部站点导航至URL除外
+* None：不会阻止
+
+##### sessionStorage
+
+1. 页面会话在浏览器打开期间一直保持，并且重新加载或恢复页面仍会保持原来的页面会话。
+
+2. 如果当前复制一份当前tab在新的tab打开或者将当前页面移到其他窗口中，session是共享的
+
+3. 打开多个相同的URL的tabs页面，会创建各自的sessionStorage
+
+4. 关闭对应浏览器串口/tab，会清除对应的sessionStorage
+
+   
+
+##### localStorage
+
+##### 三者的区别
+
+1. cookie和session具有时效性，cookie可以设置max-age为失效时间，session关闭当前tab或者浏览器就会失效，localStorage会一直存在
+2. 大小：cookie有4KB左右，storage有5M左右
+3. 请求：cookie每次都会携带，storage不参与通信
+
+### 浏览器的同源策略
+
+同源：当两个url的`协议、域名、端口号`相同的时候才是同源
+
+#### 如何解决跨域问题
+
+1. Access-contorl-allow-origin
+
+2. jsonp
+
+3. 通过同源的node服务，然后转发到跨域的api中
+
+4. nginx 反向代理 proxy_pass
+
+   ```js
+   location /proxy/ {
+   	proxy_pass http://127.0.0.1/;
+   }
+   代理到URL：http://127.0.0.1/test.html
+   
+   第二种（相对于第一种，最后少一个 / ）
+   location /proxy/ {
+   	proxy_pass http://127.0.0.1;
+   }
+   
+   ```
+
+5. img标签不跨域
+
+
 
 ### webp
 
