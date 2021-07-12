@@ -265,9 +265,43 @@ Input,img
 
 深度优先遍历：以纵向的维度对dom树开始进行遍历，从一个根节点开始，一直遍历其子节点，直到它的子节点被遍历完毕了，再去遍历根节点
 
+```js
+let deepTraversal1 = (node, nodeList = []) => {
+  if (node !== null) {
+    nodeList.push(node)
+    let children = node.children
+    for (let i = 0; i < children.length; i++) {
+      deepTraversal1(children[i], nodeList)
+    }
+  }
+  return nodeList
+}
+```
+
 
 
 广度优先遍历：以横向的维度对dom树开始进行遍历，从一个根节点开始，然后找到这个节点所有未被访问的相邻节点，知道所有节点访问完毕，然后再去找第一个子节点的所有相邻节点
+
+```js
+let widthTraversal2 = (node) => {
+  let nodes = []
+  let stack = []
+  if (node) {
+    stack.push(node)
+    while (stack.length) {
+      let item = stack.shift()
+      let children = item.children
+      nodes.push(item)
+      for (let i = 0; i < children.length; i++) {
+        stack.push(children[i])
+      }
+    }
+  }
+  return nodes
+}
+```
+
+
 
 ### js的数据类型
 
@@ -885,7 +919,7 @@ function child () {
 
 #### ES5和ES6的继承除了写法有什么不同
 
-1. es5的继承实际上是先创建子类的实例对象，然后再将父类的方法添加到this上，ES6则是先创建父类的实例对象this，然后再用子类的构造函数修改this
+1. es5的继承实际上是先创建子类的实例对象，然后再将父类的方法添加到this上（Parent.apply(this)），ES6则是先将父类实例对象的属性和方法，加到`this`上面，然后再用子类的构造函数修改this
 2. ES5的继承通过原型或者构造函数来实现，ES6通过class关键字来定义类，里面有构造方法，类之间通过extends关键字实现继承
 3. ES6中，子类必须在 constructor 方法中调用 super 方法，否则新建实例报错。因为子类没有自己的 this 对象，而是继承了父类的 this 对象，然后对其进行加工。 如果不调用 super 方法，子类得不到 this 对象。
 4. 注意 super 关键字指代父类的实例，即父类的 this 对象。在子类构造函数中，调用 super 后，才可使用 this 关键字，否则报错
@@ -952,13 +986,26 @@ function child () {
 
    
 
-4. class 的所有方法(包括静态方法和实例方法)都没有原型对象 prototype，所 以也没有[[constructor]]，不能使用 new 来调用。
+4. class 的所有方法(包括静态方法和实例方法)都没有原型对象 prototype，所以也没有[[constructor]]，不能使用 new 来调用。
 
-5. class必须使用new 调用
+5. class的所有方法都是放在类的prototype对象上的
 
-6. class内部无法重写类名
+6. class必须使用new 调用
 
+7. class内部无法重写类名
 
+### Super的作用
+
+**作为函数**
+
+作为函数表示父类的构造函数，内部返回this，该this是子类的实例对象
+
+只能在constructor内调用
+
+**作为对象**
+
+1. 普通方法中：super指向父类的原型对象，通过super.funcA()，此时funcA内的this指向**子类实例**
+2. 静态方法中：指向父类
 
 ### 执行上下文和执行栈
 
@@ -1055,6 +1102,33 @@ FunctionExectionContext = { // 函数执行上下文
 
 
 ## ES6
+
+### Set、Map、WeakSet、WeakMap的区别
+
+**Set**
+
+1. 成员不能重复。
+2. 只有键值，没有键名，类似于数组
+3. 可以遍历keys、values、entries、forEach、for...of，方法有add(返回值为Set)、has(返回值为boolean)、delete(返回值为元素)，clear
+4. 判断两个值是否相等，采用的是**类似于**===，主要区别是Set内认为NaN等于NaN，但是精确相等运算符中NaN不等于自身
+
+**WeakSet**
+
+1. 成员唯一且都是对象
+2. 成员都是弱引用，随时可以消失。 可以用来保存DOM节点，不容易造成内存泄漏
+3. 不能遍历(没有size属性，而且是弱引用)，方法有add, delete,has
+4. 构造函数的参数是一个数组，数组内部都是一个个的对象
+
+**Map**
+
+1. 本质上是键值对的集合
+2. key可以是任意类型
+3. 可以遍历，keys、values、entries、forEach，方法有has，get，set，delete，clear
+
+**WeakMap**
+
+1. 不能遍历，方法有`get()`、`set()`、`has()`、`delete()`。
+2. 不能清空，不支持clearfangfa
 
 ### 了解promise吗，平时用的多吗
 
@@ -2486,7 +2560,7 @@ function compose (middleware) {
 
 1. 200：表示请求已成功
 2. 201：表示请求已经被实现，而且有一个新的资源已经根据请求的需要而简历，且其URI已经随Location头信息返回
-3. 301：用于重定向，将来对此资源的引用都应该使用本响应返回的若干url之一
+3. 301：永久重定向，将来对此资源的引用都应该使用本响应返回的若干url之一
 4. 302：临时重定向，请求的资源现在临时从不同的 URI 响应请求。由于这样的重定向是临时的，客户端应当继续向原有地址发送以后的请求。
 5. 304：表示读缓存，如果客户端发送了一个带条件的get请求且该请求已被允许，而文档的内容并没有改变，那么服务器应当返回这个状态码
 6. 307：临时重定向，请求的资源现在临时从不同的URI 响应请求。由于这样的重定向是临时的，客户端应当继续向原有地址发送以后的请求。
