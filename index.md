@@ -123,9 +123,9 @@ css的盒模型包括标准盒模型和怪异盒模型
 
 ### 回流(重排)和重绘
 
-重排：布局或者几何属性需要改变
+重排：布局或者几何属性、隐藏需要改变
 
-重绘：当节点需要更改外观，而不是影响布局的是重绘
+重绘：当节点需要更改外观，而不是影响布局的是重绘(background-color，border-color, visibility)
 
 #### 导致重排的操作
 
@@ -156,15 +156,13 @@ css的盒模型包括标准盒模型和怪异盒模型
 1. 尽可能在DOM最末端修改class
 2. 让其脱离文档流，通过隐藏元素和文档片段等方法
 3. 避免使用calc
-4. 避免设置多层内敛样式
+4. 避免设置多层内联样式
 
 
 
 ## Html
 
-### 时间的捕获和冒泡
-
-
+### 事件的捕获和冒泡
 
 1. 基本概念
 
@@ -201,7 +199,7 @@ css的盒模型包括标准盒模型和怪异盒模型
 
 ##### 常见元素
 
-div、h1-h5、ul、li、ol、hr、p、center、article、section
+div、h1-h6、ul、li、ol、hr、p、center、article、section
 
 #### 行内元素
 
@@ -454,7 +452,7 @@ fraction：IEEE754规定，在计算机内部保存有效数字时，**默认第
 
 答案肯定是不能
 
-1. **SyntaxError**不能被正常捕获
+1. **SyntaxError**不能被正常捕获(进入try...catch之前，语法检查不通过)
 
    ```js
    try{
@@ -462,10 +460,13 @@ fraction：IEEE754规定，在计算机内部保存有效数字时，**默认第
    }catch (e) {
      console.log(e)
    }
-   
+   new Promise((resolve, reject) => {
+     console.log(a.b);
+     reject()
+   })
    ```
 
-2. 异步错误
+2. 异步错误(在try...catch之后执行)
 
    ```js
    try {
@@ -477,13 +478,11 @@ fraction：IEEE754规定，在计算机内部保存有效数字时，**默认第
    }
    ```
 
-3. 被catch住的promise错误
+3. promise内部的错误
 
-
+**能被 try catch 捕捉到的异常，必须是在报错的时候，线程执行已经进入 try catch 代码块，且处在 try catch 里面，这个时候才能被捕捉到。**
 
 #### 有哪些捕获异常的方式
-
-
 
 1. 普通的js运行时错误、资源加载错误(仅限后者)：使用onerror、addEventListener('error')捕获
 
@@ -563,9 +562,9 @@ Array.from(arguments);
 
 #### 原型
 
-首先我们要先来了解三个对象，一个是constructor，一个是原型对象，一个实例
+首先我们要先来了解constructor、原型对象、实例间的关系
 
-* 原型对象：当你在创建对象的时候，会自动帮你关联一个对象，他可以说是你创建的那个对象的父类，我们可以从它那继承过来一些属性和方法，每一个原型对象都有一个constructor属性，用来执行当前的构造函数
+* 原型对象：当你在创建对象的时候，会自动帮你关联一个对象，他可以说是你创建的那个对象的父类，我们可以从它那继承过来一些属性和方法，每一个原型对象都有一个constructor属性，用来指向当前的构造函数
 * 构造函数：每个构造函数都有一个**prototype**属性，**prototype**属性是指向我们的原型对象的；实例是通过构造函数new出来的
 * 实例：每个构造函数new出来的实例，都有一个**\_\_proto\_\_**属性，这个属性也是指向我们的原型对象的；实例的constructor属性指向构造函数(借用prototype的constructor属性)
 
@@ -728,11 +727,7 @@ console.log(c.__proto__.ages, obj.ages, c2.__proto__.ages); // { ages: [ 12, 10,
 
 上面的结果表明，现有对象的属性被所有的实例所共享，一旦一个实例进行了修改，其他的也会被修改(本质上就是原型链继承)
 
-
-
 Object.create的第二个参数是objs,其实就是Object.defineProperties的第二个参数相同
-
-
 
 **MDN上对于Object.create()的实现**
 
@@ -856,8 +851,6 @@ c.sayName();
 2. 子类实例可以共享父类原型上的方法了
 3. 子类可以向父类传参
 
-
-
 **缺点**
 
 1. 首先Parent的构造函数回调用两次
@@ -911,6 +904,7 @@ function parent () {}
 function child () {
   parent.call(this);
 }
+
 ```
 
 **优点**
@@ -922,11 +916,11 @@ function child () {
 1. es5的继承实际上是先创建子类的实例对象，然后再将父类的方法添加到this上（Parent.apply(this)），ES6则是先将父类实例对象的属性和方法，加到`this`上面，然后再用子类的构造函数修改this
 2. ES5的继承通过原型或者构造函数来实现，ES6通过class关键字来定义类，里面有构造方法，类之间通过extends关键字实现继承
 3. ES6中，子类必须在 constructor 方法中调用 super 方法，否则新建实例报错。因为子类没有自己的 this 对象，而是继承了父类的 this 对象，然后对其进行加工。 如果不调用 super 方法，子类得不到 this 对象。
-4. 注意 super 关键字指代父类的实例，即父类的 this 对象。在子类构造函数中，调用 super 后，才可使用 this 关键字，否则报错
+4. 注意 super 关键字指代父类的构造函数，用来新建父类的`this`对象。在子类构造函数中，调用 super 后，才可使用 this 关键字，否则报错
 
 ### ES5的函数声明和ES6的class声明有什么不同？
 
-1. 函数声明会有声明提升，但是class并不会，如果在声明前new，那么会进入暂时性死区
+1. 函数声明会有声明提升，在声明前使用不会报错，但是class类似于let，如果在声明前new，那么会进入暂时性死区
 
    ```js
    let foo = new Foo()
@@ -934,7 +928,7 @@ function child () {
    // ok
    
    let bar = new Bar()
-   class Bar() {}
+   class Bar {}
    // Foo is not defined
    ```
 
@@ -1004,7 +998,7 @@ function child () {
 
 **作为对象**
 
-1. 普通方法中：super指向父类的原型对象，通过super.funcA()，此时funcA内的this指向**子类实例**
+1. 普通方法中：super指向父类的**原型对象**，通过super.funcA()，此时funcA内的this指向**子类实例**
 2. 静态方法中：指向父类
 
 ### 执行上下文和执行栈
@@ -1015,7 +1009,7 @@ function child () {
 
 执行上下文共有三种，分别是全局执行上下文、函数执行上下文、eval函数执行上下文
 
-每个上下文的组成是：变量对象(活动对象)、作用域链、
+每个上下文的组成是：变量对象(活动对象)、作用域链、this
 
 #### 执行上下文的分类
 
@@ -1024,8 +1018,6 @@ function child () {
 全局上下文只有一个，在浏览器中就是window，在nodejs中就是global，this指向这个全局上下文
 
 全局上下文中的变量对象就是window或者当前模块
-
-
 
 ##### 函数上下文
 
@@ -1078,7 +1070,6 @@ eval函数执行时，会创建一个eval函数上下文，很少用而且不建
 - 函数环境：用户在函数中定义的变量被存储在环境记录中，包含了arguments对象，对外部词法环境的引用可以是全局环境或包含该函数的外部函数环境
 
 ```js
-​```js
 GlobalExectionContext = {  // 全局执行上下文
   LexicalEnvironment: {    	  // 词法环境
     EnvironmentRecord: {   		// 环境记录
@@ -1096,7 +1087,7 @@ FunctionExectionContext = { // 函数执行上下文
       outer: <Global or outer function environment reference>
   }
 }
-​```
+
 ```
 
 
@@ -1122,13 +1113,30 @@ FunctionExectionContext = { // 函数执行上下文
 **Map**
 
 1. 本质上是键值对的集合
+
 2. key可以是任意类型
-3. 可以遍历，keys、values、entries、forEach，方法有has，get，set，delete，clear
+
+3. 可以遍历，keys、values、entries、forEach,for...of([key, value])，方法有has，get，set，delete，clear
+
+   ```js
+   var m = new Map();
+   m.set(1, "black");
+   m.set(2, "red");
+   m.set("colors", 2);
+   
+   for (var [key, value] of m) {
+     console.log(key, entries, value);
+   }
+   ```
+
+   
 
 **WeakMap**
 
 1. 不能遍历，方法有`get()`、`set()`、`has()`、`delete()`。
-2. 不能清空，不支持clearfangfa
+2. 不能清空，不支持clear方法
+3. 键必须是对象
+4. 键是弱引用的
 
 ### 了解promise吗，平时用的多吗
 

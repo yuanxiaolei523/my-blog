@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script src="./index.js"></script>
+</body>
+<script>
+    window.addEventListener('unhandledrejection', (e) => {
+        console.log(e, 'e');
+    })
+    // try {
+    //     new Promise((resolve, reject) => {
+    //         // console.log(a.b);
+    //         reject(0)
+    //     })
+    // } catch (e) {
+    //     console.log(e, 'catch');
+    // }
+
+    // var A = 0;
+    // {
+    //     // console.log(new A());
+    //     // class A {
+    //     // }
+    //     console.log(A);
+    //     let A = 0;
+    // }
+    var m = new Map();
+    m.set(1, "black");
+    m.set(2, "red");
+    m.set("colors", 2);
+
+    for (var [key, value] of m) {
+        console.log(key, entries, value);
+    }
+</script>
+
+</html>
