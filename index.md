@@ -1092,6 +1092,61 @@ FunctionExectionContext = { // 函数执行上下文
 
 
 
+### 你了解浏览器的事件循环吗
+
+浏览器的事件循环是：每执行一个宏任务，就去清空微任务队列
+
+#### 为什么浏览器会有事件循环的机制
+
+因为js是`单线程`的，举一个例子，我们都知道js是可以操作DOM的，如果我们同时对一个DOM进行两个操作，一个是删除DOM，一个是修改DOM，那么到底以哪个为准呢，所以js就是单线程的，既然是单线程的，也就是说某个时间段，只能执行一个任务
+
+#### 你了解过event loop吗
+
+了解过
+
+#### 那你知道两种任务类型吗
+
+**宏任务**：整体的script代码，setTimeout，setInterval，I\O操作等等都是宏任务
+
+**微任务** ：new Promise的then、catch、finally的回调，MutationObserver
+
+#### 聊聊 MutationObserver 主要是做什么的
+
+MutationObserver 主要是用来监视对 DOM 的修改，new 的时候会创建并返回一个新的 MutationObserver，他会在指定的 DOM 发生变化时被调用
+
+#### 为什么要同时有宏任务和微任务，只有宏任务可以吗
+
+不可以，因为宏任务是一个队列结构，具有先进先出的性质，如果此时有一个紧急的任务，那么只能排队等候了
+
+#### nodejs和浏览器的事件循环有什么不同呢？
+
+nodejs中宏任务的执行顺序
+
+1. timer定时器：执行已经被安排过的setTimeout和setInterval的回调函数
+2. pending、callback回调：执行延迟到下一个事件循环的I\O回调
+3. idle、prepare：内部使用
+4. poll：检索新的I\O事件，执行相关的I\O回调函数
+5. check：执行setImmediate的回调函数
+6. close callback：关闭socket
+
+宏任务和微任务的执行顺序
+
+V10之前：
+
+1. 执行一个阶段内的所有的宏任务
+2. 执行nextTick的内容
+3. 清空微任务队列
+
+V10之后：
+
+1. 执行一个宏任务
+2. 执行nextTick
+3. 清空微任务队列
+
+
+
+
+
 ## ES6
 
 ### Set、Map、WeakSet、WeakMap的区别
@@ -2759,6 +2814,37 @@ Cache-Control > expires > Etag > Last-Modified
 1. 强缓存命中缓存后，返回的状态码是200，协商缓存命中缓存后，返回的状态码是304
 2. 强缓存如果命中缓存不会向服务端发送请求，协商缓存需要向服务器发送请求确定是否使用缓存资源
 
+
+
+### 缓存的位置
+
+当强缓存命中或者协商缓存中服务器返回304的时候，我们从缓存中读取资源，那么缓存究竟在什么位置呢？
+
+浏览器的缓存位置由四种，按照优先级从高到低排列分别为：
+
+* service worker
+* Memory cache
+* Disk cache
+* push cache
+
+#### service worker
+
+让js运行在主线程之外，脱离了浏览器窗体，无法直接访问dom
+
+#### Memory cache和Disk cache
+
+Memory Cache值的是内存缓存，从效率上来说，访问速度是最快的，但是从存活时间来讲又是最短的，当渲染进程结束后，内存缓存就不在了
+
+Disk Cache是磁盘缓存，从效率上来说比内存缓存慢，但是存储时间长且容量大
+
+> 比较大的js、css文件会被丢进磁盘，反之进内存
+>
+> 内存使用率比较高的，文件优先进磁盘
+
+#### push cache
+
+即推送缓存，这是浏览器缓存的最后一道防线。它是 `HTTP/2` 中的内容，虽然现在应用的并不广泛，但随着 HTTP/2 的推广，它的应用越来越广泛。关于 Push Cache，有非常多的内容可以挖掘，不过这已经不是本文的重点，大家可以参考这篇[扩展文章](https://link.juejin.cn/?target=https%3A%2F%2Fjakearchibald.com%2F2017%2Fh2-push-tougher-than-i-thought%2F)。
+
 #### 浏览器缓存
 
 ##### cookie
@@ -2927,57 +3013,6 @@ toDataURL中的参数，默认是`image/png,如果传入参数后，返回的url
 因为V8浏览器会自动执行垃圾回收，一单旦执行，那么就会打断js的执行，所以会造成页面的卡顿，所以V8决定采用增量标记算法回收
 
 **增量标记**允许堆的标记发生在几次5-10ms的小停顿中，增量标记在堆的大小达到一定的阈值时启用，启用之后每当一定量的内存分配后，脚本的执行就会停顿并进行一次增量标记，增量标记也是深度优先搜索(活跃对象黑色，死对象白色)
-
-### 你了解浏览器的事件循环吗
-
-浏览器的事件循环是：每执行一个宏任务，就去清空微任务队列
-
-#### 为什么浏览器会有事件循环的机制
-
-因为js是`单线程`的，举一个例子，我们都知道js是可以操作DOM的，如果我们同时对一个DOM进行两个操作，一个是删除DOM，一个是修改DOM，那么到底以哪个为准呢，所以js就是单线程的，既然是单线程的，也就是说某个时间段，只能执行一个任务
-
-#### 你了解过event loop吗
-
-了解过
-
-#### 那你知道两种任务类型吗
-
-**宏任务**：整体的script代码，setTimeout，setInterval，I\O操作等等都是宏任务
-
-**微任务** ：new Promise的then、catch、finally的回调，MutationObserver
-
-#### 聊聊 MutationObserver 主要是做什么的
-
-MutationObserver 主要是用来监视对 DOM 的修改，new 的时候会创建并返回一个新的 MutationObserver，他会在指定的 DOM 发生变化时被调用
-
-#### 为什么要同时有宏任务和微任务，只有宏任务可以吗
-
-不可以，因为宏任务是一个队列结构，具有先进先出的性质，如果此时有一个紧急的任务，那么只能排队等候了
-
-#### nodejs和浏览器的事件循环有什么不同呢？
-
-nodejs中宏任务的执行顺序
-
-1. timer定时器：执行已经被安排过的setTimeout和setInterval的回调函数
-2. pending、callback回调：执行延迟到下一个事件循环的I\O回调
-3. idle、prepare：内部使用
-4. poll：检索新的I\O事件，执行相关的I\O回调函数
-5. check：执行setImmediate的回调函数
-6. close callback：关闭socket
-
-宏任务和微任务的执行顺序
-
-V10之前：
-
-1. 执行一个阶段内的所有的宏任务
-2. 执行nextTick的内容
-3. 清空微任务队列
-
-V10之后：
-
-1. 执行一个宏任务
-2. 执行nextTick
-3. 清空微任务队列
 
 
 
