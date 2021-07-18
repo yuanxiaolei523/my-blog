@@ -2270,6 +2270,35 @@ function trap(arr) {
 
 
 
+### 翻转二叉树
+
+
+
+```js
+输入
+   4
+   /   \
+  2     7
+ / \   / \
+1   3 6   9
+输出
+     4
+   /   \
+  7     2
+ / \   / \
+9   6 3   1
+```
+
+```js
+var invertTree = function(root) {
+    if (!root) return null;
+    let left = root.left;
+    root.left =root.right ? invertTree(root.right) : null;
+    root.right = left? invertTree(left) : null;
+    return root
+};
+```
+
 
 
 
@@ -3088,5 +3117,11 @@ plugins: ["react"]
 
 ```js
 "parser": "babel-eslint"
+```
+
+## 算法
+
+```js
+
 ```
 
