@@ -2,7 +2,7 @@
 
 ## Css
 
-### 盒模型
+### 一、盒模型
 
 css的盒模型包括标准盒模型和怪异盒模型
 
@@ -20,7 +20,7 @@ css的盒模型包括标准盒模型和怪异盒模型
 
 
 
-### 选择器
+### 二、选择器
 
 #### 简单选择器
 
@@ -110,6 +110,14 @@ css的盒模型包括标准盒模型和怪异盒模型
 
 ::backdrop
 
+::link(修改从未被访问过状态下的样式)
+
+::visited(修改被访问过状态下的样式)
+
+::hover(修改鼠标悬停在a标签上的样式)
+
+::active(鼠标长按下的样式)
+
 #### 组合器
 
 1. 后代选择器 用**空格**表示 可以是孙子元素
@@ -121,7 +129,7 @@ css的盒模型包括标准盒模型和怪异盒模型
 
 
 
-### 回流(重排)和重绘
+### 三、回流(重排)和重绘
 
 重排：布局或者几何属性、隐藏需要改变
 
@@ -157,6 +165,270 @@ css的盒模型包括标准盒模型和怪异盒模型
 2. 让其脱离文档流，通过隐藏元素和文档片段等方法
 3. 避免使用calc
 4. 避免设置多层内联样式
+
+### 四、块级格式化上下文(BFC)
+
+#### 1. 什么是块级格式化上下文
+
+BFC是页面中的一块渲染区域，有自己的渲染规则，决定了子元素如果定位，以及和其他元素的关系和相互作用
+
+#### 2. 块级格式化上下文的规则
+
+* 内部的盒子会在垂直方向一个个的放置
+* 每个盒子的左边与包含块的左边接触，即使存在浮动也是如此
+* 在计算高度的时候，浮动的子元素的高度也被计算在内
+* BFC就是页面上的一个独立容器，内部的元素不会影响到外部，反之也一样
+* BFC的区域不会与float box发生重叠
+
+#### 3. 如何创建块级格式化上下文
+
+* 根元素
+* 浮动的元素
+* dispaly的值为inline-block或者table-cell
+* position的值为absolute或者fixed
+* overflow的值不为visible
+
+#### 4. 应用
+
+1. 两栏布局
+
+2. 清除内部浮动
+
+3. 防止margin重叠
+
+   
+
+### 五、定位
+
+定位的属性是position，其实为了让某些元素脱离正常的文档流，在正常的文档流，元素会垂直布局，块级元素会独占一行，内联元素会在同一行上，但是使用定位后，我们可以不按照文档流去进行排列
+
+定位的值有5个，分别是static(默认值，按照正常文档流布局)、relative、absolute、fix、sticky
+
+除去static之外，其余的四个值在设置了之后，我们可以通过`left、top、right、bottom`四个值来修改他们的位置
+
+1. relative
+
+   相对定位，和static非常相似，在正常的文档流中，但是可以通过四个属性来修改元素的位置
+
+   是基于当前元素在文档流中的位置去移动的
+
+2. absolute
+
+   绝对定位，不会存在于正常的文档流中，他坐在自己的层，独立于一切
+
+   基于有**定位的父元素**在文档流中的位置去移动的，如果父元素都没有定位(都是static)，那么就相对于浏览器视口定位的
+
+3. fixed
+
+   固定定位，和absolute相似
+
+   基于浏览器视口本身去定位的
+
+4. sticky
+
+   黏性定位，是fixed和relative的结合，在达到某个阈值点之前，他都可以滚动的，达到了阈值点之后，就变得和相对定位一样，固定在页面的某个位置
+
+#### z-index
+
+控制堆叠顺序
+
+当元素开始重叠时，我们想让哪个元素出现在其他元素的上方，我们就让他的z-index的值变大即可
+
+### 六、css样式权重
+
+`important(无限大) > 内联样式(1000) > id(100) > class和伪元素和属性选择器(10) >伪类和标签(1) > 通配符选择器(0) `
+
+### 七、圣杯布局和双飞翼布局
+
+1. 圣杯布局
+
+   注意点：
+
+   * 主要内容放在最上面
+   * 父元素设置padding
+   * 三个元素都要设置浮动
+   * left和right都设置relative和left或right
+   * left和right都要给出margin-left
+
+   ```css
+   <div id="container">
+     <div class="center"></div>
+     <div class="left"></div>
+     <div class="right"></div>
+   </div>
+   
+   #container {
+   	height: 200px;
+   	overflow: hidden;
+   	padding: 0 100px 0 200px
+   }
+   .left, .right, .center {
+     height: 200px;
+     float: left;
+   }
+   .left {
+   	width: 200px;
+     position: relative;
+     margin-left: -100%;
+     left: -200px;
+   }
+   .center {
+     width: 100%;
+     
+   }
+   .right {
+     width: 100px;
+     position: relative;
+     margin-left: -100px;
+     right: -100px
+   }
+   ```
+
+   
+
+2. 双飞翼布局
+
+   * 主要元素放在最上面
+   * center的子元素设置margin
+   * center设置width:100%
+   * center、left、right设置float
+   * left和right设置margin-left
+
+   ```css
+   <div id="container">
+     <div class="center">
+   		<div class="inner"></div>
+   	</div>
+     <div class="left"></div>
+     <div class="right"></div>
+   </div>
+   #container {
+     overflow: hidden;
+   }
+   .center,
+   .left,
+   .right {
+     height: 200px;
+     float: left;
+   }
+   .center {
+     width: 100%;
+   }
+   .inner {
+     margin: 0 200px 0 100px;
+     height: 200px;
+     background-color: aqua;
+   }
+   .left {
+     width: 100px;
+     position: relative;
+     background-color: aquamarine;
+     margin-left: -100%;
+   }
+   .right {
+     width: 200px;
+     position: relative;
+     background-color: blue;
+     margin-left: -200px;
+   }
+   
+   ```
+
+### 八、flex布局
+
+flex布局是弹性布局，设置为flex布局之后，子元素的float、clear、vertical-align属性将失效
+
+采用flex布局的元素，称为flex容器，所有的子元素都成为flex项目
+
+#### 容器上的属性
+
+1. flex-direction
+
+   决定主轴的方向
+
+   * row: 水平方向，起点在左边
+   * row-reverse：水平方向，起点在右边
+   * column：垂直方向，起点在上方
+   * column-reverse：垂直方向，起点再按下面
+
+2. flex-wrap:
+
+   决定项目是否换行
+
+   * wrap: 换行
+   * no-wrap: 不换行
+   * wrap-reverse: 换行，第一行在下方
+
+3. flex-flow：
+
+   是flex-wrap和flex-direction的简写，默认值是row nowrap
+
+4. Jusitfy-content
+
+   定义主轴上的对齐方式
+
+   * flex-start: 左对齐
+   * flex-end：右对齐
+   * center：居中
+   * space-between：两端对齐，项目之间的间隔相等
+   * space-around：项目之间的间隔比项目与边框的间隔大一倍
+
+5. align-items
+
+   定义交叉轴上的对齐方式
+
+   * flex-start: 上对齐
+   * flex-end：下对齐
+   * center：居中
+   * baseline：第一行文字的基线
+   * Stretch：如果项目未设置高度或者设置为auto，将占满整个屏幕的高度
+
+6. align-content
+
+   定义了多跟轴线的对齐方式
+
+   * `flex-start`：与交叉轴的起点对齐。
+   * `flex-end`：与交叉轴的终点对齐。
+   * `center`：与交叉轴的中点对齐。
+   * `space-between`：与交叉轴两端对齐，轴线之间的间隔平均分布。
+   * `space-around`：每根轴线两侧的间隔都相等。所以，轴线之间的间隔比轴线与边框的间隔大一倍。
+   * `stretch`（默认值）：轴线占满整个交叉轴。
+
+   
+
+#### 项目上的属性
+
+1. order
+
+   定义项目的顺序，数值越小，排列越靠前，默认为0 
+
+2. flex-grow
+
+   定义项目的放大比例，默认是0，即如果存在剩余空间，也不放大
+
+3. flex-shrink
+
+   定义项目的缩小比例，默认是1，即如果空间不足，则将缩小
+
+4. flex-basis
+
+   定义了项目在分配多余空间之前，项目占据的主轴空间，默认值为auto，即项目本身的大小
+
+5. flex
+
+   是flex-grow、flex-shrink、flex-basis的集合，默认值是0 1 auto
+
+   快捷值：auto(1 1 auto)和none(0 0  auto)
+
+6. Align-self
+
+   `align-self`属性允许单个项目有与其他项目不一样的对齐方式，可覆盖`align-items`属性。默认值为`auto`，表示继承父元素的`align-items`属性，如果没有父元素，则等同于`stretch`。
+
+   ```js
+   align-self: auto | flex-start | flex-end | center | baseline | stretch;
+   ```
+
+   
 
 
 
