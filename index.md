@@ -1,15 +1,7 @@
 # IV
 
 ## Css
-
-### @import 和 link的区别
-
-1. link是HTML标签，
-2. link是在页面加载的时候加载，而import引入的样式是在页面加载完加载
-3. link没有兼容性问题，link没有兼容性
-4. link可以通过js操作dom动态的引入样式表，但是import不可以
-
-### 盒模型
+### 一、盒模型
 
 css的盒模型包括标准盒模型和怪异盒模型
 
@@ -27,7 +19,7 @@ css的盒模型包括标准盒模型和怪异盒模型
 
 
 
-### 选择器
+### 二、选择器
 
 #### 简单选择器
 
@@ -117,6 +109,14 @@ css的盒模型包括标准盒模型和怪异盒模型
 
 ::backdrop
 
+::link(修改从未被访问过状态下的样式)
+
+::visited(修改被访问过状态下的样式)
+
+::hover(修改鼠标悬停在a标签上的样式)
+
+::active(鼠标长按下的样式)
+
 #### 组合器
 
 1. 后代选择器 用**空格**表示 可以是孙子元素
@@ -128,7 +128,7 @@ css的盒模型包括标准盒模型和怪异盒模型
 
 
 
-### 回流(重排)和重绘
+### 三、回流(重排)和重绘
 
 重排：布局或者几何属性、隐藏需要改变
 
@@ -164,6 +164,276 @@ css的盒模型包括标准盒模型和怪异盒模型
 2. 让其脱离文档流，通过隐藏元素和文档片段等方法
 3. 避免使用calc
 4. 避免设置多层内联样式
+
+### 四、块级格式化上下文(BFC)
+
+#### 1. 什么是块级格式化上下文
+
+BFC是页面中的一块渲染区域，有自己的渲染规则，决定了子元素如果定位，以及和其他元素的关系和相互作用
+
+#### 2. 块级格式化上下文的规则
+
+* 内部的盒子会在垂直方向一个个的放置
+* 每个盒子的左边与包含块的左边接触，即使存在浮动也是如此
+* 在计算高度的时候，浮动的子元素的高度也被计算在内
+* BFC就是页面上的一个独立容器，内部的元素不会影响到外部，反之也一样
+* BFC的区域不会与float box发生重叠
+
+#### 3. 如何创建块级格式化上下文
+
+* 根元素
+* 浮动的元素
+* dispaly的值为inline-block或者table-cell
+* position的值为absolute或者fixed
+* overflow的值不为visible
+
+#### 4. 应用
+
+1. 两栏布局
+
+2. 清除内部浮动
+
+3. 防止margin重叠
+
+   
+
+### 五、定位
+
+定位的属性是position，其实为了让某些元素脱离正常的文档流，在正常的文档流，元素会垂直布局，块级元素会独占一行，内联元素会在同一行上，但是使用定位后，我们可以不按照文档流去进行排列
+
+定位的值有5个，分别是static(默认值，按照正常文档流布局)、relative、absolute、fix、sticky
+
+除去static之外，其余的四个值在设置了之后，我们可以通过`left、top、right、bottom`四个值来修改他们的位置
+
+1. relative
+
+   相对定位，和static非常相似，在正常的文档流中，但是可以通过四个属性来修改元素的位置
+
+   是基于当前元素在文档流中的位置去移动的
+
+2. absolute
+
+   绝对定位，不会存在于正常的文档流中，他坐在自己的层，独立于一切
+
+   基于有**定位的父元素**在文档流中的位置去移动的，如果父元素都没有定位(都是static)，那么就相对于浏览器视口定位的
+
+3. fixed
+
+   固定定位，和absolute相似
+
+   基于浏览器视口本身去定位的
+
+4. sticky
+
+   黏性定位，是fixed和relative的结合，在达到某个阈值点之前，他都可以滚动的，达到了阈值点之后，就变得和相对定位一样，固定在页面的某个位置
+
+#### z-index
+
+控制堆叠顺序
+
+当元素开始重叠时，我们想让哪个元素出现在其他元素的上方，我们就让他的z-index的值变大即可
+
+### 六、css样式权重
+
+`important(无限大) > 内联样式(1000) > id(100) > class和伪元素和属性选择器(10) >伪类和标签(1) > 通配符选择器(0) `
+
+### 七、圣杯布局和双飞翼布局
+
+1. 圣杯布局
+
+   注意点：
+
+   * 主要内容放在最上面
+   * 父元素设置padding
+   * 三个元素都要设置浮动
+   * left和right都设置relative和left或right
+   * left和right都要给出margin-left
+
+   ```css
+   <div id="container">
+     <div class="center"></div>
+     <div class="left"></div>
+     <div class="right"></div>
+   </div>
+   
+   #container {
+   	height: 200px;
+   	overflow: hidden;
+   	padding: 0 100px 0 200px
+   }
+   .left, .right, .center {
+     height: 200px;
+     float: left;
+   }
+   .left {
+   	width: 200px;
+     position: relative;
+     margin-left: -100%;
+     left: -200px;
+   }
+   .center {
+     width: 100%;
+     
+   }
+   .right {
+     width: 100px;
+     position: relative;
+     margin-left: -100px;
+     right: -100px
+   }
+   ```
+
+   
+
+2. 双飞翼布局
+
+   * 主要元素放在最上面
+   * center的子元素设置margin
+   * center设置width:100%
+   * center、left、right设置float
+   * left和right设置margin-left
+
+   ```css
+   <div id="container">
+     <div class="center">
+   		<div class="inner"></div>
+   	</div>
+     <div class="left"></div>
+     <div class="right"></div>
+   </div>
+   #container {
+     overflow: hidden;
+   }
+   .center,
+   .left,
+   .right {
+     height: 200px;
+     float: left;
+   }
+   .center {
+     width: 100%;
+   }
+   .inner {
+     margin: 0 200px 0 100px;
+     height: 200px;
+     background-color: aqua;
+   }
+   .left {
+     width: 100px;
+     position: relative;
+     background-color: aquamarine;
+     margin-left: -100%;
+   }
+   .right {
+     width: 200px;
+     position: relative;
+     background-color: blue;
+     margin-left: -200px;
+   }
+   
+   ```
+
+### 八、flex布局
+
+flex布局是弹性布局，设置为flex布局之后，子元素的float、clear、vertical-align属性将失效
+
+采用flex布局的元素，称为flex容器，所有的子元素都成为flex项目
+
+#### 容器上的属性
+
+1. flex-direction
+
+   决定主轴的方向
+
+   * row: 水平方向，起点在左边
+   * row-reverse：水平方向，起点在右边
+   * column：垂直方向，起点在上方
+   * column-reverse：垂直方向，起点再按下面
+
+2. flex-wrap:
+
+   决定项目是否换行
+
+   * wrap: 换行
+   * no-wrap: 不换行
+   * wrap-reverse: 换行，第一行在下方
+
+3. flex-flow：
+
+   是flex-wrap和flex-direction的简写，默认值是row nowrap
+
+4. Jusitfy-content
+
+   定义主轴上的对齐方式
+
+   * flex-start: 左对齐
+   * flex-end：右对齐
+   * center：居中
+   * space-between：两端对齐，项目之间的间隔相等
+   * space-around：项目之间的间隔比项目与边框的间隔大一倍
+
+5. align-items
+
+   定义交叉轴上的对齐方式
+
+   * flex-start: 上对齐
+   * flex-end：下对齐
+   * center：居中
+   * baseline：第一行文字的基线
+   * Stretch：如果项目未设置高度或者设置为auto，将占满整个屏幕的高度
+
+6. align-content
+
+   定义了多跟轴线的对齐方式
+
+   * `flex-start`：与交叉轴的起点对齐。
+   * `flex-end`：与交叉轴的终点对齐。
+   * `center`：与交叉轴的中点对齐。
+   * `space-between`：与交叉轴两端对齐，轴线之间的间隔平均分布。
+   * `space-around`：每根轴线两侧的间隔都相等。所以，轴线之间的间隔比轴线与边框的间隔大一倍。
+   * `stretch`（默认值）：轴线占满整个交叉轴。
+
+   
+
+#### 项目上的属性
+
+1. order
+
+   定义项目的顺序，数值越小，排列越靠前，默认为0 
+
+2. flex-grow
+
+   定义项目的放大比例，默认是0，即如果存在剩余空间，也不放大
+
+3. flex-shrink
+
+   定义项目的缩小比例，默认是1，即如果空间不足，则将缩小
+
+4. flex-basis
+
+   定义了项目在分配多余空间之前，项目占据的主轴空间，默认值为auto，即项目本身的大小
+
+5. flex
+
+   是flex-grow、flex-shrink、flex-basis的集合，默认值是0 1 auto
+
+   快捷值：auto(1 1 auto)和none(0 0  auto)
+
+6. Align-self
+
+   `align-self`属性允许单个项目有与其他项目不一样的对齐方式，可覆盖`align-items`属性。默认值为`auto`，表示继承父元素的`align-items`属性，如果没有父元素，则等同于`stretch`。
+
+   ```js
+   align-self: auto | flex-start | flex-end | center | baseline | stretch;
+   ```
+
+### 九、@import 和 link的区别
+
+1. link是HTML标签，
+2. link是在页面加载的时候加载，而import引入的样式是在页面加载完加载
+3. link没有兼容性问题，link没有兼容性
+4. link可以通过js操作dom动态的引入样式表，但是import不可以
+  
 
 
 
@@ -1096,6 +1366,61 @@ FunctionExectionContext = { // 函数执行上下文
 }
 
 ```
+
+
+
+### 你了解浏览器的事件循环吗
+
+浏览器的事件循环是：每执行一个宏任务，就去清空微任务队列
+
+#### 为什么浏览器会有事件循环的机制
+
+因为js是`单线程`的，举一个例子，我们都知道js是可以操作DOM的，如果我们同时对一个DOM进行两个操作，一个是删除DOM，一个是修改DOM，那么到底以哪个为准呢，所以js就是单线程的，既然是单线程的，也就是说某个时间段，只能执行一个任务
+
+#### 你了解过event loop吗
+
+了解过
+
+#### 那你知道两种任务类型吗
+
+**宏任务**：整体的script代码，setTimeout，setInterval，I\O操作等等都是宏任务
+
+**微任务** ：new Promise的then、catch、finally的回调，MutationObserver
+
+#### 聊聊 MutationObserver 主要是做什么的
+
+MutationObserver 主要是用来监视对 DOM 的修改，new 的时候会创建并返回一个新的 MutationObserver，他会在指定的 DOM 发生变化时被调用
+
+#### 为什么要同时有宏任务和微任务，只有宏任务可以吗
+
+不可以，因为宏任务是一个队列结构，具有先进先出的性质，如果此时有一个紧急的任务，那么只能排队等候了
+
+#### nodejs和浏览器的事件循环有什么不同呢？
+
+nodejs中宏任务的执行顺序
+
+1. timer定时器：执行已经被安排过的setTimeout和setInterval的回调函数
+2. pending、callback回调：执行延迟到下一个事件循环的I\O回调
+3. idle、prepare：内部使用
+4. poll：检索新的I\O事件，执行相关的I\O回调函数
+5. check：执行setImmediate的回调函数
+6. close callback：关闭socket
+
+宏任务和微任务的执行顺序
+
+V10之前：
+
+1. 执行一个阶段内的所有的宏任务
+2. 执行nextTick的内容
+3. 清空微任务队列
+
+V10之后：
+
+1. 执行一个宏任务
+2. 执行nextTick
+3. 清空微任务队列
+
+
 
 
 
@@ -2222,6 +2547,35 @@ function trap(arr) {
 
 
 
+### 翻转二叉树
+
+
+
+```js
+输入
+   4
+   /   \
+  2     7
+ / \   / \
+1   3 6   9
+输出
+     4
+   /   \
+  7     2
+ / \   / \
+9   6 3   1
+```
+
+```js
+var invertTree = function(root) {
+    if (!root) return null;
+    let left = root.left;
+    root.left =root.right ? invertTree(root.right) : null;
+    root.right = left? invertTree(left) : null;
+    return root
+};
+```
+
 
 
 
@@ -2810,6 +3164,37 @@ Cache-Control > expires > Etag > Last-Modified
 1. 强缓存命中缓存后，返回的状态码是200，协商缓存命中缓存后，返回的状态码是304
 2. 强缓存如果命中缓存不会向服务端发送请求，协商缓存需要向服务器发送请求确定是否使用缓存资源
 
+
+
+### 缓存的位置
+
+当强缓存命中或者协商缓存中服务器返回304的时候，我们从缓存中读取资源，那么缓存究竟在什么位置呢？
+
+浏览器的缓存位置由四种，按照优先级从高到低排列分别为：
+
+* service worker
+* Memory cache
+* Disk cache
+* push cache
+
+#### service worker
+
+让js运行在主线程之外，脱离了浏览器窗体，无法直接访问dom
+
+#### Memory cache和Disk cache
+
+Memory Cache值的是内存缓存，从效率上来说，访问速度是最快的，但是从存活时间来讲又是最短的，当渲染进程结束后，内存缓存就不在了
+
+Disk Cache是磁盘缓存，从效率上来说比内存缓存慢，但是存储时间长且容量大
+
+> 比较大的js、css文件会被丢进磁盘，反之进内存
+>
+> 内存使用率比较高的，文件优先进磁盘
+
+#### push cache
+
+即推送缓存，这是浏览器缓存的最后一道防线。它是 `HTTP/2` 中的内容，虽然现在应用的并不广泛，但随着 HTTP/2 的推广，它的应用越来越广泛。关于 Push Cache，有非常多的内容可以挖掘，不过这已经不是本文的重点，大家可以参考这篇[扩展文章](https://link.juejin.cn/?target=https%3A%2F%2Fjakearchibald.com%2F2017%2Fh2-push-tougher-than-i-thought%2F)。
+
 #### 浏览器缓存
 
 ##### cookie
@@ -2982,57 +3367,6 @@ toDataURL中的参数，默认是`image/png,如果传入参数后，返回的url
 
 **增量标记**允许堆的标记发生在几次5-10ms的小停顿中，增量标记在堆的大小达到一定的阈值时启用，启用之后每当一定量的内存分配后，脚本的执行就会停顿并进行一次增量标记，增量标记也是深度优先搜索(活跃对象黑色，死对象白色)
 
-### 你了解浏览器的事件循环吗
-
-浏览器的事件循环是：每执行一个宏任务，就去清空微任务队列
-
-#### 为什么浏览器会有事件循环的机制
-
-因为js是`单线程`的，举一个例子，我们都知道js是可以操作DOM的，如果我们同时对一个DOM进行两个操作，一个是删除DOM，一个是修改DOM，那么到底以哪个为准呢，所以js就是单线程的，既然是单线程的，也就是说某个时间段，只能执行一个任务
-
-#### 你了解过event loop吗
-
-了解过
-
-#### 那你知道两种任务类型吗
-
-**宏任务**：整体的script代码，setTimeout，setInterval，I\O操作等等都是宏任务
-
-**微任务** ：new Promise的then、catch、finally的回调，MutationObserver
-
-#### 聊聊 MutationObserver 主要是做什么的
-
-MutationObserver 主要是用来监视对 DOM 的修改，new 的时候会创建并返回一个新的 MutationObserver，他会在指定的 DOM 发生变化时被调用
-
-#### 为什么要同时有宏任务和微任务，只有宏任务可以吗
-
-不可以，因为宏任务是一个队列结构，具有先进先出的性质，如果此时有一个紧急的任务，那么只能排队等候了
-
-#### nodejs和浏览器的事件循环有什么不同呢？
-
-nodejs中宏任务的执行顺序
-
-1. timer定时器：执行已经被安排过的setTimeout和setInterval的回调函数
-2. pending、callback回调：执行延迟到下一个事件循环的I\O回调
-3. idle、prepare：内部使用
-4. poll：检索新的I\O事件，执行相关的I\O回调函数
-5. check：执行setImmediate的回调函数
-6. close callback：关闭socket
-
-宏任务和微任务的执行顺序
-
-V10之前：
-
-1. 执行一个阶段内的所有的宏任务
-2. 执行nextTick的内容
-3. 清空微任务队列
-
-V10之后：
-
-1. 执行一个宏任务
-2. 执行nextTick
-3. 清空微任务队列
-
 
 
 ## ESLint
@@ -3107,5 +3441,11 @@ plugins: ["react"]
 
 ```js
 "parser": "babel-eslint"
+```
+
+## 算法
+
+```js
+
 ```
 
