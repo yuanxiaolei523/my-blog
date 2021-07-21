@@ -433,7 +433,7 @@ flex布局是弹性布局，设置为flex布局之后，子元素的float、clea
 2. link是在页面加载的时候加载，而import引入的样式是在页面加载完加载
 3. link没有兼容性问题，link没有兼容性
 4. link可以通过js操作dom动态的引入样式表，但是import不可以
-  
+
 
 
 
@@ -3076,6 +3076,50 @@ http2.0中引入了二进制数据帧和流的概念，其中帧对数据进行�
  
 
 ## Chrome
+
+### 前端路由的两种模式
+
+#### hash
+
+监听浏览器地址hash值的变化，执行相应的js切换网页
+
+使用`window.location.hash`属性及窗口的`onhashchange`事件，可以实现监听浏览器地址hash值变化，执行相应的js切换网页。
+
+hash值是不会伴随请求发送到服务端的，所以改变hash，不会重新加载页面
+
+##### 触发hashchange的情况
+
+1. 按下浏览器的前进后退时
+2. 输入的url中包含hash值时
+3. 只修改url中的hash值时，并不会再次发送骑牛，但是会触发事件
+4. a标签的href可以设置为#top，点击时会自动修改浏览器的hash值，并触发事件
+
+#### history
+
+利用history API实现url地址改变，网页内容改变
+
+window.history指向History对象，表示当前窗口的浏览历史。当发生改变时，只会改变页面的路径，不会刷新页面
+
+##### 属性
+
+1. state：History 堆栈最上层的状态值
+2. length：当前窗口访问过的网址数量
+
+##### 方法
+
+1. Back():移动到上一个网址
+2. Forward()：移动到下一个网址
+3. Go()：直接跳转n个网址，默认为0，表示刷新当前页面
+4. pushState:在历史中添加一个记录
+5. replaceState：修改history对象的当前记录
+
+##### popstate事件
+
+当history对象发生变化时，就会触发事件
+
+1. 调用pushState和replaceState不会触发事件
+2. go、back、forward才会触发或者前进后退按钮
+3. 页面第一次加载不会触发
 
 ### 在浏览器输入 URL 回车之后发生了什么
 
