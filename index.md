@@ -52,7 +52,6 @@ css的盒模型包括标准盒模型和怪异盒模型
 
 一个 CSS [伪类（pseudo-class）](https://developer.mozilla.org/en-US/docs/Web/CSS/Pseudo-classes) 是一个以冒号(:)作为前缀的关键字，当你希望样式在特定状态下才被呈现到指定的元素时，你可以往元素的选择器后面加上对应的伪类（pseudo-class）。你可能希望某个元素在处于某种状态下呈现另一种样式，例如当鼠标悬停在元素上面时，或者当一个 checkbox 被禁用或被勾选时，又或者当一个元素是它在 DOM 树中父元素的第一个孩子元素时。
 
-:active
 :any
 :checked
 :default
@@ -65,7 +64,6 @@ css的盒模型包括标准盒模型和怪异盒模型
 :first-of-type
 :fullscreen
 :focus
-:hover
 :indeterminate
 :in-range
 :invalid
@@ -73,7 +71,6 @@ css的盒模型包括标准盒模型和怪异盒模型
 :last-child
 :last-of-type
 :left
-:link
 :not()
 :nth-child()
 :nth-last-child()
@@ -91,7 +88,11 @@ css的盒模型包括标准盒模型和怪异盒模型
 :scope
 :target
 :valid
-:visited
+
+:link(修改从未被访问过状态下的样式)
+:visited(修改被访问过状态下的样式)
+:hover(修改鼠标悬停在a标签上的样式)
+:active(鼠标长按下的样式)
 
 **伪元素**
 
@@ -109,13 +110,6 @@ css的盒模型包括标准盒模型和怪异盒模型
 
 ::backdrop
 
-::link(修改从未被访问过状态下的样式)
-
-::visited(修改被访问过状态下的样式)
-
-::hover(修改鼠标悬停在a标签上的样式)
-
-::active(鼠标长按下的样式)
 
 #### 组合器
 
@@ -129,6 +123,7 @@ css的盒模型包括标准盒模型和怪异盒模型
 
 
 ### 三、回流(重排)和重绘
+重绘不一定导致重排，但重排一定会导致重绘。
 
 重排：布局或者几何属性、隐藏需要改变
 
@@ -146,11 +141,11 @@ css的盒模型包括标准盒模型和怪异盒模型
 
 5. 添加和删除可见的dom
 
-6. 激活css伪类
+6. 激活css伪类:hover
 
 7. 查询某些属性或者调用某些和方法
 
-   offsetTop、offsetHeight
+   offsetTop、offsetHeight、getComputedStyle
 
 #### 如何减少重绘的频率
 
@@ -164,12 +159,13 @@ css的盒模型包括标准盒模型和怪异盒模型
 2. 让其脱离文档流，通过隐藏元素和文档片段等方法
 3. 避免使用calc
 4. 避免设置多层内联样式
+5. 使用absolute或者fixed脱离文档流
 
 ### 四、块级格式化上下文(BFC)
 
 #### 1. 什么是块级格式化上下文
 
-BFC是页面中的一块渲染区域，有自己的渲染规则，决定了子元素如果定位，以及和其他元素的关系和相互作用
+BFC是页面中的一块独立渲染区域，有自己的渲染规则，决定了子元素如何定位，以及和其他元素的关系和相互作用
 
 #### 2. 块级格式化上下文的规则
 
