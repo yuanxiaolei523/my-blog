@@ -316,13 +316,11 @@ BFC是页面中的一块独立渲染区域，有自己的渲染规则，决定�
    }
    .left {
      width: 100px;
-     position: relative;
      background-color: aquamarine;
      margin-left: -100%;
    }
    .right {
      width: 200px;
-     position: relative;
      background-color: blue;
      margin-left: -200px;
    }
@@ -376,7 +374,7 @@ flex布局是弹性布局，设置为flex布局之后，子元素的float、clea
    * flex-end：下对齐
    * center：居中
    * baseline：第一行文字的基线
-   * Stretch：如果项目未设置高度或者设置为auto，将占满整个屏幕的高度
+   * stretch：如果项目未设置高度或者设置为auto，将占满整个屏幕的高度
 
 6. align-content
 
