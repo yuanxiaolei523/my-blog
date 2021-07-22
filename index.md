@@ -2695,7 +2695,7 @@ module.exports = {
 
 ### 简单描述一下webpack的打包过程
 
-1. 初始化参数：shell webpack.config.js中配置的
+1. 初始化参数：从配置文件和 Shell 语句中读取与合并参数,得出最终的参数。
 2. 开始编译：初始化一个Compiler对象，加载所有的配置，开始执行编译
 3. 确认入口：根据entry中的配置找到所有的入口文件
 4. 编译模块：从入口文件开始，调用所有的loader，再去递归的找模块的依赖关系
@@ -2833,7 +2833,7 @@ function compose (middleware) {
 
 12. **Referer:https://www.baidu.com/?tn=62095104_8_oem_dg** 当浏览器向web服务器发送请求的时候，一般会带上Referer，告诉服务器我是从哪个页面链接过来的，服务器籍此可以获得一些信息用于处理。
 
-13. User-Agent：浏览器类型，如果Servlet返回的内容与浏览器类型有关则该值非常有用。
+13. User-Agent：浏览器信息，如果Servlet返回的内容与浏览器类型有关则该值非常有用。
 
 14. Cache-Control
 
@@ -2903,6 +2903,7 @@ function compose (middleware) {
 4. delete
 5. patch
 6. trace
+7. options：OPTIONS它用于获取当前URL所支持的方法
 
 ##### 状态码
 
@@ -2963,7 +2964,7 @@ get请求可以向post请求一样发送body，但是get里面使用body不符�
    4. 然后去该服务器查询二级域名
    5. 接下来三级域名的查询是我们自己配置的
 
-2. 客户端和服务端经过三次握手，简历TCP连接，浏览器向服务器发送http请求
+2. 客户端和服务端经过三次握手，建立TCP连接，浏览器向服务器发送http请求
 
 3. 服务器处理请求，并返回状态码和html文件
 
