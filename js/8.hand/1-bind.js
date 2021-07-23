@@ -99,7 +99,27 @@ Function.prototype.bind4 = function (ctx) {
 };
 
 // bind4中通过fNop的中转可以做到在修改bindFoo的时候，不去修改bar的prototype
-function bar() {}
-var bindFoo = bar.bind4(null);
-bindFoo.prototype.value = 1;
-console.log(bar.prototype.value); // 1
+
+
+Function.prototype.myBind = function(ctx) {
+    ctx = ctx || window;
+    let self = this;
+    // let args = [].slice.call(arguments, 1);
+    return function () {
+        return self.apply(ctx);
+        // let innerArgs = [].concat(arguments);
+        // let ret = ctx.fn(...args, ...innerArgs);
+        // return ret;
+    };
+};
+
+function bar() {
+    this.value = 1;
+}
+function foo () {
+    console.log(this.value);
+}
+console.log(foo.bind(bar)());
+var bindFoo = foo.myBind(bar);
+// bindFoo.prototype.value = 1;
+console.log(bindFoo()); // 1

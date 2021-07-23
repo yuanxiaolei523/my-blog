@@ -1,30 +1,31 @@
-function MyPromiseAll(promiseArr) {
-    if (!Array.isArray(promiseArr)) {
-        throw new Error('');
+
+/**
+ * 1. 当所有的promise resolve之后resolve
+ * 2. 输入顺序和输出顺序相同
+ * 
+ * @param {*} promises 
+ * @returns 
+ */
+function MyPromiseAll(promises) {
+    if (!Array.isArray(promises)) {
+        return;
     }
+    let resArr = [];
+    let count = 0;
     return new Promise((resolve, reject) => {
-        let res = [];
-        if (promiseArr.length === 0) {
-            resolve(res);
-        }
-        let count = 0;
-        for (let i = 0; i < promiseArr.length; i++) {
-            // const element = promiseArr[i];
-            // promiseArr[i].then(thenres => {
-            //     res[i] = thenres;
-            //     index++;
-            // });
-            Promise.resolve(promiseArr[i]).then(value => {
+        promises.forEach((p, index) => {
+            Promise.resolve(p).then(res => {
+                resArr[index] = res;
                 count++;
-                res[i] = value;
-                if (count === promiseArr.length) {
-                    resolve(res);
+                if (count === promises.length) {
+                    resolve(resArr);
                 }
-            }).catch((e) => reject(e));
-            
-        }
-        
+            }).catch(() => {
+                reject();
+            });
+        });
     });
+    
 }
 
 const p1 = new Promise((res) => {
@@ -43,7 +44,7 @@ const p3 = new Promise((res) => {
         res('3');
     }, 4000);
 });
-MyPromiseAll([])
+MyPromiseAll([p1, p2, p3])
     .then((res) => console.log(res))
     .catch((e) => {
         console.log(e);
