@@ -39,3 +39,12 @@ Function.prototype.myCall3 = function (ctx) {
     delete ctx.fn;
     return ret;
 };
+
+Function.prototype.myCall2 = function (ctx) {
+    ctx = ctx || window;
+    ctx.fn = this;
+    let args = [].slice.call(arguments, 1);
+    let ret = ctx.fn(...args);
+    delete ctx.fn;
+    return ret;
+};

@@ -299,13 +299,11 @@ BFC是页面中的一块独立渲染区域，有自己的渲染规则，决定�
    }
    .left {
      width: 100px;
-     position: relative;
      background-color: aquamarine;
      margin-left: -100%;
    }
    .right {
      width: 200px;
-     position: relative;
      background-color: blue;
      margin-left: -200px;
    }
@@ -359,7 +357,7 @@ flex布局是弹性布局，设置为flex布局之后，子元素的float、clea
    * flex-end：下对齐
    * center：居中
    * baseline：第一行文字的基线
-   * Stretch：如果项目未设置高度或者设置为auto，将占满整个屏幕的高度
+   * stretch：如果项目未设置高度或者设置为auto，将占满整个屏幕的高度
 
 6. align-content
 
@@ -716,7 +714,7 @@ fraction：IEEE754规定，在计算机内部保存有效数字时，**默认第
 
 #### try...catch能捕获所有的异常吗
 
-答案肯定是不能
+答案肯定是不能,**能被 try catch 捕捉到的异常，必须是在报错的时候，线程执行已经进入 try catch 代码块，且处在 try catch 里面，这个时候才能被捕捉到。**
 
 **能被 try catch 捕捉到的异常，必须是在报错的时候，线程执行已经进入 try catch 代码块，且处在 try catch 里面，这个时候才能被捕捉到。**
 
@@ -838,7 +836,7 @@ Array.from(arguments);
 
 #### 原型链
 
-刚才我们提到原型也是一个对象，上面我们也说到对象(除null外)都会有一个原型对象，所以原型对象也是有他自己的原型对象的，这种方式其实构成了**原型链**
+刚才我们提到原型对象也是一个对象，上面我们也说到对象(除null外)都会有一个原型对象，所以原型对象也是有他自己的原型对象的，这种方式其实构成了**原型链**
 
 当我们在访问对象obj的某个属性时，如果在这个对象上没有找到这个属性，那么js就会去obj的原型对象上去找，如果找不到还是会往obj原型对象的原型对象上找，一直往上找，直至某个原型的原型对象为null为止，此时如果没有找到，那么就说明对象obj中没有这个属性。
 
@@ -866,7 +864,7 @@ Object instanceof Function; // true
 
 #### **Function instanceof Object;**
 
-因为Function是一个构造函数，Function.prototype数一个对象，所以对象的原型是Object.Prototype，所以原型链就变成了这样
+因为Function是一个构造函数，Function.prototype是一个对象，所以对象的原型是Object.Prototype，所以原型链就变成了这样
 
 Function --> Function.prototype --> Object.prototype --> null(可以理解为)
 
@@ -896,7 +894,7 @@ Function --> Function.prototype --> Object.prototype --> null(可以理解为)
 
 1. 引用计数法：
 
-   a对象对b对象有访问权限，那么称为a引用b对象
+   a对象对b对象有访问权限，那么称为a引用b对象，基本思路就是记录每个值被引用的次数，当记录的值为0的时候，表示它是垃圾可以被回收
 
    **弊端**：循环应用的时候，会造成内存泄露
 
@@ -907,6 +905,11 @@ Function --> Function.prototype --> Object.prototype --> null(可以理解为)
    1. 在运行的时候给存储在内存的所有变量加上标记
    2. 从根部触发，能触及的对象，把标记清除
    3. 有标记的就是要删除的变量
+   
+   弊端：
+   
+   1. 由于是从根对象(全局对象)开始查找，对于那些无法从根对象查询到的对象都将被清除
+   2. 回收后会形成内存碎片，影响后面申请大的连续内存空间
 
 #### 3. js中有哪些常见的内存泄露
 
@@ -933,10 +936,6 @@ Function --> Function.prototype --> Object.prototype --> null(可以理解为)
 
 1. 减少不必要的全局变量
 2. 用完数据后，及时解除应用
-
-
-
-
 
 ### ==和===的区别
 
@@ -1058,26 +1057,22 @@ c.sayName(); // shine
 #### 构造函数继承
 
 ```js
-function Parent () {
-  this.name = 'shine';
-  this.sex = 'male';
-  this.sayHi = function() {
-    console.log('hi');
-  }
-}
-Parent.prototype.sayName = function () {
-  console.log(this.name);
+function Parent(name) {
+    this.name = name;
 }
 
-function Child () {
-  Parent.call(this);
-  this.age = 14;
-  this.name = 'stone';
+Parent.prototype.age = 14;
+Parent.prototype.sayName = function() {
+    console.log(this.name);
+};
+function Child(name) {
+    Parent.call(this, name);
 }
 
-let c = new Child();
-console.log(c.name, c.age) // shine 14
-c.sayName(); // shine 
+let c1 = new Child('zs');
+let c2 = new Child('ls');
+console.log(c1.age, c2.age, c1.name);// undefined undefined zs
+c1.sayName(); // 报错
 ```
 
 > 本质上是把父类的this绑定到child上
@@ -1107,7 +1102,7 @@ function Child () {
 }
 
 Child.prototype = new Parent(); //用来获取父类原型上的属性和方法
-Child.prototype.constructor = Child;
+Child.prototype.constructor = Child; // 将子类原型对象的constructor指向子类的构造函数
 let c = new Child();
 console.log(c.name, c.age) // shine 14
 c.sayName(); 
@@ -1115,9 +1110,9 @@ c.sayName();
 
 **优点**
 
-1. 子类实例不会共享父类的属性了(除非你通过c.__proto\_\_来访问或者修改，这样还是会共享的)
 2. 子类实例可以共享父类原型上的方法了
 3. 子类可以向父类传参
+3. 不共享父类的引用属性
 
 **缺点**
 
@@ -1300,8 +1295,6 @@ function child () {
 1. 变量对象是规范上或者js引擎上实现，并不能在js环境中直接访问
 2. 当进入到一个函数执行上下文中，这个变量对象才会被激活，所以称为活动对象，这时候活动对象上个各种属性才能被访问
 
-
-
 调用函数时，会为其创建一个Arguments对象，并自动初始化局部变量arguments，指代该Arguments对象。所有作为参数传入的值都会称为Arguments对象的数组元素
 
 ##### eval函数上下文
@@ -1322,7 +1315,7 @@ eval函数执行时，会创建一个eval函数上下文，很少用而且不建
 
 **确定this的值**
 
-- 在全局上下文中，this执行window。而在nodejs中，this指向当前module
+- 在全局上下文中，this指向window。而在nodejs中，this指向当前module
 - 函数执行上下文中，this取决于函数的调用方式
 
 **词法环境**
@@ -1358,15 +1351,52 @@ FunctionExectionContext = { // 函数执行上下文
 
 ```
 
+**变量环境**
+
+变量环境和词法环境的区别就是
+
+* let、const声明的变量，外部环境引用保存在词法环境中。
+* var和function声明的变量和保存在环境变量中。
+
+```js
+let a = 1;
+const b = 2;
+var c = 3;
+function test (d, e) {
+  var f = 10;
+  return f * d * e;
+}
+c = test(a, b);
+
+
+GlobalLexicalEnvironment = {
+  LexicalEnvironment: {
+    OuterReference: null,
+    EnviromentRecord: {
+      Type: 'object',
+      a: <uninitialized> ,
+      b: <uninitialized> 
+    },
+  },
+  VariableEnvironment: {
+    EnviromentRecord: {
+      type: 'object',
+      test: <func>,
+      c: undefined,
+    }
+  }
+}
+```
+
 
 
 ### 你了解浏览器的事件循环吗
 
-浏览器的事件循环是：每执行一个宏任务，就去清空微任务队列
+浏览器的事件循环是：首先执行同步代码，然后清空微任务队列，之后每执行一个宏任务，就去清空微任务队列
 
 #### 为什么浏览器会有事件循环的机制
 
-因为js是`单线程`的，举一个例子，我们都知道js是可以操作DOM的，如果我们同时对一个DOM进行两个操作，一个是删除DOM，一个是修改DOM，那么到底以哪个为准呢，所以js就是单线程的，既然是单线程的，也就是说某个时间段，只能执行一个任务
+因为js是`单线程`的，举一个例子，我们都知道js是可以操作DOM的，如果我们同时对一个DOM进行两个操作，一个是删除DOM，一个是修改DOM，那么到底以哪个为准呢，所以js就是单线程的，单线程就意味着，所有任务需要排队，前一个任务结束，才会执行后一个任务。如果前一个任务耗时很长，后一个任务就不得不一直等着。如果是一些耗时的IO操作，那么后面的不需要等着
 
 #### 你了解过event loop吗
 
@@ -1391,7 +1421,7 @@ MutationObserver 主要是用来监视对 DOM 的修改，new 的时候会创建
 nodejs中宏任务的执行顺序
 
 1. timer定时器：执行已经被安排过的setTimeout和setInterval的回调函数
-2. pending、callback回调：执行延迟到下一个事件循环的I\O回调
+2. pending callbacks：执行延迟到下一个事件循环的I\O回调
 3. idle、prepare：内部使用
 4. poll：检索新的I\O事件，执行相关的I\O回调函数
 5. check：执行setImmediate的回调函数
@@ -1430,7 +1460,7 @@ V10之后：
 
 1. 成员唯一且都是对象
 2. 成员都是弱引用，随时可以消失。 可以用来保存DOM节点，不容易造成内存泄漏
-3. 不能遍历(没有size属性，而且是弱引用)，方法有add, delete,has
+3. 不能遍历(没有size属性，而且是弱引用)，没有clear方法，方法有add, delete,has
 4. 构造函数的参数是一个数组，数组内部都是一个个的对象
 
 **Map**
@@ -1537,9 +1567,8 @@ class PromiseClass {
 function LimitLoad (urls, handler, limit) {
   let sequence = urls.concat([]);
   let promises = [];
-  promises = sequence.splice(0, limit).map((url, index) => {
-    return handler(url).then(res => index;)
-  });
+  promises = sequence.splice(0, limit).map((url, index) => handler(url).then(() => index;)
+  );
   
   let p = Promise.race(promises);
   for (let i = 0; i < sequence.length; i++) {

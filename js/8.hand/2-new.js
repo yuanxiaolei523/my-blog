@@ -56,10 +56,29 @@ function myNew() {
 // p.name = '456'
 // console.log(p.age, p.strength, p.getName(), p.name, p.__proto__);
 
-function myNew2 () {
+function myNew2(cons) {
     let obj = {};
-    let Cons = [].shift.call(arguments);
-    obj.__proto__ = Cons.prototype;
-    var ret = Cons.apply(obj, arguments);
+    obj.__proto__ === cons.prototype; // 继承原型上的属性和方法
+    let args = [].slice.call(arguments, 1);
+    console.log(obj);
+    let ret = cons.apply(obj, args); // 将当前的属性和方法绑定到新对象上
     return typeof ret === 'object' ? ret : obj;
 }
+
+let a = {
+    age: 123
+};
+a.__proto__.getName = function () {
+    return this.age;
+};
+function B () {
+    this.names = 'lisi';
+    // console.log(this.name);
+    // console.log(this.age, this.__proto__);
+}
+let c = myNew2(B);
+console.log(c);
+// b.apply(a);
+// console.log(B.apply(a));
+// B.apply(a);
+// console.log(B());
