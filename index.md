@@ -493,7 +493,7 @@ Input,img
 
 
 
-## JS
+## Javascript
 
 ### js的异步方案以及优缺点
 
@@ -2067,19 +2067,28 @@ function flat5 (arr, deep = 1) {
 
 ### debounce
 
+防抖：在一段时间内，函数只会执行一次，如果这段时间内重复触发，则重新计时
+
 ```js
 function debounce (fn ,delay) {
   let t = null
   return function () {
     if (t) clearTimeout(t);
     let ctx = this;
-    let args = [...arguments];
+    let args = arguments;
     t = setTimeout(() => {
       fn.apply(ctx, args);
     }, delay);
   }
 }
 
+```
+
+### Throttle
+
+节流：在一段时间内，函数执行一次，如果在这段时间内重复触发，那么只会执行一次
+
+```js
 function throttle(fn, delay) {
   let startTime = Date.now();
   return function() {
@@ -2092,7 +2101,48 @@ function throttle(fn, delay) {
 }
 ```
 
+上面的方式有缺陷：就是第一次会立即执行
 
+```js
+function throttle(fn, delay) {
+  let time =null;
+  return function () {
+    if (!timer) {
+     	timer = setTimeout(() => {
+      	fn.apply(this, args)
+      	timer = null
+    	},delay)
+    }
+    
+  }
+}
+```
+
+上面使用定时器实现了节流，但是这种情况下最后一次不会立即执行,有什么方法能立即执行呢
+
+```js
+function throttle(fn, delay) {
+  let t = null;
+  let prev = Date.now();
+  return function () {
+    let now = Date.now();
+    let context = this;
+    let args = arguments;
+    let remaining = delay - (now - prev);
+    clearTimeout(t);
+    if (remaining<=0) {
+       fn.apply(context, args)
+       prev = Date.now()
+    } else {
+      time = setTimeout(function () {
+        fn.apply(context, args);
+      }, remaining);
+    }
+  }
+}
+```
+
+上面第一次会立即执行，同时最后一次也会立即执行
 
 ### 回文数
 
@@ -2347,19 +2397,37 @@ beforeRouteEnter(to, from, next) {
 11. 触发 DOM 更新。
 12. 调用 `beforeRouteEnter` 守卫中传给 `next` 的回调函数，创建好的组件实例会作为回调函数的参数传入。
 
+### Vue3 vs Vue2.x
+
+#### Vue3都做了什么
+
+##### 更小
+
+移除了一些不常用的api
+
+引入`tree-shaking`，可以将无用模块“剪辑”，仅打包需要的，使打包的整体体积变小了
+
+##### 更快
+
+- diff算法优化
+- 静态提升
+- 事件监听缓存
+- SSR优化
+
+##### 更友好
+
+`vue3`在兼顾`vue2`的`options API`的同时还推出了`composition API`，大大增加了代码的逻辑组织和代码复用能力
 
 
 
 
 
+#### Vue3中为什么使用Proxy代替了Object.defineProperty
 
-
-
-
-
-
-
-
+1. Object.defineProperty只能劫持对象的属性，但是proxy却可以整个对象，返回一个新的对象
+2. proxy可以监听到数组的变化（`push`、`shift`、`splice`），但是defineProperty不能监听到数组的变化
+3. defineProperty对一个对象进行删除与添加属性操作，无法劫持到
+4. Object.defineProperty 性能不好,要对深层对象劫持要一次性递归,Proxy 只在 getter 时才进行对象下一层属性的劫持 性能优化
 
 
 
