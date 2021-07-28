@@ -529,10 +529,6 @@ CSRF(Cross Site Request Forgery)指的是**跨站请求伪造**，是一种劫�
 3. sameSite
 4. token
 
-#### SQL注入
-
-
-
 ### js的异步方案以及优缺点
 
 1. 回调函数

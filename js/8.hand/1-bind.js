@@ -1,10 +1,9 @@
-// // var obj = {
-// //     name: 'shine'
-// // } 
-// // function bar () {
-// //     console.log(this.name);
-// //     return 1;
-// // }
+/**
+ * 1. bind接受一堆参数，第一个参数是一个对象，后面的参数是传入的参数
+ * 2. bind返回一个函数
+ * 3. bind返回的函数可以使用new创建实例，提供的 this 值被忽略，同时调用时的参数被提供给模拟函数。
+ * 
+ */
 
 // // var barBind = bar.bind(obj);
 // /**
