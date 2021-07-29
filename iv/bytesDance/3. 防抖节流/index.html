@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>防抖节流</title>
+    <style>
+        #box {
+            width: 100%;
+            height: 300px;
+            background-color: gray;
+            line-height: 300px;
+            text-align: center;
+            color: white;
+            font-size: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div id="box"></div>
+    <script src="./throttle.js"></script>
+    <script type="module">
+        let num = 1;
+        let box = document.getElementById('box');
+        function getCount () {
+            box.innerText = num++;
+        }
+        // console.log(throttle3, debounce1, box);
+        // box.onmousemove = getCount
+        box.onmousemove = throttle3(getCount, 1000)
+    </script>
+</body>
+</html>

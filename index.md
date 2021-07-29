@@ -2515,7 +2515,53 @@ beforeRouteEnter(to, from, next) {
 
 * componentWillUnmount:此方法用于组件卸载前，清理一些注册是监听事件，或者取消订阅的网络请求等
 
+### setState是同步的还是异步的
 
+只要你进入了 `react` 的调度流程，那就是异步的。只要你没有进入 `react` 的调度流程，那就是同步的。什么东西不会进入 `react` 的调度流程？ `setTimeout` `setInterval` ，直接在 `DOM` 上绑定原生事件等。这些都不会走 `React` 的调度流程，你在这种情况下调用 `setState` ，那这次 `setState` 就是同步的。 否则就是异步的。
+
+而 `setState` 同步执行的情况下， `DOM` 也会被同步更新，也就意味着如果你多次 `setState` ，会导致多次更新，这是毫无意义并且浪费性能的。
+
+
+
+### React的高阶组件
+
+高阶组件的参数是一个组件，返回值也算是一个组件。
+
+#### 作用
+
+1. 操作props
+
+   ```react
+   function ppHOC(WrappedComponent) {
+     return class PP extends React.Component {
+       render() {
+         const newProps = {
+           user: currentLoggedInUser
+         }
+         return <WrappedComponent {...this.props} {...newProps}/>
+       }
+     }
+   }
+   ```
+
+2. 通过refs访问组件实例
+
+   ```react
+   function refsHOC(WrappedComponent) {
+     return class RefsHOC extends React.Component {
+       proc(wrappedComponentInstance) {
+         wrappedComponentInstance.method()
+       }
+   
+       render() {
+         const props = Object.assign({}, this.props, {ref: this.proc.bind(this)})
+         return <WrappedComponent {...props}/>
+       }
+     }
+   }
+   ```
+
+3. 提取state
 
 ## Ig
 
@@ -3645,4 +3691,22 @@ plugins: ["react"]
 ```js
 
 ```
+
+## 设计模式
+
+### 创建型模式
+
+#### 工厂模式
+
+**工厂方法模式**是一种创建型设计模式， 其在父类中提供一个创建对象的方法， 允许子类决定实例化对象的类型。
+
+工厂方法模式建议使用特殊的*工厂*方法代替对于对象构造函数的直接调用 （即使用 `new`运算符）。 不用担心， 对象仍将通过 `new`运算符创建， 只是该运算符改在工厂方法中调用罢了。 工厂方法返回的对象通常被称作 “产品”。
+
+
+
+### 结构型模式
+
+
+
+### 行为模式
 

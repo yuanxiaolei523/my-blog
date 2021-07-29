@@ -42,6 +42,8 @@ function throttle3(fn, delay) {
         let args = arguments;
         let remaining = delay - (now - startTime);
         clearTimeout(time);
+        console.log(remaining);
+
         if (remaining <= 0) {
             fn.apply(context, args);
             startTime = now;
