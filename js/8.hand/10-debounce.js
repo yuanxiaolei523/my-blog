@@ -27,16 +27,15 @@ function debounce2(func, wait, immediate) {
             var callNow = !timeout;
             timeout = setTimeout(function(){
                 timeout = null;
-            }, wait)
-            if (callNow) result = func.apply(context, args)
-        }
-        else {
+            }, wait);
+            if (callNow) result = func.apply(context, args);
+        } else {
             timeout = setTimeout(function(){
-                func.apply(context, args)
+                func.apply(context, args);
             }, wait);
         }
         return result;
-    }
+    };
 }
 
 var count = 1;
@@ -44,6 +43,6 @@ var container = document.getElementById('container');
 
 function getUserAction() {
     container.innerHTML = count++;
-};
+}
 
 container.onmousemove = debounce2(getUserAction, 1000, true);

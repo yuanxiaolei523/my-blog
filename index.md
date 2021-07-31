@@ -50,7 +50,7 @@ css的盒模型包括标准盒模型和怪异盒模型
 
 **伪类**
 
-一个 CSS [伪类（pseudo-class）](https://developer.mozilla.org/en-US/docs/Web/CSS/Pseudo-classes) 是一个以冒号(:)作为前缀的关键字，当你希望样式在特定状态下才被呈现到指定的元素时，你可以往元素的选择器后面加上对应的伪类（pseudo-class）。你可能希望某个元素在处于某种状态下呈现另一种样式，例如当鼠标悬停在元素上面时，或者当一个 checkbox 被禁用或被勾选时，又或者当一个元素是它在 DOM 树中父元素的第一个孩子元素时。
+一个 CSS [伪类（pseudo-class）](https://developer.mozilla.org/en-US/docs/Web/CSS/Pseudo-classes) 是一个以冒号(:)作为前缀的关键字，当你希望**样式在特定状态下**才被呈现到指定的元素时，你可以往元素的选择器后面加上对应的伪类（pseudo-class）。你可能希望某个元素在处于某种状态下呈现另一种样式，例如当鼠标悬停在元素上面时，或者当一个 checkbox 被禁用或被勾选时，又或者当一个元素是它在 DOM 树中父元素的第一个孩子元素时。
 :checked
 :disabled
 :empty
@@ -153,14 +153,22 @@ BFC是页面中的一块独立渲染区域，有自己的渲染规则，决定�
 #### 2. 块级格式化上下文的规则
 
 * 内部的盒子会在垂直方向一个个的放置
+
 * 每个盒子的左边与包含块的左边接触，即使存在浮动也是如此
+
 * 在计算高度的时候，浮动的子元素的高度也被计算在内
+
 * BFC就是页面上的一个独立容器，内部的元素不会影响到外部，反之也一样
+
 * BFC的区域不会与float box发生重叠
+
+* Box垂直方向的距离由margin决定。属于**同一个**BFC的两个相邻Box的margin会发生重叠。
+
+  
 
 #### 3. 如何创建块级格式化上下文
 
-* 根元素
+* 根元素html
 * 浮动的元素
 * dispaly的值为inline-block或者table-cell
 * position的值为absolute或者fixed
@@ -204,7 +212,7 @@ BFC是页面中的一块独立渲染区域，有自己的渲染规则，决定�
 
 4. sticky
 
-   黏性定位，是fixed和relative的结合，在达到某个阈值点之前，他都可以滚动的，达到了阈值点之后，就变得和相对定位一样，固定在页面的某个位置
+   黏性定位，是fixed和relative的结合，在达到某个阈值点之前，他都可以滚动的，达到了阈值点之后，就变得和fixed一样，固定在页面的某个位置
 
 #### z-index
 
@@ -396,7 +404,7 @@ flex布局是弹性布局，设置为flex布局之后，子元素的float、clea
 
    快捷值：auto(1 1 auto)和none(0 0  auto)
 
-6. Align-self
+6. align-self
 
    `align-self`属性允许单个项目有与其他项目不一样的对齐方式，可覆盖`align-items`属性。默认值为`auto`，表示继承父元素的`align-items`属性，如果没有父元素，则等同于`stretch`。
 
@@ -432,7 +440,7 @@ flex布局是弹性布局，设置为flex布局之后，子元素的float、clea
 
 1. 基本概念
 
-   事件流：首先是捕获阶段，然后是目标阶段，最后是冒泡阶段
+   事件流：一个完整的事件流首先是捕获阶段，然后是目标阶段，最后是冒泡阶段
 
    捕获是自顶向下
 
@@ -639,7 +647,7 @@ let s = Symbol()
 
 ##### bigInt的注意事项
 
-1. typeof 122n === 'bigint'
+1. typeof 122n === 'bigint' // true
 2. 42n === 42 // false;
 3. 42n == 42 // true
 4. bigInt是**常量**
@@ -790,22 +798,39 @@ fraction：IEEE754规定，在计算机内部保存有效数字时，**默认第
    }
    ```
 
-3. promise内部的错误
+3. promise的错误
 
 
 
 #### 有哪些捕获异常的方式
 
-1. 普通的js运行时错误、资源加载错误(仅限后者)：使用onerror、addEventListener('error')捕获
+1. 普通的js运行时错误使用onerror捕获
+
+   onerror：不能捕获语法错误、不能捕获资源加载错误、不能捕获接口异常，可以捕获运行时错误(包括异步)
 
 ```html
 <script src="http://cdn.xxx.com/js/test.js" onerror="errorHandler(this)"></script>
 <script>
- function errorHandler(error) {log(error)}
+ function errorHandler(error) {console.log(error)}
 </script>
 ```
 
-2. #### Uncaught (in promise)：使用window.addEventListener('unhandledrejection')捕获处理捕获
+2. window.addEventListener('error',handler, **true**)
+
+   ```
+   <script>
+   window.addEventListener('error', (error) => {
+       console.log('捕获到异常：', error);
+   }, true)
+   </script>
+   <img src="./jartto.png">
+   ```
+
+   主要用于捕获资源加载异常或者接口请求异常
+
+   由于**网络请求异常不会事件冒泡**，因此必须在**捕获阶段**将其捕捉到才行
+
+3. #### Uncaught (in promise)：使用window.addEventListener('unhandledrejection')捕获处理捕获
 
 ```html
 <!DOCTYPE html>
@@ -828,7 +853,7 @@ fraction：IEEE754规定，在计算机内部保存有效数字时，**默认第
 </html>
 ```
 
-由于网络请求异常不会事件冒泡，所以必须在捕获阶段将其捕获才行
+ 由于网络请求异常不会事件冒泡，所以必须在捕获阶段将其捕获才行
 
 3. console.error:重写console.error
 
@@ -843,6 +868,8 @@ fraction：IEEE754规定，在计算机内部保存有效数字时，**默认第
 4. 请求错误
 
    自己封装XMLHTTPRequest或fetch
+   
+5. promise.catch()
 
 ### 伪数组转数组
 
@@ -960,6 +987,14 @@ Function --> Function.prototype --> Object.prototype --> null(可以理解为)
 #### 3. js中有哪些常见的内存泄露
 
 1. 意外的全局变量
+
+   ```js
+   function getAge() {
+     age = 12;
+   }
+   
+   console.log(age) // 12
+   ```
 
 2. 对dom的引用
 
@@ -2561,7 +2596,53 @@ beforeRouteEnter(to, from, next) {
 
 * componentWillUnmount:此方法用于组件卸载前，清理一些注册是监听事件，或者取消订阅的网络请求等
 
+### setState是同步的还是异步的
 
+只要你进入了 `react` 的调度流程，那就是异步的。只要你没有进入 `react` 的调度流程，那就是同步的。什么东西不会进入 `react` 的调度流程？ `setTimeout` `setInterval` ，直接在 `DOM` 上绑定原生事件等。这些都不会走 `React` 的调度流程，你在这种情况下调用 `setState` ，那这次 `setState` 就是同步的。 否则就是异步的。
+
+而 `setState` 同步执行的情况下， `DOM` 也会被同步更新，也就意味着如果你多次 `setState` ，会导致多次更新，这是毫无意义并且浪费性能的。
+
+
+
+### React的高阶组件
+
+高阶组件的参数是一个组件，返回值也算是一个组件。
+
+#### 作用
+
+1. 操作props
+
+   ```react
+   function ppHOC(WrappedComponent) {
+     return class PP extends React.Component {
+       render() {
+         const newProps = {
+           user: currentLoggedInUser
+         }
+         return <WrappedComponent {...this.props} {...newProps}/>
+       }
+     }
+   }
+   ```
+
+2. 通过refs访问组件实例
+
+   ```react
+   function refsHOC(WrappedComponent) {
+     return class RefsHOC extends React.Component {
+       proc(wrappedComponentInstance) {
+         wrappedComponentInstance.method()
+       }
+   
+       render() {
+         const props = Object.assign({}, this.props, {ref: this.proc.bind(this)})
+         return <WrappedComponent {...props}/>
+       }
+     }
+   }
+   ```
+
+3. 提取state
 
 ## Ig
 
@@ -3691,4 +3772,22 @@ plugins: ["react"]
 ```js
 
 ```
+
+## 设计模式
+
+### 创建型模式
+
+#### 工厂模式
+
+**工厂方法模式**是一种创建型设计模式， 其在父类中提供一个创建对象的方法， 允许子类决定实例化对象的类型。
+
+工厂方法模式建议使用特殊的*工厂*方法代替对于对象构造函数的直接调用 （即使用 `new`运算符）。 不用担心， 对象仍将通过 `new`运算符创建， 只是该运算符改在工厂方法中调用罢了。 工厂方法返回的对象通常被称作 “产品”。
+
+
+
+### 结构型模式
+
+
+
+### 行为模式
 

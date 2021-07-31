@@ -1,55 +1,48 @@
+
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="./shengbei.css">
-</head>
+    <title></title>
+    <style>
+        .container {
+            /* width: 200px; */
+            height: 200px;
+            overflow: hidden;
+            padding: 0 200px 0 100px;
+        }
+        .center, .left, .right {
+            float: left;
+            height: 200px;
+        }
+        .center {
+            width: 100%;
+            background-color: teal;
+        }
+        .left {
+            position: relative;
+            margin-left: -100%;
+            left: -100px;
+            width: 100px;
+            background-color: tomato;
+        }   
+        .right {
+            margin-left: -200px;
+            position: relative;
+            right: -200px;
+            width: 200px;
+            background-color: turquoise;
+        }   
+    </style>
 
+</head>
 <body>
-    <div id="container">
+    <div class="container">
         <div class="center"></div>
         <div class="left"></div>
         <div class="right"></div>
     </div>
-    <style>
-        #container {
-            overflow: hidden;
-            padding: 0 100px 0 200px;
-        }
-
-        .left,
-        .right,
-        .center {
-            float: left;
-            height: 200px;
-        }
-
-        .left {
-            width: 200px;
-            background-color: aqua;
-            position: relative;
-            left: -200px;
-            margin-left: -100%;
-        }
-
-        .right {
-            width: 100px;
-            background-color: aquamarine;
-            right: -100px;
-            position: relative;
-            margin-left: -100px;
-        }
-
-        .center {
-            width: 100%;
-            background-color: blue;
-        }
-
-    </style>
 </body>
-
 </html>
