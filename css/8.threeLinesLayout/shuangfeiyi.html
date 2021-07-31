@@ -1,59 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>双飞翼布局</title>
-</head>
+    <title>Document</title>
+    <style>
+        .box {
+            height: 200px;
+            overflow: hidden;
+            
+        }
+        .center {
+            width: 100%;
+        }
+        .child {
+            /* width: 100%; */
+            margin: 0 200px 0 100px;
+            background-color: turquoise;
+            height: 200px;
+        }
+        .left {
+            width: 100px;
+            background-color: yellow;
+            margin-left: -100%;
+        }
+        .right {
+            margin-left: -200px;
+            background-color: violet;
+            width: 200px;
+        }
+        .left, .center, .right {
+            float: left;
+            height: 200px;
 
+        }
+    </style>
+</head>
 <body>
-    <div id="container">
+    <div class="box">
         <div class="center">
-            <div class="inner"></div>
+            <div class="child"></div>
         </div>
         <div class="left"></div>
         <div class="right"></div>
     </div>
-    <style>
-        #container {
-            overflow: hidden;
-        }
-
-        .center,
-        .left,
-        .right {
-            height: 200px;
-            float: left;
-        }
-
-        .center {
-            width: 100%;
-        }
-
-        .inner {
-            margin: 0 200px 0 100px;
-            height: 200px;
-            background-color: aqua;
-            /* width: 100%; */
-        }
-
-        .left {
-            width: 100px;
-            position: relative;
-            background-color: aquamarine;
-            margin-left: -100%;
-        }
-
-        .right {
-            width: 200px;
-            position: relative;
-            background-color: blue;
-            margin-left: -200px;
-        }
-
-    </style>
 </body>
-
 </html>
