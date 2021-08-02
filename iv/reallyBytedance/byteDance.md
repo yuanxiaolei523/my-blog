@@ -3,29 +3,29 @@
 ## 前端工程化
 1. webpack的配置
 具体介绍一下
-2. 用过哪些plugin
+2. 用过哪些plugin(bad)
 HTMLwebpackPlugin
 答得不是很多
 3. Plugin和Loader分别是做什么的？怎么工作的？
 
 4. 是否写过plugin和loader
 写过loader
-5. webpack的构建流程
+5. webpack的构建流程(bad)
 答得不是很清楚
-## 源码相关
+## 源码相关(bad)
 1. vue的源码
 2. react源码
 
 ## js相关
-1. let、const、var的区别
+1. let、const、var的区别(bad)
 ```js
 const a = {};
 a.b = 123;
 ```
-2. 异步编程的区别以及优缺点
-3. async/await 的底层实现
+2. 异步编程的区别以及优缺点(bad)
+3. async/await 的底层实现 (bad)
 generator
-
+https://es6.ruanyifeng.com/#docs/async#async-%E5%87%BD%E6%95%B0%E7%9A%84%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86
 4. 写一下Promise.all
 
 5. 看一道题目
