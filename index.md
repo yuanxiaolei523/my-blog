@@ -432,7 +432,7 @@ flex布局是弹性布局，设置为flex布局之后，子元素的float、clea
 
 3. 提升用户体验：例如title、alt可以用于解释名称或者解释图片信息
 
-4. 便于团队开发和维护：是代码具有可读性
+4. 便于团队开发和维护：使代码具有可读性
 
    
 
@@ -515,6 +515,13 @@ Input,img
 
 ## Javascript
 
+### var、let、const的区别
+
+1. let、const声明的变量会产生块级作用域，var声明的并不是
+2. let、const声明的变量不存在变量提升，var会有变量提升
+3. let、const声明的变量会有暂时性死区，var不会有
+4. let、const在同一个作用域下，不允许重复声明，var可以
+
 ### 常见的web攻击方式有哪些，如何防御
 
 #### XSS
@@ -565,13 +572,15 @@ CSRF(Cross Site Request Forgery)指的是**跨站请求伪造**，是一种劫�
 
 3. generator
 
-   可以控制函数的执行
+   优点：generator 方式使得异步操作很接近同步操作，十分的简洁明了。另外，gen 执行 yield 语句时，只是将执行上下文暂时弹出，并不会销毁，这使得上下文状态被保存
+
+   缺点：流程管理不方便，需要一个执行器来执行 generator 函数
 
 4. Async/await
 
-   优点：代码清晰，不用像Promise写一堆then，处理了回调地狱的问题
+   优点：代码清晰，不用像Promise写一堆then，处理了回调地狱的问题；相比 generator 方式，async 方式省掉了自动执行器，减少了代码量
 
-   缺点：await将异步代码改造成同步代码，如果多个异步操作没有依赖性，会造成性能降低
+   缺点：await将异步代码改造成同步代码，如果多个异步操作没有依赖性，会造成性能降低(可以使用await Promise.all()来解决)
 
 
 
@@ -1132,7 +1141,7 @@ c.sayName(); // shine
 
 **缺点**
 
-1. 子类实例会共享父类的所有的属性和方法，一旦修改，则会，其他的实例继承过来的属性也会被修改
+1. 子类实例会共享父类的所有的属性和方法，一旦修改，其他的实例继承过来的属性也会被修改
 2. 无法向父类的构造函数传参
 
 #### 构造函数继承
@@ -1166,7 +1175,7 @@ c1.sayName(); // 报错
 **缺点**
 
 1. 无法继承父类的原型上的属性和方法
-2. 方法都在构造函数中声明，所以无法实现函数的复用，即子类的每一个实例都会有一个sayHi方法
+2. 方法都在构造函数中声明，所以无法实现函数的复用
 
 #### 组合继承
 
@@ -1254,6 +1263,23 @@ function child () {
 **优点**
 
 只会调用一次parent的构造函数，并且instanceof和getPropertyOf可以正常使用
+
+#### extends
+
+ES6的继承
+
+```js
+class Parent {
+  
+}
+
+class Child extends Parent{
+  
+}
+
+```
+
+
 
 #### ES5和ES6的继承除了写法有什么不同
 
@@ -1437,7 +1463,7 @@ FunctionExectionContext = { // 函数执行上下文
 变量环境和词法环境的区别就是
 
 * let、const声明的变量，外部环境引用保存在词法环境中。
-* var和function声明的变量和保存在环境变量中。
+* var和function声明的变量和保存在变量环境中。
 
 ```js
 let a = 1;
@@ -1495,7 +1521,7 @@ MutationObserver 主要是用来监视对 DOM 的修改，new 的时候会创建
 
 #### 为什么要同时有宏任务和微任务，只有宏任务可以吗
 
-不可以，因为宏任务是一个队列结构，具有先进先出的性质，如果此时有一个紧急的任务，那么只能排队等候了
+不可以，因为宏任务队列是一个队列结构，具有先进先出的性质，如果此时有一个紧急的任务，那么只能排队等候了
 
 #### nodejs和浏览器的事件循环有什么不同呢？
 
@@ -1524,7 +1550,11 @@ V10之后：
 
 
 
+### CommonJS和ESModule的区别
 
+1. CommonJS是运行时加载，ESModule是编译的时候进行
+2. CommonJS输出的是值的拷贝，ESModule输出的是值的引用
+3. CommonJS具有缓存，在第一次被加载时，会完整运行整个文件并输出一个对象，拷贝（浅拷贝）在内存中。
 
 ## ES6
 
@@ -1617,7 +1647,20 @@ function MyPromiseAll (promiseArr) {
 }
 ```
 
+4. Promise.race()
 
+   返回一个新的promise实例，实例的状态随着最先改变状态的那个promise而改变
+
+5. Promise.allSettled()
+
+   返回一个新的Promise实例，实例的状态只有等所有的Promise都返回结果，实例才会变成fullfilled
+
+6. Promise.any()
+
+   返回一个新的promise实例，实例的状态会有两种情况
+
+   * 只要有一个promise的状态是fullfilled，那么就是fullfilled
+   * 如果三个都是rejected，那么就是rejected
 
 ### 4.如何使用Promise的缓存来缓存一些比较常用的固定的结果
 
@@ -1797,7 +1840,7 @@ console.log(calculator(testData));
 ```js
 class EventEmitter {
     constructor() {
-        this.events = [];
+        this.events = {};
     }
     // 注册监听
     on(event, cb) {
@@ -2163,6 +2206,28 @@ function debounce (fn ,delay) {
   }
 }
 
+function debounce2(fn, delay, immediate) {
+  let t;
+  return function() {
+    if (t) clearTimeout(t);
+    let args = arguments;
+    let context = this;
+    if (immediate) {
+      let callnow = !t;
+      t = setTimeout(() => {
+        t = null;
+      }, delay);
+      if (callnow) {
+        fn.apply(this, args);
+        immediate = false;
+      }
+    } else {
+      t = setTimeout(() => {
+        fn.apply(this, args);
+      }, wait)
+    }
+  }
+}
 ```
 
 ### Throttle
@@ -2392,7 +2457,11 @@ computed watcher持有一个dep实例，通过dirty属性标记计算属性是�
 
 当computed的依赖值改变后，就会通知订阅的watcher进行更新，对于computed watcher会将dirty属性设置为true，并且进行计算属性方法的调用
 
+### vue中的key
 
+key是给每一个vnode的唯一id，也是diff的一种优化策略，可以根据key，更准确， 更快的找到对应的vnode节点
+
+###  
 
 ### Vue-router的路由守卫
 
@@ -2518,6 +2587,14 @@ beforeRouteEnter(to, from, next) {
 
 ## React
 
+### key的作用
+
+key 帮助 React 识别哪些元素改变了，比如被添加或删除。
+
+当没有key的时候，在列表的开头插入元素，开销会比较大，需要经历销毁、重建的过程。在列表的结尾插入元素时，开销会比较小，只需要添加一个元素即可
+
+当子元素拥有 key 时，React 使用 key 来匹配原有树上的子元素以及最新树上的子元素
+
 ### 虚拟dom
 
 #### 什么是虚拟DOM
@@ -2541,6 +2618,16 @@ beforeRouteEnter(to, from, next) {
 
 1. 首次渲染大量DOM时，由于多了一层虚拟DOM的计算，速度比正常稍慢
 2. 在一些性能要求极高的应用中虚拟 DOM 无法进行针对性的极致优化
+
+
+
+### react的diff算法
+
+* 对比不同类型的元素
+  * react会拆卸原有的树并建立起新树
+  * 当卸载一棵树时，对应的DOM节点也会被销毁
+* 对比相同类型的元素
+  * 当对比两个相同类型的 React 元素时，React 会保留 DOM 节点，仅比对及更新有改变的属性。
 
 ### React的生命周期钩子
 
@@ -2594,7 +2681,7 @@ beforeRouteEnter(to, from, next) {
 
 #### 销毁阶段
 
-* componentWillUnmount:此方法用于组件卸载前，清理一些注册是监听事件，或者取消订阅的网络请求等
+* componentWillUnmount:此方法用于组件卸载前，清理一些注册是的监听事件、定时器或者取消订阅的网络请求等
 
 ### setState是同步的还是异步的
 
@@ -2602,7 +2689,7 @@ beforeRouteEnter(to, from, next) {
 
 而 `setState` 同步执行的情况下， `DOM` 也会被同步更新，也就意味着如果你多次 `setState` ，会导致多次更新，这是毫无意义并且浪费性能的。
 
-
+在生命周期的函数场景下，setState是异步的，**相同的状态属性**多次更新会合并成一次，且最后一次会生效保留
 
 ### React的高阶组件
 
@@ -3137,7 +3224,7 @@ function compose (middleware) {
 
 10. If-Modified-since: 只有当所请求的内容在指定的日期之后又经过修改才返回它，否则返回304“Not Modified”应答
 
-11. If-None-Match：如果内容未改变返回304代码，参数为服务器先前发送的Etag，与服务器回应的Etag比较判断是否改变
+11. If-None-Match：如果内容未改变返回304，参数为服务器先前发送的Etag，与服务器回应的Etag比较判断是否改变
 
 12. **Referer:https://www.baidu.com/?tn=62095104_8_oem_dg** 当浏览器向web服务器发送请求的时候，一般会带上Referer，告诉服务器我是从哪个页面链接过来的，服务器籍此可以获得一些信息用于处理。
 
@@ -3258,7 +3345,7 @@ get请求可以向post请求一样发送body，但是get里面使用body不符�
 1. 客户端向服务端发送释放报文段，并停止发送数据
 2. 服务端收到了之后，发出响应报文段，表示自己已经知道了，此时处于半关闭状态，即A没有数据发送到b了，但是b还可以发送给数据到a
 3. 服务端没有要发送的数据之后，此时服务端向客户端发送释放请求报文
-4. 客户端收到了之后，向服务端发送响应报文，收已经收到
+4. 客户端收到了之后，向服务端发送响应报文，表示已经收到
 
 #### 四、 http和https的区别
 
@@ -3329,7 +3416,7 @@ https采用的是对称加密+非对称加密
 
 **http1.0 VS http1.1**
 
-1. 缓存处理：http1.0中主要使用expires和if-modified-since作为缓存判断的标准，http1.1中加入了etag、if-none-match等字段
+1. 缓存处理：http1.0中主要使用expires和if-modified-since作为缓存判断的标准，http1.1中加入了cache-control、etag、if-none-match等字段
 2. 长链接： 在http1.0中每次请求都需要建立新的连接，在http1.1中，新增了connection: keep-alive，在一个TCP连接上可以传送多个HTTP请求和响应
 
 
@@ -3367,7 +3454,7 @@ hash值是不会伴随请求发送到服务端的，所以改变hash，不会重
 
 1. 按下浏览器的前进后退时
 2. 输入的url中包含hash值时
-3. 只修改url中的hash值时，并不会再次发送骑牛，但是会触发事件
+3. 只修改url中的hash值时，并不会再次发送请求，但是会触发事件
 4. a标签的href可以设置为#top，点击时会自动修改浏览器的hash值，并触发事件
 
 #### history
@@ -3513,7 +3600,7 @@ Disk Cache是磁盘缓存，从效率上来说比内存缓存慢，但是存储�
 
 > 比较大的js、css文件会被丢进磁盘，反之进内存
 >
-> 内存使用率比较高的，文件优先进磁盘
+> 当前系统内存使用率比较高的情况下，文件优先进磁盘
 
 #### push cache
 
@@ -3532,7 +3619,7 @@ cookie是服务器发送到用户浏览器并保存在本地的一小块数据�
 
 Cookie的作用域
 
-1. Domain: 指定哪些主机可以接受cookie，如果不指定，默认值origin，不包含子域名，如果指定了domain，则包含子域名
+1. Domain: 指定哪些主机可以接受cookie，如果不指定，默认值origin，不包含子域名，如果指定了domain，则包含子域名（单点登录）
 2. path：指定了主机下的那些路径可以接受cookie，该url路径必须存在于请求的url中
 
 SameSite：cookie允许服务器要求某个cookie在跨站请求时不会被发送，从而可以阻止CSRF
@@ -3695,7 +3782,7 @@ toDataURL中的参数，默认是`image/png,如果传入参数后，返回的url
 
 ## ESLint
 
-### env
+### env: 代码可以运行在哪些环境中
 
 ```json
 {

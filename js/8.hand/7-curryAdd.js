@@ -99,3 +99,10 @@ function add2(...args1) {
     return func;
 }
 console.log(add2(1)(2)(3));
+
+function add2(...args) {
+    let res = getSum(args);
+    const func = (...args1) => add2(res + getSum(args1));
+    func.toString = function () { return res; }
+    return func()
+}

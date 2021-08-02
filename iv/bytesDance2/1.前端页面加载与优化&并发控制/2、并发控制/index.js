@@ -67,22 +67,19 @@ const urls = [
 
 
 
-limitLoad(urls, loadImg, 3);
+// limitLoad(urls, loadImg, 3);
 
 
-function limitLoad2(urls, handle, count) {
+function limitLoad2(urls, handler, limit) {
     let sequence = [].concat(urls);
-    let promises = [];
-    promises = sequence.splice(0, count).map((url, index) => {
-        return handle(url).then(() => {
-            return index;
-        });
-    }); 
+    let promises = urls.splice(0, limit);
+    promises = promises.map((p, index) => handler(p).then(() => index));
     let p = Promise.race(promises);
     for (let i = 0; i < sequence.length; i++) {
-        p = p.then(res => { // res 就是index
-            promises[res] = handle(sequence[i]).then(() => res);
-            return Promise.race(promises); // 返回的还是下标
+        p = p.then((index) => {
+            promises[index] = handler(sequence[i]).then(() => index);
+            return Promise.race(promises);
         });
     }
-}
+}   
+limitLoad2(urls, loadImg, 3);

@@ -65,6 +65,7 @@ function myNew2(cons) {
     return typeof ret === 'object' ? ret : obj;
 }
 
+
 let a = {
     age: 123
 };

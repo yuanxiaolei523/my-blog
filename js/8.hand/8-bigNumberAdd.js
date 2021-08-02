@@ -20,7 +20,7 @@ function bigNumber (num1, num2) {
     } else if (len1 < len2) {
         num1 = num1.padStart(len2, '0');
     }
-    let res = ''.padStart(18, '');
+    let res = ''.padStart(num1.length, '');
 
     for (let i = 0; i < num1.length; i++) {
         res += (Number(num1[i]) + Number(num2[i]));

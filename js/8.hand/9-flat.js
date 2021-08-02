@@ -38,10 +38,6 @@ function flat2 (arr, num = 1) {
 
 // console.log(flat2([1, 2, [2, 3, [4, [6, [1, [1]]]], , 5], 6], 'Infinity'));
 
-function flat3 (arr, deep) {
-    return arr.flat(deep);
-}
-
 function flat4(arr, deep = 1) {
     if (deep < 0) {
         return arr;

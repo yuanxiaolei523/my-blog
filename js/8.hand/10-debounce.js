@@ -14,9 +14,7 @@ function debounce1(fn, delay) {
 // 我们不希望非要等到事件停止触发后才执行，我希望立即执行函数，然后等到停止触发n秒后，才可以重新触发执行
 
 function debounce2(func, wait, immediate) {
-
     var timeout, result;
-
     return function () {
         var context = this;
         var args = arguments;
@@ -44,5 +42,29 @@ var container = document.getElementById('container');
 function getUserAction() {
     container.innerHTML = count++;
 }
+
+var debounce3 = function (fn, delay, immediate) {
+    var result, timeout;
+    return function () {
+        var context = this;
+        var args = arguments;
+        if (timeout) {
+            clearTimeout(timeout);
+        }
+        if (immediate) {
+            var callNow = !timeout;
+            timeout = setTimeout(() => {
+                timeout = null;
+            }, delay);
+            if (callNow ) {
+                result = fn.apply(context, args);
+            } 
+        } else {
+            timeout = setTimeout(function(){
+                fn.apply(context, args);
+            }, delay);
+        }
+    };
+};  
 
 container.onmousemove = debounce2(getUserAction, 1000, true);

@@ -16,11 +16,16 @@
 
 function Parent(name) {
     this.name = name;
+    this.sayHi = function() {
+        console.log(this, this.name);
+        return this.name;
+    };
 }
 
 Parent.prototype.age = 14;
 Parent.prototype.sayName = function() {
     console.log(this.name);
+    
 };
 function Child(name) {
     Parent.call(this, name);
@@ -28,7 +33,7 @@ function Child(name) {
 
 let c1 = new Child('zs');
 let c2 = new Child('ls');
-console.log(c1.age, c2.age, c1.name);
+console.log(c1.sayHi(), c2);
 // c1.sayName();
 // 可以向父类中传参
 // 自类不会共享父类的属性和方法了

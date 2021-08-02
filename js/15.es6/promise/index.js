@@ -51,13 +51,14 @@
 // 	.catch((res) => {
 // 		console.log(res, "catch");
 // 	});
-// const p1 = new Promise(function (resolve, reject) {
-// 	setTimeout(() => reject(new Error("fail")), 3000);
-// });
+const p1 = new Promise(function (resolve, reject) {
+    // reject("fail")
+	setTimeout(() => reject("fail"), 1000);
+});
 
-// const p2 = new Promise(function (resolve, reject) {
-// 	setTimeout(() => resolve(p1), 1000);
-// });
+const p2 = new Promise(function (resolve, reject) {
+	setTimeout(() => resolve(p1), 2000);
+});
 
 // p2.then((result) => console.log(result)).catch((error) =>
 // 	console.log(error, "catch")
@@ -214,16 +215,18 @@
 // console.log(3455);
 
 
-// p = Promise.race([p1, p2, p3]);
-// p.then(res => {
-//     console.log(res, 'then');
-// });
+p = Promise.race([p1, p2]);
+p.then(res => {
+    console.log(res, 'then');
+}).catch(e => {
+    console.log(e, 'yxl');
+})
 
-try {
-    new Promise((resolve, reject) => {
-        reject(1);
-    });
-} catch (e) {
-    console.log(e, 'catch');
-}
+// try {
+//     new Promise((resolve, reject) => {
+//         reject(1);
+//     });
+// } catch (e) {
+//     console.log(e, 'catch');
+// }
 

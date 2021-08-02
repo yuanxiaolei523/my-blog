@@ -1,5 +1,5 @@
 // 映客直播
-var name = "oop";
+var name = 'oop';
 var Person = function (options) {
     this.name = options.name;
     this.age = 10;
@@ -8,13 +8,13 @@ var Person = function (options) {
     // };
 };
 
-Person.prototype.name = "Person Prototype";
+Person.prototype.name = 'Person Prototype';
 Person.prototype.getName = function () {
     console.log(this);
     return this.name;
 };
 
-var p = new Person({ name: "inke" });
+var p = new Person({ name: 'inke' });
 // console.log(p.constructor); // 实例的constructor指向构造函数
 // console.log(p instanceof Person); // true
 // console.log(p.hasOwnProperty("name")); // true

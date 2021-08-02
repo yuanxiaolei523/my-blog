@@ -6,26 +6,28 @@
  * @param {*} promises 
  * @returns 
  */
-function MyPromiseAll(promises) {
-    if (!Array.isArray(promises)) {
-        return;
-    }
-    let resArr = [];
-    let count = 0;
+function MyPromiseAll (arr) {
+    
     return new Promise((resolve, reject) => {
-        promises.forEach((p, index) => {
+        if (!Array.isArray(arr)) {
+            reject('必须传入的是一个数组');
+            return;
+        }
+        let resArr = [];
+        let count = 0;
+        let len = arr.length;
+        arr.forEach((p, index) => {
             Promise.resolve(p).then(res => {
-                resArr[index] = res;
                 count++;
-                if (count === promises.length) {
-                    resolve(resArr);
+                resArr[index] = res;
+                if (count === len) {
+                    resolve(res);
                 }
-            }).catch(() => {
-                reject();
+            }).catch(e => {
+                reject(e);
             });
         });
     });
-    
 }
 
 const p1 = new Promise((res) => {

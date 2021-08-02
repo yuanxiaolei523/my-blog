@@ -1,14 +1,14 @@
 var obj = {
-    name: "baidu",
-    arr: ["a", "b", "c"],
+    name: 'baidu',
+    arr: ['a', 'b', 'c'],
 };
 
 var obj2 = obj;
 var arr = obj.arr;
 
-obj2.arr = ["a", "b", "c", "d"];
+obj2.arr = ['a', 'b', 'c', 'd'];
 
-obj2.name = "inke";
+obj2.name = 'inke';
 
 console.log(arr);
 

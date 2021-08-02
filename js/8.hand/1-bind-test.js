@@ -21,7 +21,7 @@ Function.prototype.myBind = function(ctx) {
         throw new Error('');
     }
     ctx = ctx || window;
-    let args = [].slice.call(arguments);
+    let args = [].slice.call(arguments, 1);
     var self = this;
     var FNop = function () {};
     var FBound = function () {
@@ -37,4 +37,19 @@ Function.prototype.myBind = function(ctx) {
     // 经过这步骤的原因是，如果直接使用FBound.prototype时，修改 fBound.prototype 的时候，也会直接修改 this.prototype
     FBound.prototype = new FNop();
     return FBound;
+};
+
+Function.prototype.myBind3 = function (ctx) {
+    ctx = ctx || window;
+    let self = this;
+    let args = [].slice.call(arguments, 1);
+    var fNop = function () {};
+    var fBound = function () {
+        let bindArgs = [...arguments];
+        return self.apply(this instanceof fNop ? this : ctx, args.concat(bindArgs));
+    };
+
+    fNop.prototype = this.prototype;
+    fBound.prototype = new fNop();
+    return fBound;
 };

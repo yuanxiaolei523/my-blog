@@ -27,3 +27,14 @@ function reverse2(s) {
 }
 console.log(reverse2(['H', 'a', 'n', 'l', 'c', 'd']));
 // console.timeEnd();
+
+
+function reverse2(s) {
+    let left = 0;
+    let right = s.length - 1;
+    while (left < right) {
+        [s[left], s[right]] = [s[right], s[left]];
+        left++;
+        right--;
+    }
+}

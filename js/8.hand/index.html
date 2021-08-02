@@ -21,7 +21,18 @@
 </head>
 
 <body>
-    <script src="./9-flat.js"></script>
+    <div id="container"></div>
+
+    <script src="./17-throttle.js"></script>
+    <script>
+        let count = 0;
+        let con = document.getElementById('container');
+        console.log(con);
+        function getCount() {
+            console.log(count);
+        }
+        con.addEventListener('mousemove', throttle3(getCount, 1000))
+    </script>
 </body>
 
 </html>
