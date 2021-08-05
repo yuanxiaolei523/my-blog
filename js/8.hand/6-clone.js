@@ -62,7 +62,7 @@ target.target = target;
 
 function cloneDeep2(obj, map = new Map()) {
     if (typeof obj !== 'object' && obj !== null) {
-        throw new Error('传入的必须是对象哦');
+        throw new Error('传入的必须是对象');
     }
     let resObj = Array.isArray(obj) ? [] : {};
     if (map.get(obj)) {
