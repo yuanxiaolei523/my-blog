@@ -312,7 +312,47 @@ React Element通过createElement创建，调用该方法需要传入三个参数
 
 ```js
 export function createElement(type, config, children) {
-  // 处理参数
+	let propName;
+  // Reserved names are extracted
+  const props = {};
+  let key = null;
+  let ref = null;
+  let self = null;
+  let source = null;
+  
+  if (config != null) {
+    if (hasValidRef(config)) {
+      ref = config.ref;
+
+      if (__DEV__) {
+        warnIfStringRefCannotBeAutoConverted(config);
+      }
+    }
+    if (hasValidKey(config)) {
+      key = '' + config.key;
+    }
+
+    self = config.__self === undefined ? null : config.__self;
+    source = config.__source === undefined ? null : config.__source;
+    // Remaining properties are added to a new props object
+    for (propName in config) {
+      if (
+        hasOwnProperty.call(config, propName) &&
+        !RESERVED_PROPS.hasOwnProperty(propName)
+      ) {
+        props[propName] = config[propName];
+      }
+    }
+  }
+  // Resolve default props 主要是组件的形式
+  if (type && type.defaultProps) {
+    const defaultProps = type.defaultProps;
+    for (propName in defaultProps) {
+      if (props[propName] === undefined) {
+        props[propName] = defaultProps[propName];
+      }
+    }
+  }
 
   return ReactElement(
     type,
@@ -421,13 +461,104 @@ type BaseFiberRootProperties = {|
 
 ## 创建更新
 
-### ReactDOM.render
+在当前节点对应的`Fiber`对象上创建了`Update`之后，进就如`scheduleWork`调度阶段。
 
-创建`ReactRoot`，并且根据情况调用`root.legacy_renderSubtreeIntoContainer`或者`root.render`，前者是遗留的 API 将来应该会删除，根据`ReactDOM.render`的调用情况也可以发现`parentComponent`是写死的`null`
+#### enqueueSetState
+enqueueSetState 主要做了两件事
 
-`DOMRenderer.unbatchedUpdates`制定不使用`batchedUpdates`，因为这是初次渲染，需要尽快完成。
+* 将新的state塞进组件的状态队列里
+* 调用enqueueUpdate处理将要更新的实例对象
+
+
+
+#### enqueueUpdate
+
+- `batchingStrategy` 是`React`内部专门用于管控批量更新的对象，其`isBatchingUpdates`属性决定了当下是走更新流程还是排队等待，`batchedUpdates` 方法可以直接发起更新流程
+- 将`batchingStrategy` 类比“锁管理器”，则`isBatchingUpdates`是`React`全局唯一的任务“锁”，它初始值为`false` 意味着当前并未进行任何批量更新操作
+- 当`React`调用`batchedUpdates` 执行更新动作时，会先把“锁”给关上（置为`true`）表明现在正处于批量更新过程中
+- 关上“锁”后，任何需要更新的组件依次入队等候下一次的批量更新
+
+## jsx和核心api
+
+### virtual Dom是什么
+
+一句话概括就是，用js对象表示dom信息和结构，更新时重新渲染更新后的对象对应的dom，这个对象就是React.createElement()的返回结果
+
+
+
+### Component
+
+#### Component
 
 ```js
+//ReactBaseClasses.js
+const emptyObject = {};
+function Component(props, context, updater) {
+  this.props = props;//props属性
+  this.context = context;//当前的context
+  this.refs = emptyObject;//ref挂载的对象
+  this.updater = updater || ReactNoopUpdateQueue;//更新的对像
+}
+
+Component.prototype.isReactComponent = {};//表示是classComponent
+```
+
+component函数中主要在当前实例上挂载了props、context、refs、updater等，所以在组件的实例上能拿到这些，而更新主要的承载结构就是updater， 主要关注isReactComponent，它用来表示这个组件是类组件
+
+总结：jsx是React.createElement的语法糖，jsx通过babel转化成React.createElement函数，React.createElement执行之后返回jsx对象，也叫virtual-dom，Fiber会根据jsx对象和current Fiber进行对比形成workInProgress Fiber
+
+#### PureComponent
+
+```js
+//ReactBaseClasses.js
+function PureComponent(props, context, updater) {
+  this.props = props;
+  this.context = context;
+  // If a component has string refs, we will assign a different object later.
+  this.refs = emptyObject;
+  this.updater = updater || ReactNoopUpdateQueue;
+}
+
+function ComponentDummy() {}
+ComponentDummy.prototype = Component.prototype;
+
+const pureComponentPrototype = (PureComponent.prototype = new ComponentDummy());
+pureComponentPrototype.constructor = PureComponent;
+// Avoid an extra prototype jump for these methods.
+Object.assign(pureComponentPrototype, Component.prototype);
+pureComponentPrototype.isPureReactComponent = true;
+```
+
+pureComponent也很简单，和component差不多，他会进行原型继承，然后赋值isPureReactComponent
+
+## legacy和concurrent模式入口函数
+
+react有三种进入主题函数的入口
+
+* legacy: `ReactDom.render(<App/>, rootNode)`这是当前React APP使用的方式
+* blocking: `ReactDOM.createBlockingRoot(rootNode).render(<App/>)`目前正在实验中，作为迁移到concurrent模式的第一个步骤
+* concurrent: `ReactDOM.createRoot(rootNode).render(<App/>)` 目前在实验中，未来稳定之后，打算作为react的默认开发模式
+
+### 不同模式在react运行时的含义
+
+legacy模式是我们常用的，它构建dom的过程是同步的，所以在render的reconciler中，如果diff的过程特别耗时，那么导致的结果就是js一直阻塞高优先级的任务(例如用户的点击事件)，表现为页面的卡顿，无法响应。
+
+concurrent Mode是react未来的模式，它用时间片调度实现了异步可中断的任务，根据设备性能的不同，时间片的长度也不一样，在每个时间片中，如果任务到了过期时间，就会主动让出线程给高优先级的任务
+
+![不同模式的render流程](./react-img/不同模式的render流程.png)
+
+### legacy
+
+采用ReactDOM.render,render调用legacyRenderSubtreeIntoContainer，最后createRootImpl会调用到createFiberRoot创建fiberRootNode,然后调用createHostRootFiber创建rootFiber，其中`fiberRootNode`是整个项目的的根节点，rootFiber是当前应用挂载的节点，也就是ReactDOM.render调用后的根节点。
+
+创建完Fiber节点后，legacyRenderSubtreeIntoContainer调用updateContainer创建创建Update对象挂载到updateQueue的环形链表上，然后执行scheduleUpdateOnFiber调用performSyncWorkOnRoot进入render阶段和commit阶段
+
+根据`ReactDOM.render`的调用情况也可以发现`parentComponent`是写死的`null`
+
+`DOMRenderer.unbatchedUpdates`指定不使用`batchedUpdates`，因为这是初次渲染，需要尽快完成。
+
+```js
+// packages/react-dom/src/client/ReactDOMLegacy.js
 ReactDOM = {
   render(
     element: React$Element<any>, // 要渲染的组件
@@ -460,27 +591,34 @@ function legacyRenderSubtreeIntoContainer(
   let fiberRoot: FiberRoot;
   if (!root) {
     // Initial mount
-    root = container._reactRootContainer = legacyCreateRootFromDOMContainer(
+    root = container._reactRootContainer = legacyCreateRootFromDOMContainer(// 创建root节点
       container,
       forceHydrate,
     )
+    fiberRoot = root;
     if (typeof callback === 'function') {
-      const originalCallback = callback
+      const originalCallback = callback;
       callback = function() {
-        const instance = DOMRenderer.getPublicRootInstance(root._internalRoot)
-        originalCallback.call(instance)
-      }
+        const instance = getPublicRootInstance(fiberRoot);
+        originalCallback.call(instance);
+      };
     }
     // Initial mount should not be batched.
-    DOMRenderer.unbatchedUpdates(() => {
-      if (parentComponent != null) {
-        // 一般不会出现
-      } else {
-        root.render(children, callback)
-      }
-    })
+    flushSyncWithoutWarningIfAlreadyRendering(() => {
+      updateContainer(children, fiberRoot, parentComponent, callback);
+    });
+   
   } else {
-    // 有root的情况
+    fiberRoot = root;
+    if (typeof callback === 'function') {
+      const originalCallback = callback;
+      callback = function() {
+        const instance = getPublicRootInstance(fiberRoot);
+        originalCallback.call(instance);
+      };
+    }
+    // Update
+    updateContainer(children, fiberRoot, parentComponent, callback);
   }
   return DOMRenderer.getPublicRootInstance(root._internalRoot)
 }
@@ -532,6 +670,7 @@ export function markContainerAsRoot(hostRoot: Fiber, node: Container): void {
 #### createContainer
 
 ```js
+//packages/react-reconciler/src/ReactFiberReconciler.old.js
 export function createContainer(
   containerInfo: Container, // 挂载的容器root
   tag: RootTag, // 0
@@ -554,6 +693,7 @@ export function createContainer(
 #### createFiberRoot
 
 ```js
+//packages/react-reconciler/src/ReactFiberRoot.old.js
 function createFiberRoot(
   containerInfo: any, // 挂载的容器
   tag: RootTag, // 0
@@ -562,6 +702,7 @@ function createFiberRoot(
   isStrictMode: boolean, // false
   concurrentUpdatesByDefaultOverride: null | boolean, // false
 ) {
+   // 创建FiberRoot
   const root: FiberRoot = (new FiberRootNode(containerInfo, tag, hydrate): any);
   if (enableSuspenseCallback) { // 默认false
     root.hydrationCallbacks = hydrationCallbacks;
@@ -569,13 +710,14 @@ function createFiberRoot(
 
   // Cyclic construction. This cheats the type system right now because
   // stateNode is any.
+  // 创建rootFiber
   const uninitializedFiber = createHostRootFiber(
     tag, 
     isStrictMode,
     concurrentUpdatesByDefaultOverride,
   );
-  root.current = uninitializedFiber; // 未初始化的fiber
-  uninitializedFiber.stateNode = root;
+  root.current = uninitializedFiber; //rootFiber和fiberRootNode连接
+  uninitializedFiber.stateNode = root; 
 
   if (enableCache) {
     const initialCache = new Map();
@@ -591,17 +733,20 @@ function createFiberRoot(
     };
     uninitializedFiber.memoizedState = initialState; // 以前的state
   }
-
+	//创建updateQueue
   initializeUpdateQueue(uninitializedFiber);
 
   return root;
 }
 
+//对于HostRoot或者ClassComponent会使用initializeUpdateQueue创建updateQueue，然后将updateQueue挂载到fiber节点上
 export function initializeUpdateQueue(fiber) {
   const queue: UpdateQueue<State> = {
-    baseState: fiber.memoizedState,
-    firstBaseUpdate: null,
-    lastBaseUpdate: null,
+    baseState: fiber.memoizedState,//初始state，后面会基于这个state，根据Update计算新的state
+    firstBaseUpdate: null, //Update形成的链表的头
+    lastBaseUpdate: null,//Update形成的链表的尾
+    //新产生的update会以单向环状链表保存在shared.pending上，计算state的时候会剪开这个环状链表，并且连接在lastBaseUpdate后
+
     shared: {
       pending: null,
       interleaved: null,
@@ -610,6 +755,29 @@ export function initializeUpdateQueue(fiber) {
     effects: null,
   };
   fiber.updateQueue = queue;
+}
+
+function updateContainer(element, container, parentComponent, callback) {
+  var lane = requestUpdateLane(current$1);//获取当前可用lane 在12章讲解
+  var update = createUpdate(eventTime, lane); //创建update
+
+  update.payload = {
+    element: element//jsx
+  };
+
+  enqueueUpdate(current$1, update);//update入队
+  scheduleUpdateOnFiber(current$1, lane, eventTime);//调度update
+  return lane;
+}
+
+function scheduleUpdateOnFiber(fiber, lane, eventTime) {
+  if (lane === SyncLane) {//同步lane 对应legacy模式
+    //...
+    performSyncWorkOnRoot(root);//render阶段的起点 render在第6章讲解
+  } else {//concurrent模式
+    //...
+    ensureRootIsScheduled(root, eventTime);//确保root被调度
+  } 
 }
 ```
 
@@ -811,53 +979,47 @@ function FiberNode(
 }
 ```
 
+### concurrent
 
+- createRoot调用createRootImpl创建fiberRootNode和rootNode
+- 创建完Fiber节点后，调用ReactDOMRoot.prototype.render执行updateContainer，然后scheduleUpdateOnFiber异步调度performConcurrentWorkOnRoot进入render阶段和commit阶段
 
+**两种模式的不同点：**
 
+1. createRootImpl中传入的第二个参数不一样 一个是LegacyRoot一个是ConcurrentRoot
+2. requestUpdateLane中获取的lane的优先级不同
+3. 在函数scheduleUpdateOnFiber中根据不同优先级进入不同分支，legacy模式进入performSyncWorkOnRoot，concurrent模式会异步调度performConcurrentWorkOnRoot
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-在当前节点对应的`Fiber`对象上创建了`Update`之后，进就如`scheduleWork`调度阶段。
-
-#### enqueueSetState
-enqueueSetState 主要做了两件事
-
-* 将新的state塞进组件的状态队列里
-* 调用enqueueUpdate处理将要更新的实例对象
-
-
-
-#### enqueueUpdate
-
-- `batchingStrategy` 是`React`内部专门用于管控批量更新的对象，其`isBatchingUpdates`属性决定了当下是走更新流程还是排队等待，`batchedUpdates` 方法可以直接发起更新流程
-- 将`batchingStrategy` 类比“锁管理器”，则`isBatchingUpdates`是`React`全局唯一的任务“锁”，它初始值为`false` 意味着当前并未进行任何批量更新操作
-- 当`React`调用`batchedUpdates` 执行更新动作时，会先把“锁”给关上（置为`true`）表明现在正处于批量更新过程中
-- 关上“锁”后，任何需要更新的组件依次入队等候下一次的批量更新
-
-## jsx和核心api
-
-### virtual Dom是什么
-
-一句话概括就是，用js对象表示dom信息和结构，更新时重新渲染更新后的对象对应的dom，这个对象就是React.createElement()的返回结果
-
-
-
-
-
-
+上一节下一节
 
 ## 总结
 
 React16的架构分为三层，有调度器、协调器、渲染器
+
+
+
+
+
+### JSX
+
+首先是我们平时写的jsx，babel会将jsx转换成createElement函数调用，createElement函数通常需要传入三个参数type、config、children。
+
+type是React元素的类型，可能是原生dom，可能是class组件，也可能是function组件，或者Fragment等等。
+
+config是当前元素的一些属性，比如说class，style、attrs等等。
+
+children，就是当前元素的子元素，可以是组件、dom、或者文字。
+
+在调用createElement的时候，
+
+1. 首先会声明一些变量(key、ref)赋值为null，
+2. 然后判断config是不是为null，
+3. 如果不为null，那么判断是不是有有效的ref，如果有，那么就为ref赋值，
+4. 然后判断是不是有key，有的话就赋值，
+5. 然后判断self和source并赋值，
+6. 之后遍历config，把除了保留属性外的其他config赋值给props(key, ref,\_\_self, __source)
+7. 然后children属性，因为children属性可能是一个children，还可能是一个数组，首先判断arguments的长度
+   1. 如果等于3，那么就直接将第三个向props上挂载children属性，
+   2. 如果长度大于三，那么就会遍历得到一个children数组，然后将props.children属性赋值为这个数组。
+8. 再往后就会判断是否存在defaultProps，如果存在的话，那么会遍历defaultProps，然后如果在props上没有挂载这个属性，那么就为其赋值，最后返回ReactElement的调用结果。
+9. ReactElement中创建一个element对象，然后将传入的参数赋值到对象上，然后将对象返回
