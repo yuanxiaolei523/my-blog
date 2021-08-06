@@ -990,7 +990,157 @@ function FiberNode(
 2. requestUpdateLane中获取的lane的优先级不同
 3. 在函数scheduleUpdateOnFiber中根据不同优先级进入不同分支，legacy模式进入performSyncWorkOnRoot，concurrent模式会异步调度performConcurrentWorkOnRoot
 
-上一节下一节
+### setState
+
+在react中触发状态更新的几种方式：
+
+- ReactDOM.render
+- this.setState
+- this.forceUpdate
+- useState
+- useReducer
+
+#### setState
+
+setState内调用this.updater.enqueueSetState
+
+```js
+// packages/react/src/ReactBaseClasses.js
+Component.prototype.setState = function (partialState, callback) {
+  if (!(typeof partialState === 'object' || typeof partialState === 'function' || partialState == null)) {
+    {
+      throw Error( "setState(...): takes an object of state variables to update or a function which returns an object of state variables." );
+    }
+  }
+  this.updater.enqueueSetState(this, partialState, callback, 'setState');
+};
+
+enqueueSetState(inst, payload, callback) { // this实例，要更新的state，更新后的回调函数
+  const fiber = getInstance(inst);//fiber实例 key._reactInternals
+  
+  const eventTime = requestEventTime();
+  const suspenseConfig = requestCurrentSuspenseConfig();
+    
+  const lane = requestUpdateLane(fiber);//获取优先级
+  
+  const update = createUpdate(eventTime, lane, suspenseConfig);//创建update
+  
+  update.payload = payload;
+  
+  if (callback !== undefined && callback !== null) {  //赋值回调
+    update.callback = callback;
+  }
+  
+  enqueueUpdate(fiber, update);//update加入updateQueue
+  scheduleUpdateOnFiber(fiber, lane, eventTime);//调度update
+}
+  
+```
+
+##### enqueueUpdate
+
+```js
+export function enqueueUpdate(
+  fiber,
+  update,
+  lane,
+) {
+  const updateQueue = fiber.updateQueue;
+  if (updateQueue === null) {// 卸载的时候
+    // Only occurs if the fiber has been unmounted.
+    return;
+  }
+
+  const sharedQueue: SharedQueue<State> = (updateQueue: any).shared;
+
+  if (isInterleavedUpdate(fiber, lane)) {
+    const interleaved = sharedQueue.interleaved;
+    if (interleaved === null) {
+      // This is the first update. Create a circular list.
+      update.next = update;
+      // At the end of the current render, this queue's interleaved updates will
+      // be transfered to the pending queue.
+      pushInterleavedQueue(sharedQueue);
+    } else {
+      update.next = interleaved.next;
+      interleaved.next = update;
+    }
+    sharedQueue.interleaved = update;
+  } else {
+    const pending = sharedQueue.pending;
+    if (pending === null) {
+      // This is the first update. Create a circular list.
+      update.next = update;
+    } else {
+      update.next = pending.next;
+      pending.next = update;
+    }
+    sharedQueue.pending = update;
+  }
+}
+```
+
+
+
+#### forceUpdate
+
+```js
+// packages/react/src/ReactBaseClasses.js
+Component.prototype.forceUpdate = function(callback) {
+  this.updater.enqueueForceUpdate(this, callback, 'forceUpdate');
+};
+
+// packages/react-reconciler/src/ReactFiberClassComponent.old.js
+enqueueForceUpdate(inst, callback) {
+  const fiber = getInstance(inst); // this，指向当前组件
+  const eventTime = requestEventTime();
+  const lane = requestUpdateLane(fiber);
+
+  const update = createUpdate(eventTime, lane);
+  update.tag = ForceUpdate;
+
+  if (callback !== undefined && callback !== null) {
+    update.callback = callback;
+  }
+
+  enqueueUpdate(fiber, update, lane);
+  const root = scheduleUpdateOnFiber(fiber, lane, eventTime);
+  if (root !== null) {
+    entangleTransitions(root, fiber, lane);
+  }
+
+  if (__DEV__) {
+    if (enableDebugTracing) {
+      if (fiber.mode & DebugTracingMode) {
+        const name = getComponentNameFromFiber(fiber) || 'Unknown';
+        logForceUpdateScheduled(name, lane);
+      }
+    }
+  }
+
+  if (enableSchedulingProfiler) {
+    markForceUpdateScheduled(fiber, lane);
+  }
+}
+//  packages/react-reconciler/src/ReactFiberWorkLoop.old.js
+export function requestEventTime() {
+  if ((executionContext & (RenderContext | CommitContext)) !== NoContext) {// 0 & (0b0010|0b0100) !== 0b0000
+    // We're inside React, so it's fine to read the actual time.
+    return now();
+  }
+  // We're not inside React, so we may be in the middle of a browser event.
+  if (currentEventTime !== NoTimestamp) {
+    // Use the same start time for all updates until we enter React again.
+    return currentEventTime;
+  }
+  // This is the first update since React yielded. Compute a new start time.
+  currentEventTime = now();
+  return currentEventTime;
+}
+
+```
+
+
 
 ## 总结
 

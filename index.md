@@ -3098,7 +3098,43 @@ module.exports = {
 6. 输出资源：根据刚才得到的依赖关系，组装成一个个包含多个module的chunk
 7. 输出完成：根据配置，确定要输出的文件名以及文件路径
 
+### 自己写的loader
 
+```js
+// extractUseStrict.js
+module.exports = function(source){
+    return source.replace(/"use strict";/g, '');
+}
+// ykit3.config.js
+config.module.rules.map((loader) => {
+  if(loader.test.toString().match(/js/)) {
+    return loader.use.unshift({loader: require.resolve('./extractUseStrict.js')});
+  }
+  return loader;
+});
+```
+
+### 常见的plugin
+
+* html-webpack-plugin
+* uglifyjs-webpack-plugin:压缩优化js
+* mini-css-extract-plugin:将CSS提取为独立的文件的，对每个包含css的js文件都会创建一个CSS文件，支持按需加载css和sourceMap
+* CleanWebpackPlugin：能帮忙每次打包之前先删除dist文件夹。
+
+### 常见的loader
+
+#### css的loader加载顺序
+
+```json
+{
+  test: /\.sass/,
+  use: [
+    'style-loader', // 将样式通过<style>插入到header中
+    'css-loader', // 将css转换为commonjs
+    'sass-loader' // 将sass转换为css
+  ]
+}
+```
 
 
 
