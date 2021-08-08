@@ -126,7 +126,9 @@ css的盒模型包括标准盒模型和怪异盒模型
 
 6. 激活css伪类:hover
 
-7. 查询某些属性或者调用某些和方法
+7. 设置style属性
+
+8. 查询某些属性或者调用某些和方法
 
    offsetTop、offsetHeight、getComputedStyle
 
@@ -138,11 +140,10 @@ css的盒模型包括标准盒模型和怪异盒模型
 
 #### 如何避免重排
 
-1. 尽可能在DOM最末端修改class
-2. 让其脱离文档流，通过隐藏元素和文档片段等方法
-3. 避免使用calc
-4. 避免设置多层内联样式
-5. 使用absolute或者fixed脱离文档流
+1. 避免大量的设置style属性
+2. 通过隐藏元素和文档片段等方法
+3. 不要使用table布局，一个某个元素触发了，那么整个table的元素都会触发
+4. 使用absolute或者fixed脱离文档流
 
 ### 四、块级格式化上下文(BFC)
 
@@ -173,6 +174,7 @@ BFC是页面中的一块独立渲染区域，有自己的渲染规则，决定�
 * dispaly的值为inline-block或者table-cell
 * position的值为absolute或者fixed
 * overflow的值不为visible
+* 弹性布局的直接子元素
 
 #### 4. 应用
 
@@ -260,7 +262,6 @@ BFC是页面中的一块独立渲染区域，有自己的渲染规则，决定�
    }
    .center {
      width: 100%;
-     
    }
    .right {
      width: 100px;
@@ -269,9 +270,9 @@ BFC是页面中的一块独立渲染区域，有自己的渲染规则，决定�
      right: -100px
    }
    ```
-
    
 
+   
 2. 双飞翼布局
 
    * 主要元素放在最上面
@@ -568,11 +569,13 @@ CSRF(Cross Site Request Forgery)指的是**跨站请求伪造**，是一种劫�
 
    优点：解决了回调地狱的问题
 
-   缺点：无法取消Promise，错误需要通过回调函数来捕获
+   缺点：无法取消Promise，错误需要通过回调函数来捕获，当处于pending阶段时，无法得到当前进入到哪个阶段
 
 3. generator
 
-   优点：generator 方式使得异步操作很接近同步操作，十分的简洁明了。另外，gen 执行 yield 语句时，只是将执行上下文暂时弹出，并不会销毁，这使得上下文状态被保存
+   Generator是es6提出的另一种异步编程解决方案，需要在函数名之前加一个*号，函数内部使用yield语句。Generaotr函数会返回一个遍历器，可以进行遍历操作执行每个中断点yield。
+
+   优点：没有了Promise的一堆then(),异步操作更像同步操作，代码更加清晰。
 
    缺点：流程管理不方便，需要一个执行器来执行 generator 函数
 
@@ -581,6 +584,14 @@ CSRF(Cross Site Request Forgery)指的是**跨站请求伪造**，是一种劫�
    优点：代码清晰，不用像Promise写一堆then，处理了回调地狱的问题；相比 generator 方式，async 方式省掉了自动执行器，减少了代码量
 
    缺点：await将异步代码改造成同步代码，如果多个异步操作没有依赖性，会造成性能降低(可以使用await Promise.all()来解决)
+
+5. 发布订阅模式
+
+   当一个任务完成时，就会发布一个时间，当这个事件有订阅者时，会接收到事件的发布，执行相应的任务
+
+   优点：可以很好地处理异步
+
+   缺点：消耗内存，且不利于后期的维护
 
 
 
@@ -764,11 +775,11 @@ fraction：IEEE754规定，在计算机内部保存有效数字时，**默认第
 
 ##### 六、为什么最大数是超过2^1024次方就会返回Infinty
 
-因为js中使用了11位来存储指数，假设尾数有53个1，那么在11位指数下最大的数就是2^0+2^1+...+2^1023次方
+因为js中使用了11位来存储指数，同时指数还会有正负，所以会占一位，剩下10位，那么在10位指数下最大的数就是2^0+2^1+...+2^1023次方
 
 ##### 七、移码、补码、原码、反码的关系
 
-1. 正数：原码、反码、补码相同，移码将补码的符号取反
+1. 正数：原码、反码、补码相同，移码将源码的符号取反
 2. 负数：反码将非符号位取反;补码将非符号位取反，末尾加1;移码将补码的符号位取反即可
 
 
@@ -778,8 +789,6 @@ fraction：IEEE754规定，在计算机内部保存有效数字时，**默认第
 #### try...catch能捕获所有的异常吗
 
 答案肯定是不能,**能被 try catch 捕捉到的异常，必须是在报错的时候，线程执行已经进入 try catch 代码块，且处在 try catch 里面，这个时候才能被捕捉到。**
-
-**能被 try catch 捕捉到的异常，必须是在报错的时候，线程执行已经进入 try catch 代码块，且处在 try catch 里面，这个时候才能被捕捉到。**
 
 1. **SyntaxError**不能被正常捕获(进入try...catch之前，语法检查不通过)
 
@@ -808,6 +817,21 @@ fraction：IEEE754规定，在计算机内部保存有效数字时，**默认第
    ```
 
 3. promise的错误
+
+   ```js
+   try {
+       new Promise(() => {
+           console.log(1);
+           throw new Error('123');
+       });
+   } catch (e) {
+       console.log(3);
+   }
+   console.log(456);
+   // 1 456 （uncaught in promise）
+   ```
+
+   
 
 
 
@@ -862,7 +886,7 @@ fraction：IEEE754规定，在计算机内部保存有效数字时，**默认第
 </html>
 ```
 
- 由于网络请求异常不会事件冒泡，所以必须在捕获阶段将其捕获才行
+
 
 3. console.error:重写console.error
 
@@ -1511,9 +1535,9 @@ GlobalLexicalEnvironment = {
 
 #### 那你知道两种任务类型吗
 
-**宏任务**：整体的script代码，setTimeout，setInterval，I\O操作等等都是宏任务
+**宏任务**：整体的script代码，setTimeout，setInterval，setImmediate，I\O操作等等都是宏任务
 
-**微任务** ：new Promise的then、catch、finally的回调，MutationObserver
+**微任务** ：new Promise的then、catch、finally的回调，MutationObserver、nextTick
 
 #### 聊聊 MutationObserver 主要是做什么的
 
@@ -1552,9 +1576,13 @@ V10之后：
 
 ### CommonJS和ESModule的区别
 
-1. CommonJS是运行时加载，ESModule是编译的时候进行
-2. CommonJS输出的是值的拷贝，ESModule输出的是值的引用
-3. CommonJS具有缓存，在第一次被加载时，会完整运行整个文件并输出一个对象，拷贝（浅拷贝）在内存中。
+1. CommonJS是运行时加载，是可以动态引入的，ESModule是编译的时候确定模块的依赖，静态引入
+
+2. commonjs导出的是一个值拷贝，会对加载结果进行缓存，一旦内部再修改这个值，则不会同步到外部。ES6是导出的一个引用，内部修改可以同步到外部。
+
+3. CommonJS模块的顶层this指向当前模块，ES6模块中，顶层this指向undefined
+
+   
 
 ## ES6
 

@@ -92,8 +92,6 @@ render阶段遍历Fiber树类似dfs的过程，‘捕获’阶段发生在beginW
 顺便说下fiberRoot是整个项目的根节点，只存在一个，rootFiber是应用的根节点，可能存在多个，例如多个ReactDOM.render(<App />, document.getElementById("root"));
 ```
 
-
-
 ### Renderer（渲染器）
 
 Renderer是在commit阶段工作的，commit阶段会遍历render阶段形成的effectList，并执行真实dom节点的操作和一些生命周期，不同平台对应的Renderer不同，例如浏览器对应的就是react-dom。
@@ -113,9 +111,219 @@ commit阶段发生在commitRoot函数中，该函数主要遍历effectList，分
 
 由于红框中的工作都在内存中进行，不会更新页面上的DOM，所以即使反复中断，用户也不会看见更新不完全的DOM（即上一节演示的情况）。
 
+## diff算法
+
+在render阶段更新Fiber节点时，我们会调用reconcileChildFibers对比current Fiber和jsx对象构建workInProgress Fiber，这里current Fiber是指当前dom对应的fiber树，jsx是class组件render方法或者函数组件的返回值。
+
+在reconcileChildFibers中会根据newChild的类型来进入单节点的diff或者多节点diff
+
+```js
+// packages/react-reconciler/src/ReactChildFiber.old.js
+// 上一层是reconcileChildren
+function reconcileChildFibers(
+    returnFiber: Fiber, // work in progress fiber
+    currentFirstChild: Fiber | null, // currrnt fiber 的子元素
+    newChild: any,
+    lanes: Lanes,
+  ): Fiber | null {
+    // 如果子节点是一个对象，并且不是null，且对象的type是fragment且key等于null
+    const isUnkeyedTopLevelFragment =
+      typeof newChild === 'object' &&
+      newChild !== null &&
+      newChild.type === REACT_FRAGMENT_TYPE &&
+      newChild.key === null;
+    if (isUnkeyedTopLevelFragment) {
+      newChild = newChild.props.children;
+    }
+    // 那么直接将newChild赋值为newChild.props.children
+
+    // 如果newChild是一个对象并且不为null
+    if (typeof newChild === 'object' && newChild !== null) {
+      switch (newChild.$$typeof) {
+        case REACT_ELEMENT_TYPE: // 如果是一个元素 那么就会单一节点diff
+          return placeSingleChild(// 
+            reconcileSingleElement(
+              returnFiber,
+              currentFirstChild,
+              newChild,
+              lanes,
+            ),
+          );
+        case REACT_PORTAL_TYPE: //如果是一个portal 那么就会单一节点diff
+          return placeSingleChild(
+            reconcileSinglePortal(
+              returnFiber,
+              currentFirstChild,
+              newChild,
+              lanes,
+            ),
+          );
+        case REACT_LAZY_TYPE: // 如果是懒加载
+          if (enableLazyElements) {
+            const payload = newChild._payload;
+            const init = newChild._init;
+            // TODO: This function is supposed to be non-recursive.
+            return reconcileChildFibers(
+              returnFiber,
+              currentFirstChild,
+              init(payload),
+              lanes,
+            );
+          }
+      }
+
+      if (isArray(newChild)) {
+        return reconcileChildrenArray(// 多节点diff
+          returnFiber,
+          currentFirstChild,
+          newChild,
+          lanes,
+        );
+      }
+
+      if (getIteratorFn(newChild)) {
+        return reconcileChildrenIterator(
+          returnFiber,
+          currentFirstChild,
+          newChild,
+          lanes,
+        );
+      }
+
+      throwOnInvalidObjectType(returnFiber, newChild);
+    }
+	  // 如果是一个string或者number，那么就会单节点diff，然后使用textNode去调节
+    if (typeof newChild === 'string' || typeof newChild === 'number') {
+      return placeSingleChild(
+        reconcileSingleTextNode(
+          returnFiber,
+          currentFirstChild,
+          '' + newChild,
+          lanes,
+        ),
+      );
+    }
+    // 删除节点
+    return deleteRemainingChildren(returnFiber, currentFirstChild);
+  }
+  // 将协调的节点返回
+  return reconcileChildFibers;
+}
+```
+
+```js
+// packages/react-reconciler/src/ReactChildFiber.old.js
+function placeSingleChild(newFiber: Fiber): Fiber {
+  // This is simpler for the single child case. We only need to do a
+  // placement for inserting new children.
+  if (shouldTrackSideEffects && newFiber.alternate === null) {
+    newFiber.flags |= Placement;
+  }
+  return newFiber;
+}
+```
+
+```js
+// packages/react-reconciler/src/ReactChildFiber.old.js
+function reconcileSingleElement(
+    returnFiber: Fiber, // work in progress
+    currentFirstChild: Fiber | null, // children
+    element: ReactElement, // 新的元素
+    lanes: Lanes, // 优先级
+  ): Fiber {
+    const key = element.key; // 首先获取到key
+    let child = currentFirstChild; // current fiber Node 的children
+    while (child !== null) { // 如果children存在
+      // TODO: If key === null and child.key === null, then this only applies to
+      // the first item in the list.
+      if (child.key === key) { // 如果current fiber的子元素的key等于当前元素的key
+        const elementType = element.type; 
+        if (elementType === REACT_FRAGMENT_TYPE) { // 元素的类型如果是Fragment
+          if (child.tag === Fragment) { // 并且当前子元素的tag是fragment
+            deleteRemainingChildren(returnFiber, child.sibling); // 删除已有的children
+            const existing = useFiber(child, element.props.children); // clone一个fiber
+            existing.return = returnFiber;// 将clone的fiber的return赋值为work in progress
+            return existing;
+          }
+        } else {
+          if (
+            child.elementType === elementType || // 如果是元素类型相同
+            // Keep this check inline so it only runs on the false path:
+            (__DEV__
+              ? isCompatibleFamilyForHotReloading(child, element)
+              : false) ||
+            (enableLazyElements &&
+              typeof elementType === 'object' &&
+              elementType !== null &&
+              elementType.$$typeof === REACT_LAZY_TYPE &&
+              resolveLazy(elementType) === child.type)
+          ) {
+            // 删除当前节点的兄弟节点
+            deleteRemainingChildren(returnFiber, child.sibling);
+            const existing = useFiber(child, element.props);
+            existing.ref = coerceRef(returnFiber, child, element);
+            existing.return = returnFiber;
+            if (__DEV__) {
+              existing._debugSource = element._source;
+              existing._debugOwner = element._owner;
+            }
+            return existing;
+          }
+        }
+        // Didn't match.
+        deleteRemainingChildren(returnFiber, child);
+        break;
+      } else {
+        deleteChild(returnFiber, child);
+      }
+      child = child.sibling;
+    }
+
+    if (element.type === REACT_FRAGMENT_TYPE) {
+      const created = createFiberFromFragment(
+        element.props.children,
+        returnFiber.mode,
+        lanes,
+        element.key,
+      );
+      created.return = returnFiber;
+      return created;
+    } else {
+      const created = createFiberFromElement(element, returnFiber.mode, lanes);
+      created.ref = coerceRef(returnFiber, currentFirstChild, element);
+      created.return = returnFiber;
+      return created;
+    }
+  }
+```
 
 
-### Fiber
+
+### diff过程的主要流程
+
+![diff](./react-img/diff.png)
+
+#### diff算法的前提
+
+1. 只对同级的比较，跨层级的dom不会复用
+2. 不同类型节点生成的dom树不同，此时会直接销毁老节点以及子孙节点，并新建节点
+3. 可以通过key来对元素diff过程提供复用的线索。
+
+#### 单节点diff
+
+有以下几种情况
+
+1. key和type相同表示可以复用节点
+2. key不同直接标记删除节点，然后新建节点
+3. key和type不同，标记删除该节点和兄弟节点，然后新创建节点
+
+```js
+
+```
+
+
+
+## Fiber
 
 本质上就是虚拟DOM
 
@@ -129,6 +337,17 @@ commit阶段发生在commitRoot函数中，该函数主要遍历effectList，分
 2. 作为静态的数据结构来说，每个`Fiber节点`对应一个`React element`，保存了该组件的类型（函数组件/类组件/原生组件...）、对应的DOM节点等信息。
 3. 作为动态的工作单元来说，每个`Fiber节点`保存了本次更新中该组件改变的状态、要执行的工作（需要被删除/被插入页面中/被更新...）。
 
+### Fiber的架构
+
+#### 有了Fiber这种数据结构后，能完成哪些事情呢
+
+* 工作单元任务分解：Fiber最重要的功能就是作为工作单元，保存原生节点或者组件节点的对应的信息，这些节点通过指针的形式形成Fiber树
+* 增量渲染：通过jsx对象和current Fiber的对比，生成最小的差异补丁，应用到真是节点上。
+* 根据优先级暂停、继续、排列优先级：Fiber节点上保存了优先级，能通过不同节点优先级的对比，达到任务的暂停、继续、排列优先级等能力，也为上层实现批量更新、suspense提供了基础
+* 保存状态：因为Fiber能保存状态和更新的信息，所以就能实现函数组件的状态更新，即hooks
+
+
+
 #### Fiber的结构
 
 ```js
@@ -139,22 +358,22 @@ function FiberNode(
   mode: TypeOfMode,
 ) {
   // 作为静态数据结构的属性
-  this.tag = tag;
-  this.key = key;
-  this.elementType = null;
-  this.type = null;
-  this.stateNode = null;
+  this.tag = tag; // 对应组件的类型
+  this.key = key; // key属性
+  this.elementType = null; // 元素类型
+  this.type = null; // func或者class
+  this.stateNode = null; // 真实dom节点
 
   // 用于连接其他Fiber节点形成Fiber树
-  this.return = null;
-  this.child = null;
-  this.sibling = null;
+  this.return = null; //指向父节点
+  this.child = null; // 指向子节点
+  this.sibling = null; // 指向兄弟节点
   this.index = 0;
 
   this.ref = null;
 
   // 作为动态的工作单元的属性
-  this.pendingProps = pendingProps;
+  this.pendingProps = pendingProps; // 
   this.memoizedProps = null;
   this.updateQueue = null;
   this.memoizedState = null;
@@ -172,7 +391,7 @@ function FiberNode(
   this.lanes = NoLanes;
   this.childLanes = NoLanes;
 
-  // 指向该fiber在另一次更新时对应的fiber
+  //current和workInProgress的指针
   this.alternate = null;
 }
 ```
@@ -188,6 +407,72 @@ this.return = null;
 this.child = null;
 // 指向右边第一个兄弟Fiber节点
 this.sibling = null;
+```
+
+#### 双缓存Fiber树
+
+在`React`中最多会同时存在两棵`Fiber树`。当前屏幕上显示内容对应的`Fiber树`称为`current Fiber树`，正在内存中构建的`Fiber树`称为`workInProgress Fiber树`。
+
+`current Fiber树`中的`Fiber节点`被称为`current fiber`，`workInProgress Fiber树`中的`Fiber节点`被称为`workInProgress fiber`，他们通过`alternate`属性连接。
+
+* 在mount时：会创建fiberRoot和rootFiber，然后根据jsx对象创建Fiber节点，节点连接成current Fiber树。
+* 在update时：会根据新的状态形成的jsx（ClassComponent的render或者FuncComponent的返回值）和current Fiber对比形（diff算法）成一颗叫workInProgress的Fiber树，然后将fiberRoot的current指向workInProgress树，此时workInProgress就变成了current Fiber。
+
+fiberRoot：指整个应用的根节点，只存在一个
+
+rootFiber：ReactDOM.render或者ReactDOM.unstable_createRoot创建出来的应用的节点，可以存在多个。
+
+构建workInProgress Fiber发生在createWorkInProgress中，它能创建或者服用Fiber
+
+```js
+//ReactFiber.old.js
+export function createWorkInProgress(current: Fiber, pendingProps: any): Fiber {
+  let workInProgress = current.alternate; // 获取到正在构建的树
+  if (workInProgress === null) {//区分是在mount时还是在update时
+    workInProgress = createFiber(
+      current.tag,
+      pendingProps,
+      current.key,
+      current.mode,
+    );
+    workInProgress.elementType = current.elementType;
+    workInProgress.type = current.type;
+    workInProgress.stateNode = current.stateNode;
+   
+    workInProgress.alternate = current;
+    current.alternate = workInProgress;
+  } else {
+    workInProgress.pendingProps = pendingProps;//复用属性
+    workInProgress.type = current.type;
+    workInProgress.flags = NoFlags;
+
+    workInProgress.nextEffect = null;
+    workInProgress.firstEffect = null;
+    workInProgress.lastEffect = null;
+    //...
+  }
+  workInProgress.childLanes = current.childLanes;//复用属性
+  workInProgress.lanes = current.lanes;
+
+  workInProgress.child = current.child;
+  workInProgress.memoizedProps = current.memoizedProps;
+  workInProgress.memoizedState = current.memoizedState;
+  workInProgress.updateQueue = current.updateQueue;
+
+  const currentDependencies = current.dependencies;
+  workInProgress.dependencies =
+    currentDependencies === null
+      ? null
+      : {
+          lanes: currentDependencies.lanes,
+          firstContext: currentDependencies.firstContext,
+        };
+
+  workInProgress.sibling = current.sibling;
+  workInProgress.index = current.index;
+  workInProgress.ref = current.ref;
+  return workInProgress;
+}
 ```
 
 
@@ -280,18 +565,7 @@ setState`和`forceUpdate`的代码我们可以看到，几乎是一模一样的�
 
 关于`Update`和`UpdateQueue`的数据结构可以看[这里](https://react.jokcy.me/book/api/react-structure.html)
 
-## 双缓存Fiber树
 
-在`React`中最多会同时存在两棵`Fiber树`。当前屏幕上显示内容对应的`Fiber树`称为`current Fiber树`，正在内存中构建的`Fiber树`称为`workInProgress Fiber树`。
-
-`current Fiber树`中的`Fiber节点`被称为`current fiber`，`workInProgress Fiber树`中的`Fiber节点`被称为`workInProgress fiber`，他们通过`alternate`属性连接。
-
-* 在mount时：会创建fiberRoot和rootFiber，然后根据jsx对象创建Fiber节点，节点连接成current Fiber树。
-* 在update时：会根据新的状态形成的jsx（ClassComponent的render或者FuncComponent的返回值）和current Fiber对比形（diff算法）成一颗叫workInProgress的Fiber树，然后将fiberRoot的current指向workInProgress树，此时workInProgress就变成了current Fiber。
-
-fiberRoot：指整个应用的根节点，只存在一个
-
-rootFiber：ReactDOM.render或者ReactDOM.unstable_createRoot创建出来的应用的节点，可以存在多个。
 
 ### 总结
 
@@ -547,11 +821,81 @@ concurrent Mode是react未来的模式，它用时间片调度实现了异步可
 
 ![不同模式的render流程](./react-img/不同模式的render流程.png)
 
-### legacy
+### legacy(ReactDOM.render)
+
+#### render阶段整体流程
+
+![图片](./react-img/不同模式的render流程.png)
+
+- 捕获阶段 从根节点rootFiber开始，遍历到叶子节点，每次遍历到的节点都会执行beginWork，并且传入当前Fiber节点，然后创建或复用它的子Fiber节点，并赋值给workInProgress.child。
+- 冒泡阶段 在捕获阶段遍历到子节点之后，会执行completeWork方法，执行完成之后会判断此节点的兄弟节点存不存在，如果存在就会为兄弟节点执行completeWork，当全部兄弟节点执行完之后，会向上‘冒泡’到父节点执行completeWork，直到rootFiber。
+
+#### beginWork
+
+```js
+function beginWork(
+  current: Fiber | null,//当前存在于dom树中对应的Fiber树
+  workInProgress: Fiber,//正在构建的Fiber树
+  renderLanes: Lanes,//第12章在讲
+): Fiber | null {
+ // 1.update时满足条件即可复用current fiber进入bailoutOnAlreadyFinishedWork函数
+  if (current !== null) {
+    const oldProps = current.memoizedProps;
+    const newProps = workInProgress.pendingProps;
+    if (
+      oldProps !== newProps ||
+      hasLegacyContextChanged() ||
+      (__DEV__ ? workInProgress.type !== current.type : false)
+    ) {
+      didReceiveUpdate = true;
+    } else if (!includesSomeLane(renderLanes, updateLanes)) {
+      didReceiveUpdate = false;
+      switch (workInProgress.tag) {
+        // ...
+      }
+      return bailoutOnAlreadyFinishedWork(
+        current,
+        workInProgress,
+        renderLanes,
+      );
+    } else {
+      didReceiveUpdate = false;
+    }
+  } else {
+    didReceiveUpdate = false;
+  }
+
+  //2.根据tag来创建不同的fiber 最后进入reconcileChildren函数
+  switch (workInProgress.tag) {
+    case IndeterminateComponent: 
+      // ...
+    case LazyComponent: 
+      // ...
+    case FunctionComponent: 
+      // ...
+    case ClassComponent: 
+      // ...
+    case HostRoot:
+      // ...
+    case HostComponent:
+      // ...
+    case HostText:
+      // ...
+  }
+}
+```
+
+
+
+
+
+
 
 采用ReactDOM.render,render调用legacyRenderSubtreeIntoContainer，最后createRootImpl会调用到createFiberRoot创建fiberRootNode,然后调用createHostRootFiber创建rootFiber，其中`fiberRootNode`是整个项目的的根节点，rootFiber是当前应用挂载的节点，也就是ReactDOM.render调用后的根节点。
 
 创建完Fiber节点后，legacyRenderSubtreeIntoContainer调用updateContainer创建创建Update对象挂载到updateQueue的环形链表上，然后执行scheduleUpdateOnFiber调用performSyncWorkOnRoot进入render阶段和commit阶段
+
+
 
 根据`ReactDOM.render`的调用情况也可以发现`parentComponent`是写死的`null`
 
@@ -1000,7 +1344,7 @@ function FiberNode(
 - useState
 - useReducer
 
-#### setState
+#### Component.prototype.setState
 
 setState内调用this.updater.enqueueSetState
 
