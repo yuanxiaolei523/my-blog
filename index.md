@@ -3926,7 +3926,7 @@ plugins: ["react"]
 
 
 
-### parser: 解析器
+### parser: 解析器而parser 的作用是将我们写的代码转换为 [ESTree](https://link.zhihu.com/?target=https%3A//github.com/estree/estree)
 
 ```js
 "parser": "babel-eslint"
