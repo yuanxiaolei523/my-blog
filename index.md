@@ -3094,15 +3094,70 @@ module.exports = {
 
 #### Loader
 
-模块转换器，将非js模块转换为webpack能识别的js模块
+模块转换器，将非js、json模块转换为webpack能识别的js、json模块
 
 本质上，webpack loader将所有类型的文件，转换为应用程序的依赖图可以直接引用的模块
 
+##### 自己写的loader
 
+```js
+// extractUseStrict.js
+module.exports = function(source){
+    return source.replace(/"use strict";/g, '');
+}
+// ykit3.config.js
+config.module.rules.map((loader) => {
+  if(loader.test.toString().match(/js/)) {
+    return loader.use.unshift({loader: require.resolve('./extractUseStrict.js')});
+  }
+  return loader;
+});
+```
+
+##### 常见的loader
+
+1. css loader的加载顺序
+
+```json
+{
+  test: /\.sass/,
+  use: [
+    'style-loader', // 将样式通过<style>插入到header中
+    'css-loader', // 将css转换为commonjs
+    'sass-loader' // 将sass转换为css
+  ]
+}
+```
+
+2. babel-loader babel-core babel/preset-env
+
+```js
+rules: [
+    {
+      test: /\.m?js$/,
+      exclude: /node_modules/,
+      use: {
+        loader: 'babel-loader',
+        options: {
+          presets: [
+            ['@babel/preset-env', { targets: "defaults" }]
+          ]
+        }
+      }
+    }
+  ]
+```
 
 #### plugin
 
 本质上是一个扩展，运行在webpack打包的各个阶段，webpack打包的各个阶段都会广播出对应的事件。然后插件就是去监听对应的事件
+
+##### 常见的plugin
+
+* html-webpack-plugin：会生成一个html模板，同时会自动帮你引入chunk
+* uglifyjs-webpack-plugin:压缩优化js
+* mini-css-extract-plugin:将CSS提取为独立的文件的，对每个包含css的js文件都会创建一个CSS文件，支持按需加载css和sourceMap
+* CleanWebpackPlugin：能帮忙每次打包之前先删除dist文件夹。
 
 
 
@@ -3124,45 +3179,7 @@ module.exports = {
 4. 编译模块：从入口文件开始，调用所有的loader，再去递归的找模块的依赖关系
 5. 完成模块的编译：得到每个模块被翻译成的最终内容，以及他们之间的依赖关系
 6. 输出资源：根据刚才得到的依赖关系，组装成一个个包含多个module的chunk
-7. 输出完成：根据配置，确定要输出的文件名以及文件路径
-
-### 自己写的loader
-
-```js
-// extractUseStrict.js
-module.exports = function(source){
-    return source.replace(/"use strict";/g, '');
-}
-// ykit3.config.js
-config.module.rules.map((loader) => {
-  if(loader.test.toString().match(/js/)) {
-    return loader.use.unshift({loader: require.resolve('./extractUseStrict.js')});
-  }
-  return loader;
-});
-```
-
-### 常见的plugin
-
-* html-webpack-plugin
-* uglifyjs-webpack-plugin:压缩优化js
-* mini-css-extract-plugin:将CSS提取为独立的文件的，对每个包含css的js文件都会创建一个CSS文件，支持按需加载css和sourceMap
-* CleanWebpackPlugin：能帮忙每次打包之前先删除dist文件夹。
-
-### 常见的loader
-
-#### css的loader加载顺序
-
-```json
-{
-  test: /\.sass/,
-  use: [
-    'style-loader', // 将样式通过<style>插入到header中
-    'css-loader', // 将css转换为commonjs
-    'sass-loader' // 将sass转换为css
-  ]
-}
-```
+7. 输出完成：根据output配置，确定要输出的文件名以及文件路径
 
 
 
@@ -3266,7 +3283,7 @@ function compose (middleware) {
 3. Node 正向代理：如果有一个api，跨域了，此时我们可以将其转发到同域的node服务上，然后在node服务上继续请求/api，然后将数据返回给前端(跨域只限于浏览器端)
 4. Nginx 反向代理， proxy_pass. /api --> /same/api
 
-#### 二. HTTP状态码、方法、请求头
+#### 二. HTTP状态码、方法、请求头、响应头
 
 ##### 请求头
 
@@ -3379,16 +3396,17 @@ function compose (middleware) {
 1. 200：表示请求已成功
 2. 201：表示请求已经被实现，而且有一个新的资源已经根据请求的需要而建立，且其URI已经随Location头信息返回
 3. 301：永久重定向，将来对此资源的引用都应该使用本响应返回的若干url之一
-4. 302：临时重定向，请求的资源现在临时从不同的 URI 响应请求。由于这样的重定向是临时的，客户端应当继续向原有地址发送以后的请求。
-5. 304：表示读缓存，如果客户端发送了一个带条件的get请求且该请求已被允许，而文档的内容并没有改变，那么服务器应当返回这个状态码
-6. 307：临时重定向，请求的资源现在临时从不同的URI 响应请求。由于这样的重定向是临时的，客户端应当继续向原有地址发送以后的请求。
-7. 400：不好的请求：一为语义有误，当前请求无法被服务器理解，二为请求参数错误
-8. 401：未授权
-9. 403：forbidden：拒绝执行
-10. 404：找不到资源
-11. 405：请求方法不允许
-12. 500：服务器遇到了不知道该如何处理的错误
-13. 502：服务器挂了
+4. 302：临时重定向，请求的资源现在临时从不同的 URI 响应请求。如果302响应对应的请求方法不是GET或者HEAD，那么客户端在获得用户许可之前是不能自动进行重定向的，因为这有可能会改变请求的条件。
+5. 303： 请求的资源可以在另一个URI处找到，客户端必须使用GET方法来获取新位置的资源。不能缓存303响应，但是可以缓存第二次请求的响应。
+6. 304：表示读缓存，如果客户端发送了一个带条件的get请求且该请求已被允许，而文档的内容并没有改变，那么服务器应当返回这个状态码
+7. 307：临时重定向，请求的资源现在临时从不同的URI 响应请求。客户端应当继续向原有地址发送以后的请求。`307 状态码不允许浏览器将原本为 POST 的请求重定向到 GET 请求上`
+8. 400：不好的请求：一为语义有误，当前请求无法被服务器理解，二为请求参数错误
+9. 401：未授权
+10. 403：forbidden：拒绝执行
+11. 404：找不到资源
+12. 405：请求方法不允许
+13. 500：服务器遇到了不知道该如何处理的错误
+14. 502：服务器挂了
 
 ##### Q:
 
@@ -3508,8 +3526,6 @@ http2.0中引入了二进制数据帧和流的概念，其中帧对数据进行�
 
 #### hash
 
-监听浏览器地址hash值的变化，执行相应的js切换网页
-
 使用`window.location.hash`属性及窗口的`onhashchange`事件，可以实现监听浏览器地址hash值变化，执行相应的js切换网页。
 
 hash值是不会伴随请求发送到服务端的，所以改变hash，不会重新加载页面
@@ -3584,11 +3600,11 @@ window.history指向History对象，表示当前窗口的浏览历史。当发�
 
   现在`TCP连接`建立完毕，浏览器可以和服务器开始通信，即开始发送 HTTP 请求。浏览器发 HTTP 请求要携带三样东西:**请求行**(协议、url、方法)、**[请求头](#请求头)**和**请求体**。
 
-* 服务器接收到客户端的请求，开始处理数据，返回给客户端，响应的内容有**响应行**、**(响应头)[响应头]**和**响应体**。
+* 服务器接收到客户端的请求，开始处理数据，返回给客户端，响应的内容有**响应行**、**[响应头](#响应头)**和**响应体**。
 
 * 浏览器根据服务器返回的状态码选择后续该如何做，如果是400、500，那么直接报错，如果是300，那么就会重定向、如果是2xx，并且Content-Type的值为text/html，则next
 
-* 之后浏览器会开始解析html结构，加载外部脚本以及资源文件，解析执行脚本，根据html构建解析dom树，css构建cssom树，如果遇到script标签，会判断是否存在async或者defer，前者会并行下载并执行js，后者会先下载文件，等待html解析完成后顺序执行，渲染显示。然后cssom和dom树结合构造出render tree
+* 之后浏览器会开始解析html结构，根据html构建解析dom树，css构建cssom树，加载外部脚本以及资源文件，解析执行脚本，如果遇到script标签，会判断是否存在async或者defer，前者会并行下载并执行js，后者会并行下载文件，等待html解析完成后顺序执行，渲染显示。然后cssom和dom树结合构造出render tree
 
 * 构造完毕之后，就是layout，计算出每个阶段在屏幕中的位置
 
@@ -3689,7 +3705,7 @@ Cookie的作用域
 SameSite：cookie允许服务器要求某个cookie在跨站请求时不会被发送，从而可以阻止CSRF
 
 * Strict：表示只在访问相同站点时发送cookie
-* Lax：与strict相似，用户用外部站点导航至URL除外
+* Lax：与strict相似，但是导航到目标网址的 Get 请求除外。导航到目标网址的 GET 请求，只包括三种情况：链接，预加载请求，GET 表单
 * None：不会阻止
 
 ##### sessionStorage
@@ -3860,8 +3876,6 @@ toDataURL中的参数，默认是`image/png,如果传入参数后，返回的url
   }
 }
 ```
-
-### .gitignore
 
 
 
