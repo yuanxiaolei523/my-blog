@@ -1512,7 +1512,7 @@ children，就是当前元素的子元素，可以是组件、dom、或者文字
 4. 然后判断是不是有key，有的话就赋值，
 5. 然后判断self和source并赋值，
 6. 之后遍历config，把除了保留属性外的其他config赋值给props(key, ref,\_\_self, __source)
-7. 然后children属性，因为children属性可能是一个children，还可能是一个数组，首先判断arguments的长度
+7. 然后children属性，children可能会不止一个参数，首先判断arguments的长度
    1. 如果等于3，那么就直接将第三个向props上挂载children属性，
    2. 如果长度大于三，那么就会遍历得到一个children数组，然后将props.children属性赋值为这个数组。
 8. 再往后就会判断是否存在defaultProps，如果存在的话，那么会遍历defaultProps，然后如果在props上没有挂载这个属性，那么就为其赋值，最后返回ReactElement的调用结果。
