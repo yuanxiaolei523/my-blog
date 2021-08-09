@@ -1488,7 +1488,11 @@ export function requestEventTime() {
 
 ## 总结
 
-React16的架构分为三层，有调度器、协调器、渲染器
+React16的架构分为三层，有调度器、协调器、渲染器，
+
+调度器用于调度任务的优先级，高优任务优先进入Reconciler，Reconciler负责找出变化的组件；Reconciler负责找出变化的组件
+
+
 
 
 
@@ -1496,13 +1500,13 @@ React16的架构分为三层，有调度器、协调器、渲染器
 
 ### JSX
 
-首先是我们平时写的jsx，babel会将jsx转换成createElement函数调用，createElement函数通常需要传入三个参数type、config、children。
+首先是我们平时写的jsx,jsx就是createElement的语法糖，babel会将jsx转换成createElement函数调用，createElement函数通常需要传入三个参数type、config、children。
 
 type是React元素的类型，可能是原生dom，可能是class组件，也可能是function组件，或者Fragment等等。
 
-config是当前元素的一些属性，比如说class，style、attrs等等。
+config是当前元素的一些属性，比如说class、style、key、ref等等。
 
-children，就是当前元素的子元素，可以是组件、dom、或者文字。
+children，就是当前元素的子元素，可以是组件、dom、或者文本。
 
 在调用createElement的时候，
 
