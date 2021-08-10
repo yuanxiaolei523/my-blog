@@ -331,6 +331,23 @@ function reconcileSingleElement(
 
 为了解决这个问题，`React16`将**递归的无法中断的更新**重构为**异步的可中断更新**，由于曾经用于递归的**虚拟DOM**数据结构已经无法满足需要。于是，全新的`Fiber`架构应运而生。
 
+### 作用
+
+为了使react渲染的过程可以被中断，可以将控制权交还给浏览器，可以让位给高优先级的任务，等浏览器空闲后在恢复渲染，对于计算量比较大的js计算或者dom计算，不会显示特别卡顿，而是一帧一帧的有规律的执行任务
+
+
+
+### 为什么不使用generator
+
+1. 使用generator，需要将涉及到的所有代码都包装成generator的形式，非常麻烦
+2. generator内部有状态，很难在恢复执行的时候，拿到上面的被修改的状态
+
+### 如何判断
+
+一帧16ms
+
+requestIdleCallback:使浏览器在有空的回收执行我们的回调，这个回调会传入一个参数，表示浏览器有多少时间供我们执行任务
+
 #### Fiber的含义
 
 1. 作为架构来说，之前`React15`的`Reconciler`采用递归的方式执行，数据保存在递归调用栈中，所以被称为`stack Reconciler`。`React16`的`Reconciler`基于`Fiber节点`实现，被称为`Fiber Reconciler`。
@@ -1500,7 +1517,7 @@ React16的架构分为三层，有调度器、协调器、渲染器，
 
 ### JSX
 
-首先是我们平时写的jsx,jsx就是createElement的语法糖，babel会将jsx转换成createElement函数调用，createElement函数通常需要传入三个参数type、config、children。
+首先是我们平时写的jsx，jsx就是createElement的语法糖，babel会将jsx转换成createElement函数调用，createElement函数通常需要传入三个参数type、config、children。
 
 type是React元素的类型，可能是原生dom，可能是class组件，也可能是function组件，或者Fragment等等。
 
@@ -1510,14 +1527,31 @@ children，就是当前元素的子元素，可以是组件、dom、或者文本
 
 在调用createElement的时候，
 
-1. 首先会声明一些变量(key、ref)赋值为null，
-2. 然后判断config是不是为null，
-3. 如果不为null，那么判断是不是有有效的ref，如果有，那么就为ref赋值，
-4. 然后判断是不是有key，有的话就赋值，
-5. 然后判断self和source并赋值，
+1. 首先会声明一些变量(key、ref)赋值为null，以及props={}
+3. 然后判断config是不是为null，如果不为null，
+4. 那么判断是不是有ref、key、self和source，如果有，那么就为ref赋值，
 6. 之后遍历config，把除了保留属性外的其他config赋值给props(key, ref,\_\_self, __source)
 7. 然后children属性，children可能会不止一个参数，首先判断arguments的长度
-   1. 如果等于3，那么就直接将第三个向props上挂载children属性，
+   1. 如果等于3，那么就直接将第三个向props上挂载children属性
    2. 如果长度大于三，那么就会遍历得到一个children数组，然后将props.children属性赋值为这个数组。
 8. 再往后就会判断是否存在defaultProps，如果存在的话，那么会遍历defaultProps，然后如果在props上没有挂载这个属性，那么就为其赋值，最后返回ReactElement的调用结果。
 9. ReactElement中创建一个element对象，然后将传入的参数赋值到对象上，然后将对象返回
+
+### diff
+
+从reconcileChildFibers开始
+
+1. 首先判断新节点是不是一个没有key的并且是Fragment类型的元素，如果是的话，那么就直接将新节点赋值为newChild.props.children
+2. 如果新节点是一个对象的话，那么会判断$$typeof属性
+   1. 如果是一个react元素的话，那么就会调用reconcileSingleElement进行单一节点diff
+      1. 如果当前的子元素存在，并且新旧节点的key相同，那么就会判断新节点的type
+      2. 如果是Fragment或者react元素，那么就会直接复用
+      3. 如果不是fragment或者react，那么就会直接调用deleteRemainingChildren(将当前节点的兄弟节点删除掉)，然后创建一个work in progress，其实就是克隆一份当前的节点，然后将其index设置为0，sibling设置为null，然后设置ref和return属性
+   2. 如果是一个portal\lazy，那么就会调用reconcileSinglePortal\reconcileChildFibers
+   3. 如果是一个数组的话，那么就会调用reconcileChildrenArray进行多节点diff，多节点diff有三个for循环遍历，第一个遍历处理节点的更新（包括props更新和type更新和删除），第二个遍历处理其他的情况（节点新增），其原因在于在大多数的应用中，节点更新的频率更加频繁，第三个处理位节点置改变
+      1. 
+   4. 如果是一个Iterator函数，那么xxx
+   5. 如果新元素是一个string或者是一个number，那么就会调用reconcileSingleTextNode
+   6. 然后调用deleteRemainingChildren
+   7. 然后将reconcileChildFibers返回
+
