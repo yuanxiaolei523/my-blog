@@ -5,9 +5,9 @@ export default class MyButton extends Component {
     constructor() {
         super();
     }
-    componentWillMount () {
-        console.log('componentWillMount')
-    }
+    // componentWillMount () {
+    //     console.log('componentWillMount')
+    // }
     render () {
         console.log('render')
         return <div>123</div>

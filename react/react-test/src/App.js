@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React from 'react'
 import MyButton from './components/constructors/index'
 import MyProps from './components/constructors/props'
 
@@ -30,10 +30,13 @@ export default class App extends React.Component {
     console.log(res);
     return res;
   }
-  componentWillMount () {
+  componentDidMount() {
     this.init()
-    console.log(123);
   }
+  // uNSAFE_componentWillMount () {
+  //   this.init()
+  //   console.log(123);
+  // }
   render () {
     let button = <MyButton/>
     console.log(button)

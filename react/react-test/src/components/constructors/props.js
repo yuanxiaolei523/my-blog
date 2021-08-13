@@ -6,7 +6,7 @@ export default class PropsTest extends React.Component {
         console.log(props)
     }
     render() {
-        return <div>{this.props.name}</div>
+        return <div>123</div>
     }
 }
 PropsTest.defaultProps = {
